@@ -98,4 +98,9 @@ class Mesh
             pointArray.deallocate()
         }
     }
+    
+    func RefineMesh(withMinAngle:Double)
+    {
+        let pointlist = UnsafeMutablePointer<Double>.allocate(capacity: 2 * self.nodes.count)
+    }
 }
