@@ -25,20 +25,30 @@ class Node:Hashable
     
     // Properties
     
+    // A number that is used by Triangle to identify the node
+    let tag:Int
+    
     // The point where the node is located
     let vertex:NSPoint
     
-    // The current value of the point
+    // The current "value" of the Node
     
     
-    // A set of neighbours to the point
+    // A set of neighbours to the Node
     var neighbours:Set<Node> = []
     
-    // The elements that have this node as a corner
+    // The elements that have this Node as a corner
     var elements:Set<Element> = []
     
-    init(vertex:NSPoint)
+    // Designated initializer
+    init(tag:Int, vertex:NSPoint)
     {
+        self.tag = tag
         self.vertex = vertex
+    }
+    
+    convenience init()
+    {
+        self.init(tag: -1, vertex: NSPoint(x: Double.greatestFiniteMagnitude, y: Double.greatestFiniteMagnitude))
     }
 }

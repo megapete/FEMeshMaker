@@ -13,13 +13,17 @@ import Cocoa
 
 class Region
 {
+    // A numerical identifier for the region. NOTE: This must be GREATER or EQUAL to 1.
+    let tag:Int
+    
     var description:String = ""
     let enclosingPath:NSBezierPath
     var attributes:[String:Complex] = [:]
     var associatedTriangles:[Element] = []
     
-    init(enclosingPath:NSBezierPath)
+    init(tag:Int, enclosingPath:NSBezierPath)
     {
+        self.tag = tag
         self.enclosingPath = enclosingPath
     }
     

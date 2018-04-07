@@ -84,13 +84,19 @@ class Element:Hashable
         return false
     }
     
+    let tag:Int
+    
+    var region:Region?
+    
     var corners:(n0:Node, n1:Node, n2:Node)
     
     var value:Complex = Complex(real: 0.0, imag: 0.0)
     
-    init(n0:Node, n1:Node, n2:Node)
+    init(tag:Int, n0:Node, n1:Node, n2:Node, region:Region? = nil)
     {
+        self.tag = tag
         self.corners = (n0, n1, n2)
+        self.region = region
         
         // Set self as being one of the triangles that each of the nodes is used for
         n0.elements.insert(self)
@@ -206,9 +212,9 @@ class Element:Hashable
     }
     
     // Return a new node, normalized on self
-    func NormalizedOn(n0:Node) -> Element
+    func NormalizedOn(n0:Node, withTag:Int) -> Element
     {
-        let result = Element(n0:self.corners.n0, n1:self.corners.n1, n2:self.corners.n2)
+        let result = Element(tag:withTag, n0:self.corners.n0, n1:self.corners.n1, n2:self.corners.n2)
         
         result.NormalizeOn(n0: n0)
         

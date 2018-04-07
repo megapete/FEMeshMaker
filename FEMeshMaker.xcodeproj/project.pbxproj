@@ -18,6 +18,7 @@
 		D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987A72077B0A70052B863 /* PCH_Defs.swift */; };
 		D39987B0207910020052B863 /* triangle.c in Sources */ = {isa = PBXBuildFile; fileRef = D39987AE207910020052B863 /* triangle.c */; };
 		D39987B2207914D30052B863 /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B1207914D30052B863 /* Region.swift */; };
+		D39987B42079236D0052B863 /* Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B32079236D0052B863 /* Mesh.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,7 @@
 		D39987AE207910020052B863 /* triangle.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = triangle.c; sourceTree = "<group>"; };
 		D39987AF207910020052B863 /* triangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangle.h; sourceTree = "<group>"; };
 		D39987B1207914D30052B863 /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
+		D39987B32079236D0052B863 /* Mesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mesh.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 				D39987A22077A5DB0052B863 /* Edge.swift */,
 				D39987A42077A6750052B863 /* Element.swift */,
 				D39987B1207914D30052B863 /* Region.swift */,
+				D39987B32079236D0052B863 /* Mesh.swift */,
 				D39987AF207910020052B863 /* triangle.h */,
 				D39987AE207910020052B863 /* triangle.c */,
 				D39987922077A3120052B863 /* Assets.xcassets */,
@@ -163,6 +166,7 @@
 				D39987A12077A35C0052B863 /* Node.swift in Sources */,
 				D39987B0207910020052B863 /* triangle.c in Sources */,
 				D39987912077A3110052B863 /* AppDelegate.swift in Sources */,
+				D39987B42079236D0052B863 /* Mesh.swift in Sources */,
 				D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */,
 				D39987A32077A5DB0052B863 /* Edge.swift in Sources */,
 				D399879F2077A32E0052B863 /* AppController.swift in Sources */,
