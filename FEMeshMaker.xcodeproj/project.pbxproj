@@ -16,6 +16,8 @@
 		D39987A52077A6750052B863 /* Element.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987A42077A6750052B863 /* Element.swift */; };
 		D39987A82077B0A70052B863 /* GlobalDefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987A62077B0A70052B863 /* GlobalDefs.swift */; };
 		D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987A72077B0A70052B863 /* PCH_Defs.swift */; };
+		D39987B0207910020052B863 /* triangle.c in Sources */ = {isa = PBXBuildFile; fileRef = D39987AE207910020052B863 /* triangle.c */; };
+		D39987B2207914D30052B863 /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B1207914D30052B863 /* Region.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,10 @@
 		D39987A42077A6750052B863 /* Element.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Element.swift; sourceTree = "<group>"; };
 		D39987A62077B0A70052B863 /* GlobalDefs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlobalDefs.swift; path = ../../../../Dropbox/MyProjects/GlobalDefs.swift; sourceTree = "<group>"; };
 		D39987A72077B0A70052B863 /* PCH_Defs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PCH_Defs.swift; path = ../../../../Dropbox/MyProjects/PCH_Defs.swift; sourceTree = "<group>"; };
+		D39987AA20790E250052B863 /* FEMeshMaker-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FEMeshMaker-Bridging-Header.h"; sourceTree = "<group>"; };
+		D39987AE207910020052B863 /* triangle.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = triangle.c; sourceTree = "<group>"; };
+		D39987AF207910020052B863 /* triangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangle.h; sourceTree = "<group>"; };
+		D39987B1207914D30052B863 /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,10 +76,14 @@
 				D39987A02077A35C0052B863 /* Node.swift */,
 				D39987A22077A5DB0052B863 /* Edge.swift */,
 				D39987A42077A6750052B863 /* Element.swift */,
+				D39987B1207914D30052B863 /* Region.swift */,
+				D39987AF207910020052B863 /* triangle.h */,
+				D39987AE207910020052B863 /* triangle.c */,
 				D39987922077A3120052B863 /* Assets.xcassets */,
 				D39987942077A3120052B863 /* MainMenu.xib */,
 				D39987972077A3120052B863 /* Info.plist */,
 				D39987982077A3120052B863 /* FEMeshMaker.entitlements */,
+				D39987AA20790E250052B863 /* FEMeshMaker-Bridging-Header.h */,
 			);
 			path = FEMeshMaker;
 			sourceTree = "<group>";
@@ -110,6 +120,7 @@
 				TargetAttributes = {
 					D399878C2077A3110052B863 = {
 						CreatedOnToolsVersion = 9.3;
+						LastSwiftMigration = 0930;
 					};
 				};
 			};
@@ -148,7 +159,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D39987B2207914D30052B863 /* Region.swift in Sources */,
 				D39987A12077A35C0052B863 /* Node.swift in Sources */,
+				D39987B0207910020052B863 /* triangle.c in Sources */,
 				D39987912077A3110052B863 /* AppDelegate.swift in Sources */,
 				D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */,
 				D39987A32077A5DB0052B863 /* Edge.swift in Sources */,
@@ -289,6 +302,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = FEMeshMaker/FEMeshMaker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -299,6 +313,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.huberis-tech.FEMeshMaker";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "FEMeshMaker/FEMeshMaker-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -307,6 +323,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = FEMeshMaker/FEMeshMaker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -317,6 +334,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.huberis-tech.FEMeshMaker";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "FEMeshMaker/FEMeshMaker-Bridging-Header.h";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
