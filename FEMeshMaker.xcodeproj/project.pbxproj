@@ -10,6 +10,12 @@
 		D39987912077A3110052B863 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987902077A3110052B863 /* AppDelegate.swift */; };
 		D39987932077A3120052B863 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D39987922077A3120052B863 /* Assets.xcassets */; };
 		D39987962077A3120052B863 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = D39987942077A3120052B863 /* MainMenu.xib */; };
+		D399879F2077A32E0052B863 /* AppController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D399879E2077A32E0052B863 /* AppController.swift */; };
+		D39987A12077A35C0052B863 /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987A02077A35C0052B863 /* Node.swift */; };
+		D39987A32077A5DB0052B863 /* Edge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987A22077A5DB0052B863 /* Edge.swift */; };
+		D39987A52077A6750052B863 /* Element.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987A42077A6750052B863 /* Element.swift */; };
+		D39987A82077B0A70052B863 /* GlobalDefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987A62077B0A70052B863 /* GlobalDefs.swift */; };
+		D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987A72077B0A70052B863 /* PCH_Defs.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +25,12 @@
 		D39987952077A3120052B863 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		D39987972077A3120052B863 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D39987982077A3120052B863 /* FEMeshMaker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FEMeshMaker.entitlements; sourceTree = "<group>"; };
+		D399879E2077A32E0052B863 /* AppController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppController.swift; sourceTree = "<group>"; };
+		D39987A02077A35C0052B863 /* Node.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
+		D39987A22077A5DB0052B863 /* Edge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Edge.swift; sourceTree = "<group>"; };
+		D39987A42077A6750052B863 /* Element.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Element.swift; sourceTree = "<group>"; };
+		D39987A62077B0A70052B863 /* GlobalDefs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlobalDefs.swift; path = ../../../../Dropbox/MyProjects/GlobalDefs.swift; sourceTree = "<group>"; };
+		D39987A72077B0A70052B863 /* PCH_Defs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PCH_Defs.swift; path = ../../../../Dropbox/MyProjects/PCH_Defs.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +64,12 @@
 			isa = PBXGroup;
 			children = (
 				D39987902077A3110052B863 /* AppDelegate.swift */,
+				D399879E2077A32E0052B863 /* AppController.swift */,
+				D39987A62077B0A70052B863 /* GlobalDefs.swift */,
+				D39987A72077B0A70052B863 /* PCH_Defs.swift */,
+				D39987A02077A35C0052B863 /* Node.swift */,
+				D39987A22077A5DB0052B863 /* Edge.swift */,
+				D39987A42077A6750052B863 /* Element.swift */,
 				D39987922077A3120052B863 /* Assets.xcassets */,
 				D39987942077A3120052B863 /* MainMenu.xib */,
 				D39987972077A3120052B863 /* Info.plist */,
@@ -130,7 +148,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D39987A12077A35C0052B863 /* Node.swift in Sources */,
 				D39987912077A3110052B863 /* AppDelegate.swift in Sources */,
+				D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */,
+				D39987A32077A5DB0052B863 /* Edge.swift in Sources */,
+				D399879F2077A32E0052B863 /* AppController.swift in Sources */,
+				D39987A82077B0A70052B863 /* GlobalDefs.swift in Sources */,
+				D39987A52077A6750052B863 /* Element.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
