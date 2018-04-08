@@ -31,8 +31,8 @@ class Node:Hashable
     // The point where the node is located
     let vertex:NSPoint
     
-    // The current "value" of the Node
-    
+    // The current "value" of the Node. Note that we save Complex numbers for this value, even if it is only real.
+    var phi:Complex = Complex(real: 0, imag: 0)
     
     // A set of neighbours to the Node
     var neighbours:Set<Node> = []
@@ -50,5 +50,31 @@ class Node:Hashable
     convenience init()
     {
         self.init(tag: -1, vertex: NSPoint(x: Double.greatestFiniteMagnitude, y: Double.greatestFiniteMagnitude))
+    }
+    
+    func SortedArrayOfTriangles() -> [Element]
+    {
+        let result = Array(self.elements).sorted { (elem1, elem2) -> Bool in
+            
+            let delta1 = NSPoint(x: elem1.CenterOfMass().x - self.vertex.x, y: elem1.CenterOfMass().y - self.vertex.y)
+            let delta2 = NSPoint(x: elem2.CenterOfMass().x - self.vertex.x, y: elem2.CenterOfMass().y - self.vertex.y)
+            
+            var angle1 = atan2(delta1.y, delta1.x)
+            if angle1 < 0.0
+            {
+                angle1 += CGFloat(2.0 * π)
+            }
+            
+            var angle2 = atan2(delta2.y, delta2.x)
+            if angle2 < 0.0
+            {
+                angle2 += CGFloat(2.0 * π)
+            }
+            
+            return angle1 < angle2
+            
+        }
+        
+        return result
     }
 }

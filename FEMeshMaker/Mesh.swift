@@ -6,6 +6,8 @@
 //  Copyright © 2018 Peter Huber. All rights reserved.
 //
 
+// This is essentially a wrapper for the Triangle program by Jonathan Richard Shewchuk. It takes simple Bezier paths as input (plus any extra points that are needed) and regions for the FE solution. Calling RefineMesh() will create all the triangles.
+
 import Foundation
 import Cocoa
 
