@@ -99,8 +99,77 @@ class Mesh
         }
     }
     
-    func RefineMesh(withMinAngle:Double)
+    func RefineMesh(withMinAngle:Double) -> Bool
     {
+        // allocate memory for the IO struct
+        let inStruct = UnsafeMutablePointer<triangulateio>.allocate(capacity: 1)
+        
+        // Start with the point-related fields
         let pointlist = UnsafeMutablePointer<Double>.allocate(capacity: 2 * self.nodes.count)
+        
+        for nextNode in self.nodes
+        {
+            pointlist[2 * nextNode.tag] = Double(nextNode.vertex.x)
+            pointlist[2 * nextNode.tag + 1] = Double(nextNode.vertex.y)
+        }
+        
+        inStruct.pointee.pointlist = pointlist
+        inStruct.pointee.numberofpoints = Int32(self.nodes.count)
+        
+        // We don't use point attributes or point markers, so we set things according to the triangle.h file
+        inStruct.pointee.numberofpointattributes = 0
+        inStruct.pointee.pointattributelist = nil
+        inStruct.pointee.pointmarkerlist = nil
+        
+        // We don't use any of the triangle-related stuff on input
+        inStruct.pointee.trianglelist = nil
+        inStruct.pointee.triangleattributelist = nil
+        inStruct.pointee.trianglearealist = nil
+        inStruct.pointee.neighborlist = nil
+        inStruct.pointee.numberoftriangles = 0
+        inStruct.pointee.numberofcorners = 0
+        inStruct.pointee.numberoftriangleattributes = 0
+        
+        // Now the segment-related fields
+        var useSegmentsFlag = ""
+        inStruct.pointee.segmentmarkerlist = nil
+        if self.segments.count > 0
+        {
+            let segmentlist = UnsafeMutablePointer<Int32>.allocate(capacity: 2 * self.segments.count)
+            
+            var i = 0
+            for nextSegment in self.segments
+            {
+                segmentlist[2 * i] = Int32(nextSegment.endPoint1.tag)
+                segmentlist[2 * i + 1] = Int32(nextSegment.endPoint2.tag)
+                i += 1
+            }
+        
+            inStruct.pointee.segmentlist = segmentlist
+            inStruct.pointee.numberofsegments = Int32(self.segments.count)
+            
+            useSegmentsFlag = "p"
+        }
+        else
+        {
+            inStruct.pointee.segmentlist = nil
+            inStruct.pointee.numberofsegments = 0
+        }
+        
+        // We don't use holes
+        inStruct.pointee.holelist = nil
+        inStruct.pointee.numberofholes = 0
+        
+        
+        inStruct.deallocate()
+        pointlist.deallocate()
+        
+        if inStruct.pointee.numberofsegments > 0
+        {
+            inStruct.pointee.segmentlist.deallocate()
+        }
+        
+        return true
     }
+    
 }
