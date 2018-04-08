@@ -286,6 +286,9 @@ void triangulate(char *, struct triangulateio *, struct triangulateio *,
                  struct triangulateio *);
 void trifree(VOID *memptr);
 #else /* not ANSI_DECLARATORS */
-void triangulate();
-void trifree();
+
+// PCH: We need to change the 'char *' type of the first argument to 'const char*' to facilitate string conversion in Swift
+void triangulate(const char *, struct triangulateio *, struct triangulateio *,
+                 struct triangulateio *);
+void trifree(void *memptr);
 #endif /* not ANSI_DECLARATORS */

@@ -1361,6 +1361,8 @@ int triunsuitable();
 
 #else /* not EXTERNAL_TEST */
 
+#define ANSI_DECLARATORS
+
 #ifdef ANSI_DECLARATORS
 int triunsuitable(vertex triorg, vertex tridest, vertex triapex, REAL area)
 #else /* not ANSI_DECLARATORS */
@@ -1438,7 +1440,7 @@ int size;
 }
 
 #ifdef ANSI_DECLARATORS
-void trifree(VOID *memptr)
+void trifree(void *memptr)
 #else /* not ANSI_DECLARATORS */
 void trifree(memptr)
 VOID *memptr;
@@ -11272,7 +11274,7 @@ FILE *polyfile;
   /* Allocate a temporary array that maps each vertex to some adjacent */
   /*   triangle.  I took care to allocate all the permanent memory for */
   /*   triangles and subsegments first.                                */
-  vertexarray = (triangle *) trimalloc(m->vertices.items *
+  vertexarray = (triangle *) trimalloc((int) m->vertices.items *
                                        (int) sizeof(triangle));
   /* Each vertex is initially unrepresented. */
   for (i = 0; i < m->vertices.items; i++) {
@@ -11560,7 +11562,7 @@ FILE *polyfile;
   }
 
   trifree((VOID *) vertexarray);
-  return hullsize;
+  return (int)hullsize;
 }
 
 #endif /* not CDT_ONLY */
@@ -15667,7 +15669,7 @@ struct behavior *b;
 #ifdef TRILIBRARY
 
 #ifdef ANSI_DECLARATORS
-void triangulate(char *triswitches, struct triangulateio *in,
+void triangulate(const char *triswitches, struct triangulateio *in,
                  struct triangulateio *out, struct triangulateio *vorout)
 #else /* not ANSI_DECLARATORS */
 void triangulate(triswitches, in, out, vorout)
@@ -15857,24 +15859,24 @@ char **argv;
 
 #ifdef TRILIBRARY
   if (b.jettison) {
-    out->numberofpoints = m.vertices.items - m.undeads;
+    out->numberofpoints = (int)m.vertices.items - m.undeads;
   } else {
-    out->numberofpoints = m.vertices.items;
+    out->numberofpoints = (int)m.vertices.items;
   }
   out->numberofpointattributes = m.nextras;
-  out->numberoftriangles = m.triangles.items;
+  out->numberoftriangles = (int)m.triangles.items;
   out->numberofcorners = (b.order + 1) * (b.order + 2) / 2;
   out->numberoftriangleattributes = m.eextras;
-  out->numberofedges = m.edges;
+  out->numberofedges = (int)m.edges;
   if (b.usesegments) {
-    out->numberofsegments = m.subsegs.items;
+    out->numberofsegments = (int)m.subsegs.items;
   } else {
-    out->numberofsegments = m.hullsize;
+    out->numberofsegments = (int)m.hullsize;
   }
   if (vorout != (struct triangulateio *) NULL) {
-    vorout->numberofpoints = m.triangles.items;
+    vorout->numberofpoints = (int)m.triangles.items;
     vorout->numberofpointattributes = m.nextras;
-    vorout->numberofedges = m.edges;
+    vorout->numberofedges = (int)m.edges;
   }
 #endif /* TRILIBRARY */
   /* If not using iteration numbers, don't write a .node file if one was */

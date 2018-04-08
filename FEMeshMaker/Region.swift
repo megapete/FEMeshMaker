@@ -13,7 +13,7 @@ import Cocoa
 
 class Region
 {
-    // A numerical identifier for the region. NOTE: This must be GREATER or EQUAL to 1.
+    // A numerical identifier for the region. NOTE: This MUST be GREATER or EQUAL to 1.
     let tag:Int
     
     var description:String = ""
@@ -23,6 +23,11 @@ class Region
     
     init(tag:Int, enclosingPath:NSBezierPath)
     {
+        if tag < 1
+        {
+            ALog("Region tag identifier must be greater than or equal to 1")
+        }
+        
         self.tag = tag
         self.enclosingPath = enclosingPath
     }
