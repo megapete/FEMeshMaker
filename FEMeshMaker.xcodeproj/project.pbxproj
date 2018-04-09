@@ -21,6 +21,7 @@
 		D39987B42079236D0052B863 /* Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B32079236D0052B863 /* Mesh.swift */; };
 		D39987B8207A8BEE0052B863 /* FE_Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B7207A8BEE0052B863 /* FE_Mesh.swift */; };
 		D39987BA207A8D4F0052B863 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B9207A8D4F0052B863 /* Matrix.swift */; };
+		D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 		D39987B32079236D0052B863 /* Mesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mesh.swift; sourceTree = "<group>"; };
 		D39987B7207A8BEE0052B863 /* FE_Mesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FE_Mesh.swift; sourceTree = "<group>"; };
 		D39987B9207A8D4F0052B863 /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
+		D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DielectricRegion.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +85,7 @@
 				D39987A22077A5DB0052B863 /* Edge.swift */,
 				D39987A42077A6750052B863 /* Element.swift */,
 				D39987B1207914D30052B863 /* Region.swift */,
+				D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */,
 				D39987B32079236D0052B863 /* Mesh.swift */,
 				D39987B7207A8BEE0052B863 /* FE_Mesh.swift */,
 				D39987B9207A8D4F0052B863 /* Matrix.swift */,
@@ -170,6 +173,7 @@
 			files = (
 				D39987B8207A8BEE0052B863 /* FE_Mesh.swift in Sources */,
 				D39987B2207914D30052B863 /* Region.swift in Sources */,
+				D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */,
 				D39987A12077A35C0052B863 /* Node.swift in Sources */,
 				D39987B0207910020052B863 /* triangle.c in Sources */,
 				D39987912077A3110052B863 /* AppDelegate.swift in Sources */,
