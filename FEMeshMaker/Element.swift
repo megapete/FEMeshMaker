@@ -104,6 +104,18 @@ class Element:Hashable
         n2.elements.insert(self)
     }
     
+    func ElementAsPath() -> NSBezierPath
+    {
+        let result = NSBezierPath()
+        
+        result.move(to: self.corners.n0.vertex)
+        result.line(to: self.corners.n1.vertex)
+        result.line(to: self.corners.n2.vertex)
+        result.close()
+        
+        return result
+    }
+    
     func Height() -> Double
     {
         let minY = min(self.corners.n0.vertex.y, self.corners.n1.vertex.y, self.corners.n2.vertex.y)

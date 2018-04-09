@@ -21,6 +21,9 @@
 		D39987B42079236D0052B863 /* Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B32079236D0052B863 /* Mesh.swift */; };
 		D39987B8207A8BEE0052B863 /* FE_Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B7207A8BEE0052B863 /* FE_Mesh.swift */; };
 		D39987BA207A8D4F0052B863 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B9207A8D4F0052B863 /* Matrix.swift */; };
+		D39987BD207B94120052B863 /* GeometryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987BB207B94120052B863 /* GeometryViewController.swift */; };
+		D39987BE207B94120052B863 /* GeometryViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D39987BC207B94120052B863 /* GeometryViewController.xib */; };
+		D39987C2207B952C0052B863 /* GeometryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987C1207B952C0052B863 /* GeometryView.swift */; };
 		D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +47,9 @@
 		D39987B32079236D0052B863 /* Mesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mesh.swift; sourceTree = "<group>"; };
 		D39987B7207A8BEE0052B863 /* FE_Mesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FE_Mesh.swift; sourceTree = "<group>"; };
 		D39987B9207A8D4F0052B863 /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
+		D39987BB207B94120052B863 /* GeometryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryViewController.swift; sourceTree = "<group>"; };
+		D39987BC207B94120052B863 /* GeometryViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GeometryViewController.xib; sourceTree = "<group>"; };
+		D39987C1207B952C0052B863 /* GeometryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryView.swift; sourceTree = "<group>"; };
 		D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DielectricRegion.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -93,6 +99,9 @@
 				D39987AE207910020052B863 /* triangle.c */,
 				D39987922077A3120052B863 /* Assets.xcassets */,
 				D39987942077A3120052B863 /* MainMenu.xib */,
+				D39987BB207B94120052B863 /* GeometryViewController.swift */,
+				D39987BC207B94120052B863 /* GeometryViewController.xib */,
+				D39987C1207B952C0052B863 /* GeometryView.swift */,
 				D39987972077A3120052B863 /* Info.plist */,
 				D39987982077A3120052B863 /* FEMeshMaker.entitlements */,
 				D39987AA20790E250052B863 /* FEMeshMaker-Bridging-Header.h */,
@@ -159,6 +168,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D39987BE207B94120052B863 /* GeometryViewController.xib in Resources */,
 				D39987932077A3120052B863 /* Assets.xcassets in Resources */,
 				D39987962077A3120052B863 /* MainMenu.xib in Resources */,
 			);
@@ -173,9 +183,11 @@
 			files = (
 				D39987B8207A8BEE0052B863 /* FE_Mesh.swift in Sources */,
 				D39987B2207914D30052B863 /* Region.swift in Sources */,
+				D39987BD207B94120052B863 /* GeometryViewController.swift in Sources */,
 				D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */,
 				D39987A12077A35C0052B863 /* Node.swift in Sources */,
 				D39987B0207910020052B863 /* triangle.c in Sources */,
+				D39987C2207B952C0052B863 /* GeometryView.swift in Sources */,
 				D39987912077A3110052B863 /* AppDelegate.swift in Sources */,
 				D39987B42079236D0052B863 /* Mesh.swift in Sources */,
 				D39987BA207A8D4F0052B863 /* Matrix.swift in Sources */,

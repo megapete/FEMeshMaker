@@ -90,12 +90,38 @@ class Mesh
                 }
                 else if nextElement == .closePathBezierPathElement
                 {
-                    // The "end point" of this element is actually the original sart point of the path, so we won't add it again
-                    self.segments.append(Edge(endPoint1: currentNode, endPoint2: pathStartNode))
+                    // The "end point" of this element is actually the original sart point of the path, so we won't add it again. If, for some reason, the current point is equal to the start point, we won't add an edge
+                    
+                    if currentNode != pathStartNode
+                    {
+                        self.segments.append(Edge(endPoint1: currentNode, endPoint2: pathStartNode))
+                    }
                 }
-                else
+                else // must be .curveToBezierPathElement
                 {
-                    ALog("Curves are not implemented!")
+                    // Curves are a major pain in the butt. Since most of the curves we'll be using are relatively simple (they tend to be simple arcs, not weird splines), we use a simple flattening algorithm. NSBezierPath uses 4 control points to define a curve (ie: cubic Bezier curves). For now, we will arbitrarily split any curve into 10 lines (this may be adjusted for speed or accuracy at some point).
+                    
+                    let segmentCount = 10
+                    let tInterval = CGFloat(1.0 / CGFloat(segmentCount))
+                    
+                    let points:[NSPoint] = [currentNode.vertex, pointArray[0], pointArray[1], pointArray[2]]
+                    
+                    var t:CGFloat = tInterval
+                    while t < 0.999 // careful for rounding...
+                    {
+                        // The PointOnCurve function is in GlobalDefs, on the off chance we'll need it again someday
+                        let newNode = Node(tag: self.nodeIndex, vertex: PointOnCurve(points: points, t: t))
+                        self.nodeIndex += 1
+                        
+                        self.nodes.append(newNode)
+                        self.segments.append(Edge(endPoint1: currentNode, endPoint2: newNode))
+                        
+                        currentNode = newNode
+                        
+                        t += tInterval
+                    }
+                    
+                    // after processing the curve, currentNode points at the last point on the curve
                 }
             }
             
