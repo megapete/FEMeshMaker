@@ -41,7 +41,7 @@ class Mesh
     
     // Designated initializer
     // Basically, the geometric model to create a mesh for. Note that either withBezierPath or vertices MUST be non-empty a non-empty array. If both are empty, then a single vertex is created with coordinates equal to the largest Double and a tag equal to -1.
-    init(withBezierPaths:[NSBezierPath], vertices:[NSPoint], regions:[Region])
+    init(withBezierPaths:[NSBezierPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
         if withBezierPaths.count + vertices.count == 0
         {
@@ -106,7 +106,7 @@ class Mesh
                 {
                     // Curves are a major pain in the butt. Since most of the curves we'll be using are relatively simple (they tend to be simple arcs, not weird splines), we use a simple flattening algorithm. NSBezierPath uses 4 control points to define a curve (ie: cubic Bezier curves). For now, we will arbitrarily split any curve into 10 lines (this may be adjusted for speed or accuracy at some point).
                     
-                    let segmentCount = 10
+                    let segmentCount = 5
                     let tInterval = CGFloat(1.0 / CGFloat(segmentCount))
                     
                     let points:[NSPoint] = [currentNode.vertex, pointArray[0], pointArray[1], pointArray[2]]
@@ -138,53 +138,32 @@ class Mesh
         {
             self.regionDict.updateValue(nextRegion, forKey: nextRegion.tag)
         }
+        
+        self.holes = holes
     }
     
-    func AllocateAndInitializeTriangleStruct() -> UnsafeMutablePointer<triangulateio>
+    func InitializeTriangleStruct() -> triangulateio
     {
         // There's an ugly way of using calloc in Swift, but I don't trust Apple to keep supporting it, so I did things in a more "Swifty" way.
+        let zeroStruct = triangulateio(pointlist: nil, pointattributelist: nil, pointmarkerlist: nil, numberofpoints: 0, numberofpointattributes: 0, trianglelist: nil, triangleattributelist: nil, trianglearealist: nil, neighborlist: nil, numberoftriangles: 0, numberofcorners: 0, numberoftriangleattributes: 0, segmentlist: nil, segmentmarkerlist: nil, numberofsegments: 0, holelist: nil, numberofholes: 0, regionlist: nil, numberofregions: 0, edgelist: nil, edgemarkerlist: nil, normlist: nil, numberofedges: 0)
         
-        let result = UnsafeMutablePointer<triangulateio>.allocate(capacity: 1)
-        
-        var theStruct = result.pointee
-        
-        theStruct.pointlist = nil
-        theStruct.pointattributelist = nil
-        theStruct.pointmarkerlist = nil
-        theStruct.numberofpoints = 0
-        theStruct.numberofpointattributes = 0
-        
-        theStruct.trianglelist = nil
-        theStruct.triangleattributelist = nil
-        theStruct.trianglearealist = nil
-        theStruct.neighborlist = nil
-        theStruct.numberoftriangles = 0
-        theStruct.numberofcorners = 0
-        theStruct.numberoftriangleattributes = 0
-        
-        theStruct.segmentlist = nil
-        theStruct.segmentmarkerlist = nil
-        theStruct.numberofsegments = 0
-        
-        theStruct.holelist = nil
-        theStruct.numberofholes = 0
-        
-        theStruct.regionlist = nil
-        theStruct.numberofregions = 0
-        
-        theStruct.edgelist = nil
-        theStruct.edgemarkerlist = nil
-        theStruct.normlist = nil
-        theStruct.numberofedges = 0
-        
-        return result
+        return zeroStruct
     }
     
     // We default to the 'magic' minimum angle of 28.6 degrees
     func RefineMesh(withMinAngle:Double = 28.6) -> Bool
     {
-        // allocate memory for the IO struct, setting everything to nil/0
-        let inStruct = AllocateAndInitializeTriangleStruct()
+        // This is the easiest (and safest) way to initialize a pointer to a struct in Swift. First, create a dummy "zeroed" struct
+        let zeroStruct = triangulateio(pointlist: nil, pointattributelist: nil, pointmarkerlist: nil, numberofpoints: 0, numberofpointattributes: 0, trianglelist: nil, triangleattributelist: nil, trianglearealist: nil, neighborlist: nil, numberoftriangles: 0, numberofcorners: 0, numberoftriangleattributes: 0, segmentlist: nil, segmentmarkerlist: nil, numberofsegments: 0, holelist: nil, numberofholes: 0, regionlist: nil, numberofregions: 0, edgelist: nil, edgemarkerlist: nil, normlist: nil, numberofedges: 0)
+        
+        // allocate memory for the IO struct
+        let inStruct = UnsafeMutablePointer<triangulateio>.allocate(capacity: 1)
+        
+        // initialize the memory to the sero struct
+        inStruct.initialize(to: zeroStruct)
+        
+        // let testStruct = inStruct.pointee
+        // DLog("This is the value in pointmarkerlist:\(testStruct.pointmarkerlist)")
         
         // Start with the point-related fields
         let pointlist = UnsafeMutablePointer<Double>.allocate(capacity: 2 * self.nodes.count)
@@ -214,7 +193,7 @@ class Mesh
         
         // Now the segment-related fields
         var useSegmentsFlag = ""
-        inStruct.pointee.segmentmarkerlist = nil
+        // inStruct.pointee.segmentmarkerlist = nil
         if self.segments.count > 0
         {
             let segmentlist = UnsafeMutablePointer<Int32>.allocate(capacity: 2 * self.segments.count)
@@ -233,6 +212,7 @@ class Mesh
             useSegmentsFlag = "p"
         }
         
+        
         // holes (we don't need to set any flags, seeing as how we don't set the 'r' flag (see triangle.h)
         if self.holes.count > 0
         {
@@ -250,9 +230,9 @@ class Mesh
             inStruct.pointee.numberofholes = Int32(self.holes.count)
         }
         
+        
         // Region-related data
         var useRegionsFlag = ""
-        inStruct.pointee.regionlist = nil
         if self.regions.count > 0
         {
             var totalRegionDataCount = 0
@@ -293,10 +273,18 @@ class Mesh
             useRegionsFlag = "A"
         }
         
-        // Set up the flags that we will pass to the triangulate() call. We always use -z, -j, -e, and -n. The two flags -p and -A are conditionally set above. The 'q' flag is followed by the requested minimum angle
-        let argString = "zjen\(useSegmentsFlag)\(useRegionsFlag)q\(withMinAngle)"
         
-        let outStruct = AllocateAndInitializeTriangleStruct()
+        // on entry we don't send in edge-related data
+        // inStruct.pointee.edgelist = nil
+        // inStruct.pointee.edgemarkerlist = nil
+        // inStruct.pointee.normlist = nil
+        // inStruct.pointee.numberofedges = 0
+        
+        // Set up the flags that we will pass to the triangulate() call. We always use -z, -j, -e, and -n. The two flags -p and -A are conditionally set above. The 'q' flag is followed by the requested minimum angle
+        let argString = "zDjen\(useSegmentsFlag)\(useRegionsFlag)q\(withMinAngle)"
+        
+        let outStruct = UnsafeMutablePointer<triangulateio>.allocate(capacity: 1)
+        outStruct.initialize(to: zeroStruct)
         
         triangulate(argString, inStruct, outStruct, nil)
         

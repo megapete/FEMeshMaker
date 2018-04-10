@@ -59,6 +59,8 @@ class GeometryViewController: NSViewController
             }
             
             geoView.triangles = triangles
+            
+            //numTriangles.stringValue = "Triangles: \(triangles.count)"
         }
     }
     
@@ -128,6 +130,8 @@ class GeometryViewController: NSViewController
         }
         
         geoView.triangles = self.triangles
+        
+        //numTriangles.stringValue = "Triangles: \(self.triangles.count)"
     }
     
 }
