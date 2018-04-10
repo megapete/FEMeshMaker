@@ -8,6 +8,12 @@
 
 import Cocoa
 
-class AppController: NSObject {
+class AppController: NSObject
+{
 
+    @IBAction func handleCreateDemo(_ sender: Any) {
+    }
+    
+    @IBAction func handleShowElements(_ sender: Any) {
+    }
 }
