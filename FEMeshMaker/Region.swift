@@ -19,9 +19,10 @@ class Region
     var description:String = ""
     let enclosingPath:NSBezierPath
     var attributes:[String:Complex] = [:]
+    var refPoints:[NSPoint] = [] // all the points in the model that refer to this Region (there should be at least one)
     var associatedTriangles:[Element] = []
     
-    init(tag:Int, enclosingPath:NSBezierPath)
+    init(tag:Int, enclosingPath:NSBezierPath, refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)])
     {
         if tag < 1
         {
@@ -30,6 +31,7 @@ class Region
         
         self.tag = tag
         self.enclosingPath = enclosingPath
+        self.refPoints = refPoints
     }
     
     func TotalTriangleArea() -> Double
@@ -44,29 +46,5 @@ class Region
         return result
     }
     
-    func CenterOfMass() -> NSPoint
-    {
-        if self.associatedTriangles.count == 0
-        {
-            DLog("No triangles defined for region!")
-            return NSPoint(x: Double.greatestFiniteMagnitude, y: Double.greatestFiniteMagnitude)
-        }
-        
-        // return the average of all the center of masses of the associated triangles
-        
-        var xTotal:CGFloat = 0.0
-        var yTotal:CGFloat = 0.0
-        
-        for nextTriangle in self.associatedTriangles
-        {
-            let nextCenter = nextTriangle.CenterOfMass()
-            
-            xTotal += nextCenter.x
-            yTotal += nextCenter.y
-        }
-        
-        let triangleCount = CGFloat(self.associatedTriangles.count)
-        
-        return NSPoint(x: xTotal / triangleCount, y: yTotal / triangleCount)
-    }
+    
 }

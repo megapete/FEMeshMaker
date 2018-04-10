@@ -28,6 +28,9 @@ class Mesh
     // Edges for the current Mesh
     var edges:[Edge] = []
     
+    // The vertices of "holes" (unmeshed areas) in the model
+    var holes:[NSPoint] = []
+    
     // Elements of the current Mesh
     var elements:[Element] = []
     
@@ -228,32 +231,64 @@ class Mesh
             useSegmentsFlag = "p"
         }
         
-        // We don't use holes
-        // inStruct.pointee.holelist = nil
-        // inStruct.pointee.numberofholes = 0
+        // holes (we don't need to set any flags, seeing as how we don't set the 'r' flag (see triangle.h)
+        if self.holes.count > 0
+        {
+            let holelist = UnsafeMutablePointer<Double>.allocate(capacity: 2 * self.holes.count)
+            
+            var i = 0
+            for nextHole in self.holes
+            {
+                holelist[2 * i] = Double(nextHole.x)
+                holelist[2 * i + 1] = Double(nextHole.y)
+                i += 1
+            }
+            
+            inStruct.pointee.holelist = holelist
+            inStruct.pointee.numberofholes = Int32(self.holes.count)
+        }
         
         // Region-related data
         var useRegionsFlag = ""
         inStruct.pointee.regionlist = nil
         if self.regions.count > 0
         {
-            let regionlist = UnsafeMutablePointer<Double>.allocate(capacity: 4 * self.regions.count)
+            var totalRegionDataCount = 0
+            for nextRegion in regions
+            {
+                guard nextRegion.refPoints.count > 0 else
+                {
+                    ALog("Illegal to create a region without any reference points!")
+                    return false
+                }
+                
+                totalRegionDataCount += nextRegion.refPoints.count
+            }
+            
+            let regionlist = UnsafeMutablePointer<Double>.allocate(capacity: 4 * totalRegionDataCount)
             
             var i = 0
             for nextRegion in regions
             {
-                let regionRefPoint = nextRegion.CenterOfMass()
-                regionlist[4 * i] = Double(regionRefPoint.x)
-                regionlist[4 * i + 1] = Double(regionRefPoint.y)
-                regionlist[4 * i + 2] = Double(nextRegion.tag)
-                regionlist[4 * i + 2] = 0.0 // unused
-                i += 1
-                
-                inStruct.pointee.regionlist = regionlist
-                inStruct.pointee.numberofregions = Int32(self.regions.count)
-                
-                useRegionsFlag = "A"
+                for nextRefPoint in nextRegion.refPoints
+                {
+                    if nextRefPoint.x == CGFloat(0.0) && nextRefPoint.y == CGFloat(0.0)
+                    {
+                        DLog("Region's reference point is (0,0). Did you mean to do this?")
+                    }
+                    
+                    regionlist[4 * i] = Double(nextRefPoint.x)
+                    regionlist[4 * i + 1] = Double(nextRefPoint.y)
+                    regionlist[4 * i + 2] = Double(nextRegion.tag)
+                    regionlist[4 * i + 2] = 0.0 // unused
+                    i += 1
+                }
             }
+            
+            inStruct.pointee.regionlist = regionlist
+            inStruct.pointee.numberofregions = Int32(self.regions.count)
+            
+            useRegionsFlag = "A"
         }
         
         // Set up the flags that we will pass to the triangulate() call. We always use -z, -j, -e, and -n. The two flags -p and -A are conditionally set above. The 'q' flag is followed by the requested minimum angle
@@ -274,6 +309,11 @@ class Mesh
         if inStruct.pointee.numberofregions > 0
         {
             inStruct.pointee.regionlist.deallocate()
+        }
+        
+        if inStruct.pointee.numberofholes > 0
+        {
+            inStruct.pointee.holelist.deallocate()
         }
         
         inStruct.deallocate()
@@ -321,8 +361,9 @@ class Mesh
             self.elements.append(newElement)
         }
         
-        // triangle simply copies the regionlist from inStruct, so we want to make sure we don't free it twice
+        // triangle simply copies the regionlist and holelist from inStruct, so we want to make sure we don't free them twice
         output.regionlist = nil
+        output.holelist = nil
         
         // We need to free all the memory that triangle (may have) malloc'd
         free(output.pointlist)
@@ -334,7 +375,7 @@ class Mesh
         free(output.neighborlist)
         free(output.segmentlist)
         free(output.segmentmarkerlist)
-        free(output.holelist)
+        // free(output.holelist)
         // free(output.regionlist)
         free(output.edgelist)
         free(output.edgemarkerlist)
