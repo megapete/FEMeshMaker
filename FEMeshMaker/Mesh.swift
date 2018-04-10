@@ -99,6 +99,8 @@ class Mesh
                     {
                         self.segments.append(Edge(endPoint1: currentNode, endPoint2: pathStartNode))
                     }
+                    
+                    break // this is needed because for some reason, we end with a "moveto" the start point if the NSBezierPath was created with an NSRect
                 }
                 else // must be .curveToBezierPathElement
                 {

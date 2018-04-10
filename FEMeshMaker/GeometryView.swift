@@ -10,6 +10,8 @@ import Cocoa
 
 class GeometryView: NSView {
     
+    var lineWidth:CGFloat = 1.0
+    
     // The shapes to show. The Bezier path dimensions should be the actual dimensions of the objects.
     var geometry:[(path:NSBezierPath, color:NSColor)] = []
     
@@ -23,16 +25,25 @@ class GeometryView: NSView {
 
         // Drawing code here.
         
+        let oldLineWidth = NSBezierPath.defaultLineWidth
+        
+        NSBezierPath.defaultLineWidth = self.lineWidth
+        
         triangleColor.setStroke()
         for nextTriangle in triangles
         {
+            let trianglePath = nextTriangle.ElementAsPath()
+            trianglePath.lineWidth = self.lineWidth
             nextTriangle.ElementAsPath().stroke()
         }
         
         for nextPath in self.geometry
         {
             nextPath.color.setStroke()
+            nextPath.path.lineWidth = self.lineWidth
             nextPath.path.stroke()
         }
+        
+        NSBezierPath.defaultLineWidth = oldLineWidth
     }
 }

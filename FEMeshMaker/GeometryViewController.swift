@@ -12,6 +12,56 @@ class GeometryViewController: NSViewController
 {
     var currentScale:CGFloat = 1.0
     
+    var meshBounds = NSRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0)
+    var paths:[NSBezierPath] = []
+    var triangles:[Element] = []
+    
+    // Initializer to stick the new input geometry view right into a window
+    convenience init(intoWindow:NSWindow)
+    {
+        if !intoWindow.isVisible
+        {
+            intoWindow.makeKeyAndOrderFront(nil)
+        }
+        
+        // DLog("Is the window visible: \(intoWindow.isVisible)")
+        self.init(nibName: nil, bundle: nil)
+        
+        if let winView = intoWindow.contentView
+        {
+            if winView.subviews.count > 0
+            {
+                // DLog("Window already has subview! Removing...")
+                winView.subviews = []
+            }
+            
+            winView.addSubview(self.view)
+        }
+    }
+    
+    func SetGeometry(meshBounds:NSRect, paths:[NSBezierPath], triangles:[Element])
+    {
+        self.meshBounds = meshBounds
+        self.paths = paths
+        self.triangles = triangles
+        
+        if self.isViewLoaded
+        {
+            let geoView = self.view as! GeometryView
+            
+            ZoomAll(meshBounds: meshBounds)
+            
+            geoView.geometry = []
+            
+            for nextPath in paths
+            {
+                geoView.geometry.append((path:nextPath, color:NSColor.black))
+            }
+            
+            geoView.triangles = triangles
+        }
+    }
+    
     // Zoom routines
     func ZoomAll(meshBounds:NSRect)
     {
@@ -51,12 +101,33 @@ class GeometryViewController: NSViewController
     {
         self.view.bounds = newRect
         
+        let geoView = self.view as! GeometryView
+        geoView.lineWidth = self.currentScale
+        
         self.view.needsDisplay = true
     }
 
-    override func viewDidLoad() {
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
-        // Do view setup here.
+        
+        if self.meshBounds.width == 0.0 || self.meshBounds.height == 0.0
+        {
+            return
+        }
+        
+        let geoView = self.view as! GeometryView
+        
+        ZoomAll(meshBounds: self.meshBounds)
+        
+        geoView.geometry = []
+        
+        for nextPath in self.paths
+        {
+            geoView.geometry.append((path:nextPath, color:NSColor.black))
+        }
+        
+        geoView.triangles = self.triangles
     }
     
 }
