@@ -714,6 +714,9 @@
                 <rect key="frame" x="0.0" y="0.0" width="821" height="557"/>
                 <autoresizingMask key="autoresizingMask"/>
             </view>
+            <connections>
+                <outlet property="delegate" destination="Msw-Rr-Zan" id="kfr-lc-kUz"/>
+            </connections>
             <point key="canvasLocation" x="218.5" y="-114.5"/>
         </window>
     </objects>

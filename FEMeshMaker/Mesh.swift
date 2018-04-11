@@ -22,10 +22,10 @@ class Mesh
     // Nodes for the current Mesh
     var nodes:[Node] = []
     
-    // Segments for the current Mesh
+    // Segments for the current Mesh. Note that after the call to triangulate, the entries in this array correspond to only those segments that are ON the original segments passed to the init() function.
     var segments:[Edge] = []
     
-    // Edges for the current Mesh
+    // Edges for the current Mesh. Note that after the call to triangulate(), the entries in this array correspond to ALL the segments that make up the triangles, INCLUDING the ones in the segments array
     var edges:[Edge] = []
     
     // The vertices of "holes" (unmeshed areas) in the model
@@ -167,20 +167,22 @@ class Mesh
         
         // Start with the point-related fields
         let pointlist = UnsafeMutablePointer<Double>.allocate(capacity: 2 * self.nodes.count)
+        let pointmarkerlist = UnsafeMutablePointer<Int32>.allocate(capacity: self.nodes.count)
         
         for nextNode in self.nodes
         {
             pointlist[2 * nextNode.tag] = Double(nextNode.vertex.x)
             pointlist[2 * nextNode.tag + 1] = Double(nextNode.vertex.y)
+            pointmarkerlist[nextNode.tag] = Int32(nextNode.marker)
         }
         
         inStruct.pointee.pointlist = pointlist
+        inStruct.pointee.pointmarkerlist = pointmarkerlist
         inStruct.pointee.numberofpoints = Int32(self.nodes.count)
         
-        // We don't use point attributes or point markers, so we set things according to the triangle.h file
+        // We don't use point attributes, so we set things according to the triangle.h file
         // inStruct.pointee.numberofpointattributes = 0
         // inStruct.pointee.pointattributelist = nil
-        // inStruct.pointee.pointmarkerlist = nil
         
         // We don't use any of the triangle-related stuff on input
         // inStruct.pointee.trianglelist = nil
@@ -197,17 +199,20 @@ class Mesh
         if self.segments.count > 0
         {
             let segmentlist = UnsafeMutablePointer<Int32>.allocate(capacity: 2 * self.segments.count)
+            let segmentmarkerlist = UnsafeMutablePointer<Int32>.allocate(capacity: self.segments.count)
             
             var i = 0
             for nextSegment in self.segments
             {
                 segmentlist[2 * i] = Int32(nextSegment.endPoint1.tag)
                 segmentlist[2 * i + 1] = Int32(nextSegment.endPoint2.tag)
+                segmentmarkerlist[i] = Int32(nextSegment.marker)
                 i += 1
             }
         
             inStruct.pointee.segmentlist = segmentlist
             inStruct.pointee.numberofsegments = Int32(self.segments.count)
+            inStruct.pointee.segmentmarkerlist = segmentmarkerlist
             
             useSegmentsFlag = "p"
         }
@@ -280,7 +285,7 @@ class Mesh
         // inStruct.pointee.normlist = nil
         // inStruct.pointee.numberofedges = 0
         
-        // Set up the flags that we will pass to the triangulate() call. We always use -z, -j, -e, and -n. The two flags -p and -A are conditionally set above. The 'q' flag is followed by the requested minimum angle
+        // Set up the flags that we will pass to the triangulate() call. We always use -z, -D, -j, -e, and -n. The two flags -p and -A are conditionally set above. The 'q' flag is followed by the requested minimum angle
         let argString = "zDjen\(useSegmentsFlag)\(useRegionsFlag)q\(withMinAngle)"
         
         let outStruct = UnsafeMutablePointer<triangulateio>.allocate(capacity: 1)
@@ -290,10 +295,12 @@ class Mesh
         
         // Deallocate all inStruct pointers that were created in Swift and then deallocate inStruct itself
         pointlist.deallocate()
+        pointmarkerlist.deallocate()
         
         if inStruct.pointee.numberofsegments > 0
         {
             inStruct.pointee.segmentlist.deallocate()
+            inStruct.pointee.segmentmarkerlist.deallocate()
         }
         
         if inStruct.pointee.numberofregions > 0
@@ -314,26 +321,32 @@ class Mesh
         self.nodes = []
         for i in 0..<Int(output.numberofpoints)
         {
-            let newNode = Node(tag: i, vertex: NSPoint(x: output.pointlist[2 * i], y: output.pointlist[2 * i + 1]))
+            let newNode = Node(tag: i, marker: Int(output.pointmarkerlist[i]), vertex: NSPoint(x: output.pointlist[2 * i], y: output.pointlist[2 * i + 1]))
             
-            nodes.append(newNode)
+            self.nodes.append(newNode)
         }
+        
+        DLog("Num nodes: \(self.nodes.count)")
         
         self.segments = []
         for i in 0..<Int(output.numberofsegments)
         {
-            let newSegment = Edge(endPoint1: nodes[Int(output.segmentlist[2 * i])], endPoint2: nodes[Int(output.segmentlist[2 * i + 1])])
+            let newSegment = Edge(endPoint1: self.nodes[Int(output.segmentlist[2 * i])], endPoint2: self.nodes[Int(output.segmentlist[2 * i + 1])])
             
-            segments.append(newSegment)
+            self.segments.append(newSegment)
         }
+        
+        DLog("Num segs: \(self.segments.count)")
         
         self.edges = []
         for i in 0..<Int(output.numberofedges)
         {
             let newEdge = Edge(endPoint1: nodes[Int(output.edgelist[2 * i])], endPoint2: nodes[Int(output.edgelist[2 * i + 1])])
             
-            edges.append(newEdge)
+            self.edges.append(newEdge)
         }
+        
+        DLog("Num edges: \(self.edges.count)")
         
         self.elements = []
         let numTriAttr = Int(output.numberoftriangleattributes)

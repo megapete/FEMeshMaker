@@ -22,7 +22,7 @@ class AppController: NSObject, NSWindowDelegate
         self.meshRectangle = NSRect(x: 0.0, y: 0.0, width: 20.0, height: 40.0)
         let tankPath = NSBezierPath(rect: meshRectangle)
         let rect1 = NSRect(x: 5.0, y: 5.0, width: 2.5, height: 30.0)
-        let electrode1Path = NSBezierPath(roundedRect: rect1, xRadius: 0.25, yRadius: 0.25) // NSBezierPath(rect: NSRect(x: 5.0, y: 5.0, width: 2.5, height: 30.0))
+        let electrode1Path = /* NSBezierPath(roundedRect: rect1, xRadius: 0.25, yRadius: 0.25) */  NSBezierPath(rect: rect1)
         let hole1 = NSPoint(x: 5.1, y: 5.1)
         let electrode2Path = NSBezierPath(rect: NSRect(x: 10.0, y: 5.0, width: 2.5, height: 30.0))
         let hole2 = NSPoint(x: 10.1, y: 5.1)
@@ -32,6 +32,20 @@ class AppController: NSObject, NSWindowDelegate
         {
             DLog("Shoot, something didn't work")
         }
+        
+        var repeats = 0
+        for nextSegment in testMesh.segments
+        {
+            for nextEdge in testMesh.edges
+            {
+                if nextEdge == nextSegment
+                {
+                    repeats += 1
+                }
+            }
+        }
+        
+        DLog("There are \(repeats) repeats in the edge and segment arrays.")
         
         self.geometryView = GeometryViewController(intoWindow: self.window)
         

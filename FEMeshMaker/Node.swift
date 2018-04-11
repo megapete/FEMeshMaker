@@ -28,6 +28,9 @@ class Node:Hashable
     // A number that is used by Triangle to identify the node
     let tag:Int
     
+    // A number used to identify the boundary (if any) that the point is on. A boundary can be (for example), a counductor with fixed voltage, a mesh boundary, etc.
+    let marker:Int
+    
     // The point where the node is located
     let vertex:NSPoint
     
@@ -41,9 +44,10 @@ class Node:Hashable
     var elements:Set<Element> = []
     
     // Designated initializer
-    init(tag:Int, vertex:NSPoint)
+    init(tag:Int, marker:Int = 0, vertex:NSPoint)
     {
         self.tag = tag
+        self.marker = marker
         self.vertex = vertex
     }
     

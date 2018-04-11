@@ -25,8 +25,6 @@ class GeometryView: NSView {
 
         // Drawing code here.
         
-        
-        
         let oldLineWidth = NSBezierPath.defaultLineWidth
         
         NSBezierPath.defaultLineWidth = self.lineWidth
