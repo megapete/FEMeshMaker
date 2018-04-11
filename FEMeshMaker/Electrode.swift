@@ -10,11 +10,14 @@
 
 import Foundation
 
-struct Electrode
+class Electrode:Boundary
 {
-    let tag:Int
-    
-    let description:String
-    
     let prescribedVoltage:Complex
+    
+    init(tag:Int, prescribedVoltage:Complex, description:String)
+    {
+        self.prescribedVoltage = prescribedVoltage
+        
+        super.init(tag: tag, description: description)
+    }
 }

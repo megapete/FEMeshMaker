@@ -19,11 +19,11 @@ class FE_Mesh:Mesh
     
     var bounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
     
-    init(precision:PCH_Matrix.precisions, withBezierPaths:[NSBezierPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
+    init(precision:PCH_Matrix.precisions, withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
         self.precision = precision
         
-        super.init(withBezierPaths: withBezierPaths, vertices: vertices, regions: regions, holes: holes)
+        super.init(withPaths: withPaths, vertices: vertices, regions: regions, holes: holes)
         
         guard self.RefineMesh() else
         {

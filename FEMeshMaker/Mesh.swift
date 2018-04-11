@@ -42,10 +42,10 @@ class Mesh
     
     // Designated initializer
     // Basically, the geometric model to create a mesh for. Note that either withBezierPath or vertices MUST be non-empty a non-empty array. If both are empty, then a single vertex is created with coordinates equal to the largest Double and a tag equal to -1.
-    init(withBezierPaths:[NSBezierPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
+    init(withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
         // If there are no paths or vertices, the routine returns with only a single node assigned, an "error" node which the calling routine can test for by checking if the Node's tag property is less than 0
-        if withBezierPaths.count + vertices.count == 0
+        if withPaths.count + vertices.count == 0
         {
             nodes.append(Node(tag: -1, vertex: NSPoint(x: Double.greatestFiniteMagnitude, y: Double.greatestFiniteMagnitude)))
             
@@ -66,8 +66,11 @@ class Mesh
         }
         
         // Paths are a bit more complicated since they are actually "code" for building a path, so the elements have to be decoded then converted into nodes and segments.
-        for nextPath in withBezierPaths
+        for nextMeshPath in withPaths
         {
+            let nextPath = nextMeshPath.path
+            let nextMarker = nextMeshPath.boundary.tag
+            
             let elemCount = nextPath.elementCount
             
             // Initialize a couple of varables as "dummy" nodes
@@ -83,7 +86,7 @@ class Mesh
                 
                 if nextElement == .moveToBezierPathElement
                 {
-                    pathStartNode = Node(tag: self.nodeIndex, vertex: pointArray[0])
+                    pathStartNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: pointArray[0])
                     self.nodeIndex += 1
                     
                     currentNode = pathStartNode
@@ -92,7 +95,7 @@ class Mesh
                 }
                 else if nextElement == .lineToBezierPathElement
                 {
-                    let newNode = Node(tag: self.nodeIndex, vertex: pointArray[0])
+                    let newNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: pointArray[0])
                     self.nodeIndex += 1
                     
                     self.nodes.append(newNode)
@@ -124,7 +127,7 @@ class Mesh
                     while t < 0.999 // careful for rounding...
                     {
                         // The PointOnCurve function is in GlobalDefs, on the off-chance we'll need it again someday
-                        let newNode = Node(tag: self.nodeIndex, vertex: PointOnCurve(points: points, t: t))
+                        let newNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: PointOnCurve(points: points, t: t))
                         self.nodeIndex += 1
                         
                         self.nodes.append(newNode)

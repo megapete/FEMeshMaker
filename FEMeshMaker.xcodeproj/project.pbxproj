@@ -26,6 +26,8 @@
 		D39987C2207B952C0052B863 /* GeometryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987C1207B952C0052B863 /* GeometryView.swift */; };
 		D39987C6207EAA540052B863 /* Electrode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987C5207EAA540052B863 /* Electrode.swift */; };
 		D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */; };
+		D3D3C295207EC05500EC5C83 /* MeshPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C294207EC05500EC5C83 /* MeshPath.swift */; };
+		D3D3C297207EC11700EC5C83 /* Boundary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C296207EC11700EC5C83 /* Boundary.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +55,8 @@
 		D39987C1207B952C0052B863 /* GeometryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryView.swift; sourceTree = "<group>"; };
 		D39987C5207EAA540052B863 /* Electrode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Electrode.swift; sourceTree = "<group>"; };
 		D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DielectricRegion.swift; sourceTree = "<group>"; };
+		D3D3C294207EC05500EC5C83 /* MeshPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshPath.swift; sourceTree = "<group>"; };
+		D3D3C296207EC11700EC5C83 /* Boundary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Boundary.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,12 +94,14 @@
 				D39987A62077B0A70052B863 /* GlobalDefs.swift */,
 				D39987A72077B0A70052B863 /* PCH_Defs.swift */,
 				D39987A02077A35C0052B863 /* Node.swift */,
+				D3D3C296207EC11700EC5C83 /* Boundary.swift */,
 				D39987C5207EAA540052B863 /* Electrode.swift */,
 				D39987A22077A5DB0052B863 /* Edge.swift */,
 				D39987A42077A6750052B863 /* Element.swift */,
 				D39987B1207914D30052B863 /* Region.swift */,
 				D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */,
 				D39987B32079236D0052B863 /* Mesh.swift */,
+				D3D3C294207EC05500EC5C83 /* MeshPath.swift */,
 				D39987B7207A8BEE0052B863 /* FE_Mesh.swift */,
 				D39987B9207A8D4F0052B863 /* Matrix.swift */,
 				D39987AF207910020052B863 /* triangle.h */,
@@ -191,6 +197,7 @@
 				D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */,
 				D39987A12077A35C0052B863 /* Node.swift in Sources */,
 				D39987B0207910020052B863 /* triangle.c in Sources */,
+				D3D3C297207EC11700EC5C83 /* Boundary.swift in Sources */,
 				D39987C2207B952C0052B863 /* GeometryView.swift in Sources */,
 				D39987912077A3110052B863 /* AppDelegate.swift in Sources */,
 				D39987B42079236D0052B863 /* Mesh.swift in Sources */,
@@ -198,6 +205,7 @@
 				D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */,
 				D39987A32077A5DB0052B863 /* Edge.swift in Sources */,
 				D399879F2077A32E0052B863 /* AppController.swift in Sources */,
+				D3D3C295207EC05500EC5C83 /* MeshPath.swift in Sources */,
 				D39987A82077B0A70052B863 /* GlobalDefs.swift in Sources */,
 				D39987A52077A6750052B863 /* Element.swift in Sources */,
 			);

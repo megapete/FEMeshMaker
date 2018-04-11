@@ -23,7 +23,10 @@ class AppController: NSObject, NSWindowDelegate
         
         let bulkOil = DielectricRegion(dielectric: .TransformerOil)
         bulkOil.refPoints = [NSPoint(x: 0.1, y: 0.1)]
-        let tankPath = NSBezierPath(rect: meshRectangle)
+        
+        let tankBoundary = Electrode(tag: 1, prescribedVoltage: Complex(real: 0.0, imag: 0.0), description: "Tank")
+        let tankPath = MeshPath(path: NSBezierPath(rect: meshRectangle), boundary: tankBoundary)
+        
         let rect1 = NSRect(x: 5.0, y: 5.0, width: 2.5, height: 30.0)
         let electrode1Path = /* NSBezierPath(roundedRect: rect1, xRadius: 0.25, yRadius: 0.25) */  NSBezierPath(rect: rect1)
         let testRegion = DielectricRegion(dielectric: .PaperInOil)
@@ -32,7 +35,7 @@ class AppController: NSObject, NSWindowDelegate
         let electrode2Path = NSBezierPath(rect: NSRect(x: 10.0, y: 5.0, width: 2.5, height: 30.0))
         let hole2 = NSPoint(x: 10.1, y: 5.1)
         
-        let testMesh = Mesh(withBezierPaths: [tankPath, electrode1Path, electrode2Path], vertices: [], regions: [bulkOil, testRegion], holes:[hole2])
+        let testMesh = Mesh(withPaths: [tankPath], vertices: [], regions: [bulkOil, testRegion], holes:[hole2])
         if !testMesh.RefineMesh()
         {
             DLog("Shoot, something didn't work")
@@ -44,7 +47,7 @@ class AppController: NSObject, NSWindowDelegate
         
         self.geometryView = GeometryViewController(intoWindow: self.window)
         
-        self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: [tankPath, electrode1Path, electrode2Path], triangles: testMesh.elements)
+        self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: [tankPath.path], triangles: testMesh.elements)
         
     }
     
