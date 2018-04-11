@@ -9,16 +9,19 @@
 import Foundation
 import Cocoa
 
+// We define a constant so that we don't need to come up with a tag number every time
+let PCH_DIELECTRIC_TAG_BASE = 100
+
 class DielectricRegion: Region {
     
-    // dielectric constants for commonly used transformer-related materials
-    let transformerOil = 2.2
-    let transformerBoard = 4.5
-    let paper = 3.5
-    
-    // some dry-type constants
-    let air = 1.00059
-    let nomex = 2.7 // at approximately 8 mil thick
+    enum CommonDielectrics:Int {
+        case Vacuum = 0
+        case TransformerOil = 1
+        case TransformerBoard = 2
+        case PaperInOil = 3
+        case Air = 4
+        case Nomex = 5
+    }
     
     // charge density
     let rho:Complex
@@ -26,11 +29,46 @@ class DielectricRegion: Region {
     // relative dielectric constant (permittivity) (>= 1)
     let eRel:Complex
     
-    init(tag:Int, enclosingPath:NSBezierPath, refPoints:[NSPoint], eRel:Complex, rho:Complex)
+    init(tag:Int = PCH_DIELECTRIC_TAG_BASE, description:String = "Vacuum", refPoints:[NSPoint] = [], eRel:Complex = Complex(real:1.0, imag:0.0), rho:Complex = Complex(real:0.0, imag:0.0))
     {
         self.rho = rho
         self.eRel = eRel
         
-        super.init(tag: tag, enclosingPath: enclosingPath, refPoints: refPoints)
+        super.init(tag: tag, description: description, refPoints: refPoints)
+    }
+    
+    // Convenience initializer for common dielectric materials. Note that it is up the calling routine to manually set the reference point(s) for the region after its creation.
+    convenience init(dielectric:CommonDielectrics, rho:Complex = Complex(real:0.0, imag:0.0))
+    {
+        var eRel = 1.0
+        var desc = "Vacuum"
+        
+        switch dielectric {
+            
+        case .TransformerOil:
+            eRel = 2.2
+            desc = "Transformer Oil"
+            
+        case .TransformerBoard:
+            eRel = 4.5
+            desc = "Transformer Board"
+            
+        case .PaperInOil:
+            eRel = 3.5
+            desc = "Oil-soaked Paper"
+            
+        case .Air:
+            eRel = 1.00059
+            desc = "Air"
+            
+        case .Nomex:
+            eRel = 2.7 // at 7 to 10 mil thickness
+            desc = "Nomex"
+            
+        default:
+            eRel = 1.0 // vacuum
+        }
+        
+        self.init(tag: PCH_DIELECTRIC_TAG_BASE + dielectric.rawValue, description: desc, eRel: Complex(real: eRel, imag: 0.0), rho:rho)
     }
 }

@@ -16,13 +16,14 @@ class Region
     // A numerical identifier for the region. NOTE: This MUST be GREATER or EQUAL to 1.
     let tag:Int
     
-    var description:String = ""
-    let enclosingPath:NSBezierPath
+    // An optional string descriptor for the region
+    var description:String = "Region"
+    // let enclosingPath:NSBezierPath
     var attributes:[String:Complex] = [:]
     var refPoints:[NSPoint] = [] // all the points in the model that refer to this Region (there should be at least one)
     var associatedTriangles:[Element] = []
     
-    init(tag:Int, enclosingPath:NSBezierPath, refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)])
+    init(tag:Int, description:String = "Region", refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)])
     {
         if tag < 1
         {
@@ -30,7 +31,8 @@ class Region
         }
         
         self.tag = tag
-        self.enclosingPath = enclosingPath
+        self.description = description
+        // self.enclosingPath = enclosingPath
         self.refPoints = refPoints
     }
     

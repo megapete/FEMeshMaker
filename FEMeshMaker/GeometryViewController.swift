@@ -16,6 +16,8 @@ class GeometryViewController: NSViewController
     var paths:[NSBezierPath] = []
     var triangles:[Element] = []
     
+    var parentWindow:NSWindow? = nil
+    
     // Initializer to stick the new input geometry view right into a window
     convenience init(intoWindow:NSWindow)
     {
@@ -26,6 +28,8 @@ class GeometryViewController: NSViewController
         
         // DLog("Is the window visible: \(intoWindow.isVisible)")
         self.init(nibName: nil, bundle: nil)
+        
+        self.parentWindow = intoWindow
         
         if let winView = intoWindow.contentView
         {
@@ -49,7 +53,7 @@ class GeometryViewController: NSViewController
         {
             let geoView = self.view as! GeometryView
             
-            ZoomAll(meshBounds: meshBounds)
+            ZoomAll(meshBounds: meshBounds, intoWindow: self.parentWindow!)
             
             geoView.geometry = []
             
@@ -65,8 +69,9 @@ class GeometryViewController: NSViewController
     }
     
     // Zoom routines
-    func ZoomAll(meshBounds:NSRect)
+    func ZoomAll(meshBounds:NSRect, intoWindow:NSWindow)
     {
+        let selfViewFrame = self.view.frame
         let xScale = meshBounds.size.width / self.view.frame.size.width
         let yScale = meshBounds.size.height / self.view.frame.size.height
         
@@ -120,7 +125,7 @@ class GeometryViewController: NSViewController
         
         let geoView = self.view as! GeometryView
         
-        ZoomAll(meshBounds: self.meshBounds)
+        ZoomAll(meshBounds: self.meshBounds, intoWindow: self.parentWindow!)
         
         geoView.geometry = []
         
