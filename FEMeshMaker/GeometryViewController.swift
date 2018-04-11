@@ -39,6 +39,8 @@ class GeometryViewController: NSViewController
                 winView.subviews = []
             }
             
+            // This next line is required so that the new view completely takes up the space of the window's content view
+            self.view.frame = winView.frame
             winView.addSubview(self.view)
         }
     }
@@ -53,7 +55,7 @@ class GeometryViewController: NSViewController
         {
             let geoView = self.view as! GeometryView
             
-            ZoomAll(meshBounds: meshBounds, intoWindow: self.parentWindow!)
+            ZoomAll(meshBounds: meshBounds)
             
             geoView.geometry = []
             
@@ -69,11 +71,14 @@ class GeometryViewController: NSViewController
     }
     
     // Zoom routines
-    func ZoomAll(meshBounds:NSRect, intoWindow:NSWindow)
+    func ZoomAll(meshBounds:NSRect)
     {
-        let selfViewFrame = self.view.frame
-        let xScale = meshBounds.size.width / self.view.frame.size.width
-        let yScale = meshBounds.size.height / self.view.frame.size.height
+        // We always want the outr mesh boundary to be inset by 5 points.
+        let insetPoints = CGFloat(5.0)
+        
+        // let selfViewFrame = self.view.frame
+        let xScale = meshBounds.size.width / (self.view.frame.size.width - 2.0 * insetPoints)
+        let yScale = meshBounds.size.height / (self.view.frame.size.height - 2.0 * insetPoints)
         
         var scaledMeshRect = meshBounds
         
@@ -87,6 +92,13 @@ class GeometryViewController: NSViewController
             self.currentScale = yScale
             scaledMeshRect.size.width = self.view.frame.size.width * yScale
         }
+        
+        let insetValue = insetPoints * self.currentScale
+        
+        scaledMeshRect.origin.x -= insetValue
+        scaledMeshRect.origin.y -= insetValue
+        scaledMeshRect.size.height += insetValue * 2.0
+        scaledMeshRect.size.width += insetValue * 2.0
         
         ZoomRect(newRect: scaledMeshRect)
     }
@@ -125,7 +137,7 @@ class GeometryViewController: NSViewController
         
         let geoView = self.view as! GeometryView
         
-        ZoomAll(meshBounds: self.meshBounds, intoWindow: self.parentWindow!)
+        ZoomAll(meshBounds: self.meshBounds)
         
         geoView.geometry = []
         

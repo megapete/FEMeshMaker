@@ -50,7 +50,7 @@ class AppController: NSObject, NSWindowDelegate
             }
         }
         
-        DLog("Window frame: \(self.window.frame); ContentViewFrame: \(self.window.contentView!.frame)")
+        // DLog("Window frame: \(self.window.frame); ContentViewFrame: \(self.window.contentView!.frame)")
         
         self.geometryView = GeometryViewController(intoWindow: self.window)
         
@@ -63,6 +63,6 @@ class AppController: NSObject, NSWindowDelegate
     
     func windowDidResize(_ notification: Notification) {
         
-        self.geometryView?.ZoomAll(meshBounds: self.meshRectangle, intoWindow: self.window)
+        self.geometryView?.ZoomAll(meshBounds: self.meshRectangle)
     }
 }
