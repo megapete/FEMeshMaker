@@ -24,6 +24,7 @@
 		D39987BD207B94120052B863 /* GeometryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987BB207B94120052B863 /* GeometryViewController.swift */; };
 		D39987BE207B94120052B863 /* GeometryViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D39987BC207B94120052B863 /* GeometryViewController.xib */; };
 		D39987C2207B952C0052B863 /* GeometryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987C1207B952C0052B863 /* GeometryView.swift */; };
+		D39987C6207EAA540052B863 /* Electrode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987C5207EAA540052B863 /* Electrode.swift */; };
 		D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */; };
 /* End PBXBuildFile section */
 
@@ -50,6 +51,7 @@
 		D39987BB207B94120052B863 /* GeometryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryViewController.swift; sourceTree = "<group>"; };
 		D39987BC207B94120052B863 /* GeometryViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GeometryViewController.xib; sourceTree = "<group>"; };
 		D39987C1207B952C0052B863 /* GeometryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryView.swift; sourceTree = "<group>"; };
+		D39987C5207EAA540052B863 /* Electrode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Electrode.swift; sourceTree = "<group>"; };
 		D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DielectricRegion.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -88,6 +90,7 @@
 				D39987A62077B0A70052B863 /* GlobalDefs.swift */,
 				D39987A72077B0A70052B863 /* PCH_Defs.swift */,
 				D39987A02077A35C0052B863 /* Node.swift */,
+				D39987C5207EAA540052B863 /* Electrode.swift */,
 				D39987A22077A5DB0052B863 /* Edge.swift */,
 				D39987A42077A6750052B863 /* Element.swift */,
 				D39987B1207914D30052B863 /* Region.swift */,
@@ -182,6 +185,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D39987B8207A8BEE0052B863 /* FE_Mesh.swift in Sources */,
+				D39987C6207EAA540052B863 /* Electrode.swift in Sources */,
 				D39987B2207914D30052B863 /* Region.swift in Sources */,
 				D39987BD207B94120052B863 /* GeometryViewController.swift in Sources */,
 				D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */,

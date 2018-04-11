@@ -37,6 +37,7 @@ class Mesh
     // Regions being used in the current Mesh
     var regions:[Region] = []
     
+    // Simple way of getting the region back from its tag
     var regionDict:[Int:Region] = [:]
     
     // Designated initializer

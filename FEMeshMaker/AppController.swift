@@ -38,17 +38,7 @@ class AppController: NSObject, NSWindowDelegate
             DLog("Shoot, something didn't work")
         }
         
-        var repeats = 0
-        for nextSegment in testMesh.segments
-        {
-            for nextEdge in testMesh.edges
-            {
-                if nextEdge == nextSegment
-                {
-                    repeats += 1
-                }
-            }
-        }
+        
         
         // DLog("Window frame: \(self.window.frame); ContentViewFrame: \(self.window.contentView!.frame)")
         
