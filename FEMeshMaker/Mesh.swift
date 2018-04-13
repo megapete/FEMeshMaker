@@ -69,7 +69,12 @@ class Mesh
         for nextMeshPath in withPaths
         {
             let nextPath = nextMeshPath.path
-            let nextMarker = nextMeshPath.boundary.tag
+            
+            var nextMarker = 0
+            if let boundary = nextMeshPath.boundary
+            {
+                nextMarker = boundary.tag
+            }
             
             let elemCount = nextPath.elementCount
             

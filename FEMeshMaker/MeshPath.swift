@@ -13,9 +13,9 @@ class MeshPath
 {
     let path:NSBezierPath
     
-    let boundary:Boundary
+    let boundary:Boundary?
     
-    init(path:NSBezierPath, boundary:Boundary)
+    init(path:NSBezierPath, boundary:Boundary?)
     {
         self.path = path
         self.boundary = boundary

@@ -27,15 +27,60 @@ class AppController: NSObject, NSWindowDelegate
         let tankBoundary = Electrode(tag: 1, prescribedVoltage: Complex(real: 0.0, imag: 0.0), description: "Tank")
         let tankPath = MeshPath(path: NSBezierPath(rect: meshRectangle), boundary: tankBoundary)
         
-        let rect1 = NSRect(x: 5.0, y: 5.0, width: 2.5, height: 30.0)
-        let electrode1Path = /* NSBezierPath(roundedRect: rect1, xRadius: 0.25, yRadius: 0.25) */  NSBezierPath(rect: rect1)
-        let testRegion = DielectricRegion(dielectric: .PaperInOil)
-        // let hole1 = NSPoint(x: 5.1, y: 5.1)
-        testRegion.refPoints = [NSPoint(x: 5.1, y: 5.1)]
-        let electrode2Path = NSBezierPath(rect: NSRect(x: 10.0, y: 5.0, width: 2.5, height: 30.0))
-        let hole2 = NSPoint(x: 10.1, y: 5.1)
+        let diskSize = NSSize(width: 2.25, height: 0.375)
+        let diskPitch = 0.575
+        let numDisksPerCoil = round((30.0 - Double(diskSize.height)) / diskPitch) - 1.0
         
-        let testMesh = Mesh(withPaths: [tankPath], vertices: [], regions: [bulkOil, testRegion], holes:[hole2])
+        let lvID = 2.5
+        let lvVoltsPerDisk = 12500.0 / numDisksPerCoil
+        let hVID = lvID + Double(diskSize.width) + 2.0
+        let hvVoltsPerDisk = 25000.0 / numDisksPerCoil
+        let coilBottom = 5.0
+        var diskBottom = coilBottom
+        var lvDiskV = 0.0
+        var hvDiskV = 0.0
+        
+        var nextTag = 2
+        
+        var meshPaths:[MeshPath] = [tankPath]
+        var holes:[NSPoint] = []
+        
+        let diskPaper = DielectricRegion(dielectric: .PaperInOil)
+        
+        for i in 0..<Int(numDisksPerCoil)
+        {
+            let nextLVDiskRect = NSRect(origin: NSPoint(x: lvID, y: diskBottom), size: diskSize)
+            let nextLVDiskName = "LV\(i+1)"
+            let nextHVDiskRect = NSRect(origin: NSPoint(x: hVID, y: diskBottom), size: diskSize)
+            let nextHVDiskName = "HV\(i+1)"
+            
+            let lvDiskPaperPath = MeshPath(path: NSBezierPath(roundedRect: nextLVDiskRect, xRadius: 0.030, yRadius: 0.030), boundary: nil)
+            diskPaper.refPoints.append(NSPoint(x: nextLVDiskRect.origin.x + 0.015, y: nextLVDiskRect.origin.y + 0.1875))
+            let hvDiskPaperPath = MeshPath(path: NSBezierPath(roundedRect: nextHVDiskRect, xRadius: 0.030, yRadius: 0.030), boundary: nil)
+            diskPaper.refPoints.append(NSPoint(x: nextHVDiskRect.origin.x + 0.015, y: nextHVDiskRect.origin.y + 0.1875))
+            
+            let nextLVCopperRect = NSInsetRect(nextLVDiskRect, -0.030, -0.030)
+            let nextHVCopperRect = NSInsetRect(nextHVDiskRect, -0.030, -0.030)
+            
+            holes.append(NSPoint(x: lvID + 1.125, y: diskBottom + 0.1875))
+            holes.append(NSPoint(x: hVID + 1.125, y: diskBottom + 0.1875))
+            
+            let lvDiskPath = MeshPath(path: NSBezierPath(rect: nextLVCopperRect), boundary: Electrode(tag: nextTag, prescribedVoltage: Complex(real: lvDiskV, imag: 0.0), description: nextLVDiskName))
+            
+            nextTag += 1
+            
+            let hvDiskPath = MeshPath(path: NSBezierPath(rect: nextHVCopperRect), boundary: Electrode(tag: nextTag, prescribedVoltage: Complex(real: hvDiskV, imag: 0.0), description: nextHVDiskName))
+            
+            nextTag += 1
+            meshPaths.append(contentsOf: [lvDiskPaperPath, lvDiskPath, hvDiskPaperPath, hvDiskPath])
+            
+            diskBottom += diskPitch
+            lvDiskV += lvVoltsPerDisk
+            hvDiskV += hvVoltsPerDisk
+        }
+        
+        
+        let testMesh = Mesh(withPaths: meshPaths, vertices: [], regions: [bulkOil], holes:holes)
         if !testMesh.RefineMesh()
         {
             DLog("Shoot, something didn't work")
@@ -47,7 +92,13 @@ class AppController: NSObject, NSWindowDelegate
         
         self.geometryView = GeometryViewController(intoWindow: self.window)
         
-        self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: [tankPath.path], triangles: testMesh.elements)
+        var diskPaths:[NSBezierPath] = [tankPath.path]
+        for nextPath in meshPaths
+        {
+            diskPaths.append(nextPath.path)
+        }
+        
+        self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: testMesh.elements)
         
     }
     
