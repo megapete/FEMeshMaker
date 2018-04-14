@@ -14,6 +14,11 @@ class AppController: NSObject, NSWindowDelegate
     @IBOutlet weak var mainScrollView: NSScrollView!
     
     var geometryView:GeometryViewController? = nil
+    var currentGeometryViewBounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
+    
+    @IBOutlet weak var showTrianglesMenuItem: NSMenuItem!
+    
+    var currentMesh:Mesh? = nil
     
     var meshRectangle = NSRect(x: 0, y: 0, width: 0, height: 0)
     
@@ -87,11 +92,12 @@ class AppController: NSObject, NSWindowDelegate
             DLog("Shoot, something didn't work")
         }
         
-        
+        self.currentMesh = testMesh
         
         // DLog("Window frame: \(self.window.frame); ContentViewFrame: \(self.window.contentView!.frame)")
         
         self.geometryView = GeometryViewController(intoWindow: self.window, intoView:self.mainScrollView)
+        self.currentGeometryViewBounds = self.geometryView!.view.bounds
         
         var diskPaths:[NSBezierPath] = [tankPath.path]
         for nextPath in meshPaths
@@ -103,11 +109,40 @@ class AppController: NSObject, NSWindowDelegate
         
     }
     
-    @IBAction func handleShowElements(_ sender: Any) {
+    @IBAction func handleShowElements(_ sender: Any)
+    {
+        if let gView = self.geometryView
+        {
+            let currentState = gView.ToggleTriangles()
+            
+            self.showTrianglesMenuItem.state = (currentState ? .on : .off)
+        }
+    }
+    
+    func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize
+    {
+        let sizeDiff = NSSize(width: frameSize.width - self.window.frame.width, height: frameSize.height - self.window.frame.height)
+        
+        if let gView = self.geometryView
+        {
+            let sizeDiffX = sizeDiff.width * gView.currentScale
+            let sizeDiffY = sizeDiff.height * gView.currentScale
+            
+            let oldBounds = gView.view.bounds
+            
+            let newBounds = NSRect(x: oldBounds.origin.x, y: oldBounds.origin.y - sizeDiffY, width: oldBounds.width + sizeDiffX, height: oldBounds.height + sizeDiffY)
+            
+            self.currentGeometryViewBounds = newBounds
+            // gView.ZoomRect(newRect: newBounds)
+            
+        }
+        
+        return frameSize
     }
     
     func windowDidResize(_ notification: Notification) {
         
-        self.geometryView?.ZoomAll(meshBounds: self.meshRectangle)
+        self.geometryView?.ZoomRect(newRect: self.currentGeometryViewBounds)
+        
     }
 }

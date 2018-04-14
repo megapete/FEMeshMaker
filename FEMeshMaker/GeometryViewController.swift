@@ -15,6 +15,7 @@ class GeometryViewController: NSViewController
     var meshBounds = NSRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0)
     var paths:[NSBezierPath] = []
     var triangles:[Element] = []
+    var trianglesAreVisible:Bool = false
     
     var parentWindow:NSWindow? = nil
     
@@ -69,7 +70,7 @@ class GeometryViewController: NSViewController
                 geoView.geometry.append((path:nextPath, color:NSColor.black))
             }
             
-            geoView.triangles = triangles
+            // geoView.triangles = triangles
             
             //numTriangles.stringValue = "Triangles: \(triangles.count)"
         }
@@ -130,6 +131,26 @@ class GeometryViewController: NSViewController
         
         self.view.needsDisplay = true
     }
+    
+    // show/hide the triangles and return whether or not they are currently visible
+    func ToggleTriangles() -> Bool
+    {
+        let geoView = self.view as! GeometryView
+        
+        if self.trianglesAreVisible
+        {
+            geoView.triangles = []
+        }
+        else
+        {
+            geoView.triangles = self.triangles
+        }
+        
+        geoView.needsDisplay = true
+        self.trianglesAreVisible = !self.trianglesAreVisible
+        
+        return self.trianglesAreVisible
+    }
 
     override func viewDidLoad()
     {
@@ -151,7 +172,7 @@ class GeometryViewController: NSViewController
             geoView.geometry.append((path:nextPath, color:NSColor.black))
         }
         
-        geoView.triangles = self.triangles
+        // geoView.triangles = self.triangles
         
         //numTriangles.stringValue = "Triangles: \(self.triangles.count)"
     }
