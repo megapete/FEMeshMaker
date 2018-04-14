@@ -22,6 +22,15 @@ class AppController: NSObject, NSWindowDelegate
     
     var meshRectangle = NSRect(x: 0, y: 0, width: 0, height: 0)
     
+    
+    @IBAction func handleZoomAll(_ sender: Any)
+    {
+        if let gView = self.geometryView
+        {
+            gView.ZoomAll(meshBounds: self.meshRectangle)
+        }
+    }
+    
     @IBAction func handleCreateDemo(_ sender: Any)
     {
         // Simple model

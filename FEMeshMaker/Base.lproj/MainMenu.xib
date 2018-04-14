@@ -641,6 +641,9 @@
                         <items>
                             <menuItem title="Zoom All" id="erP-LY-6fU">
                                 <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="handleZoomAll:" target="Msw-Rr-Zan" id="bwi-go-1Kd"/>
+                                </connections>
                             </menuItem>
                             <menuItem title="Zoom In" keyEquivalent="+" id="Opa-b3-Oqz"/>
                             <menuItem title="Zoom Out" keyEquivalent="-" id="N4k-Of-BEm"/>
