@@ -11,6 +11,7 @@ import Cocoa
 class AppController: NSObject, NSWindowDelegate
 {
     @IBOutlet weak var window: NSWindow!
+    @IBOutlet weak var mainScrollView: NSScrollView!
     
     var geometryView:GeometryViewController? = nil
     
@@ -90,7 +91,7 @@ class AppController: NSObject, NSWindowDelegate
         
         // DLog("Window frame: \(self.window.frame); ContentViewFrame: \(self.window.contentView!.frame)")
         
-        self.geometryView = GeometryViewController(intoWindow: self.window)
+        self.geometryView = GeometryViewController(intoWindow: self.window, intoView:self.mainScrollView)
         
         var diskPaths:[NSBezierPath] = [tankPath.path]
         for nextPath in meshPaths

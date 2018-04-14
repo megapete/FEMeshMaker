@@ -19,6 +19,7 @@
         </customObject>
         <customObject id="Msw-Rr-Zan" customClass="AppController" customModule="FEMeshMaker" customModuleProvider="target">
             <connections>
+                <outlet property="mainScrollView" destination="17S-zO-6cv" id="1Hs-6P-7rR"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="BEI-OJ-Lsl"/>
             </connections>
         </customObject>
@@ -637,10 +638,16 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="View" id="poS-Q6-1li">
                         <items>
-                            <menuItem title="Show Toolbar" keyEquivalent="t" id="erP-LY-6fU">
+                            <menuItem title="Zoom All" id="erP-LY-6fU">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem title="Zoom In" keyEquivalent="+" id="Opa-b3-Oqz"/>
+                            <menuItem title="Zoom Out" keyEquivalent="-" id="N4k-Of-BEm"/>
+                            <menuItem isSeparatorItem="YES" id="Ds1-sN-xAg"/>
+                            <menuItem title="Show Toolbar" keyEquivalent="t" id="aUn-Ws-3OB">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
-                                    <action selector="toggleToolbarShown:" target="-1" id="NNH-HW-YK2"/>
+                                    <action selector="toggleToolbarShown:" target="-1" id="qPW-Fy-w4Z"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Customize Toolbar…" id="A3h-wI-RBS">
@@ -709,10 +716,34 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="335" y="390" width="821" height="557"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1177"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <view key="contentView" wantsLayer="YES" id="EiT-Mj-1SZ">
                 <rect key="frame" x="0.0" y="0.0" width="821" height="557"/>
                 <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="17S-zO-6cv">
+                        <rect key="frame" x="-1" y="-1" width="823" height="559"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <clipView key="contentView" ambiguous="YES" id="VI7-Ol-hrb">
+                            <rect key="frame" x="1" y="1" width="806" height="542"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <view fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hxs-VP-wvT">
+                                    <rect key="frame" x="0.0" y="0.0" width="791" height="527"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                </view>
+                            </subviews>
+                        </clipView>
+                        <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="b7f-6B-J1M">
+                            <rect key="frame" x="1" y="543" width="806" height="15"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                        <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="T8q-t9-yS0">
+                            <rect key="frame" x="807" y="1" width="15" height="542"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                    </scrollView>
+                </subviews>
             </view>
             <connections>
                 <outlet property="delegate" destination="Msw-Rr-Zan" id="kfr-lc-kUz"/>

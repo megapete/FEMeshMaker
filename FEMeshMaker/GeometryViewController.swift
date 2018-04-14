@@ -18,8 +18,8 @@ class GeometryViewController: NSViewController
     
     var parentWindow:NSWindow? = nil
     
-    // Initializer to stick the new input geometry view right into a window
-    convenience init(intoWindow:NSWindow)
+    // Initializer to stick the new input geometry view right into a window. Optionally, the new view can be added as a subView to a scroll view within the window. If nil is passed as intoView, the new view replaces the lowest-level view in the contentView of the window.
+    convenience init(intoWindow:NSWindow, intoView:NSScrollView? = nil)
     {
         if !intoWindow.isVisible
         {
@@ -31,7 +31,12 @@ class GeometryViewController: NSViewController
         
         self.parentWindow = intoWindow
         
-        if let winView = intoWindow.contentView
+        if let parentView = intoView
+        {
+            self.view.frame = parentView.contentView.frame
+            parentView.documentView = self.view
+        }
+        else if let winView = intoWindow.contentView
         {
             if winView.subviews.count > 0
             {
