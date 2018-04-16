@@ -31,9 +31,54 @@ class AppController: NSObject, NSWindowDelegate
         }
     }
     
-    @IBAction func handleCreateDemo(_ sender: Any)
+    @IBAction func handleCreateDemo1(_ sender: Any)
     {
         // Simple model
+        self.meshRectangle = NSRect(x: 0.0, y: 0.0, width: 20.0, height: 40.0)
+        
+        let bulkOil = DielectricRegion(dielectric: .TransformerOil)
+        bulkOil.refPoints = [NSPoint(x: 0.1, y: 0.1)]
+        
+        let tankBoundary = Electrode(tag: 1, prescribedVoltage: Complex(real: 0.0, imag: 0.0), description: "Tank")
+        let tankPath = MeshPath(path: NSBezierPath(rect: meshRectangle), boundary: tankBoundary)
+        
+        let coilRect = NSRect(x: 0.0, y: 5.0, width: 2.25, height: 30.0)
+        
+        let lvElectrode = Electrode(tag: 1, prescribedVoltage: Complex(real: 26400.0), description: "LV")
+        let hvElectrode = Electrode(tag: 2, prescribedVoltage: Complex(real: 120000.0 / SQRT3), description: "HV")
+        
+        var meshPaths:[MeshPath] = [tankPath]
+        var holes:[NSPoint] = []
+        
+        meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 2.5, 0.0), boundary: lvElectrode))
+        holes.append(NSPoint(x: 3.0, y: 10.0))
+        meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 6.75, 0.0), boundary: hvElectrode))
+        holes.append(NSPoint(x: 7.25, y: 10.0))
+        
+        let feMesh = FE_Mesh(precision: .complex, withPaths: meshPaths, vertices: [], regions: [bulkOil], holes: holes)
+        guard feMesh.RefineMesh() else
+        {
+            DLog("RefineMesh failure!")
+            return
+        }
+        
+        self.currentMesh = feMesh
+        
+        self.geometryView = GeometryViewController(intoWindow: self.window, intoView:self.mainScrollView)
+        self.currentGeometryViewBounds = self.geometryView!.view.bounds
+        
+        var diskPaths:[NSBezierPath] = [tankPath.path]
+        for nextPath in meshPaths
+        {
+            diskPaths.append(nextPath.path)
+        }
+        
+        self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: feMesh.elements)
+    }
+    
+    @IBAction func handleCreateDemo(_ sender: Any)
+    {
+        // More realistic model
         self.meshRectangle = NSRect(x: 0.0, y: 0.0, width: 20.0, height: 40.0)
         
         let bulkOil = DielectricRegion(dielectric: .TransformerOil)
@@ -95,7 +140,7 @@ class AppController: NSObject, NSWindowDelegate
         }
         
         
-        let testMesh = Mesh(withPaths: meshPaths, vertices: [], regions: [bulkOil], holes:holes)
+        let testMesh = Mesh(withPaths: meshPaths, vertices: [], regions: [bulkOil, diskPaper], holes:holes)
         if !testMesh.RefineMesh()
         {
             DLog("Shoot, something didn't work")

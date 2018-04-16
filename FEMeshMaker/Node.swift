@@ -35,7 +35,10 @@ class Node:Hashable
     let vertex:NSPoint
     
     // The current "value" of the Node. Note that we save Complex numbers for this value, even if it is only real.
-    var phi:Complex = Complex(real: 0, imag: 0)
+    var phi:Complex = Complex.ComplexNan
+    
+    // To simplify matters, we allow an optional "prescribed" value for a node (to avoid looking up values in a dictionary)
+    var phiPrescribed:Complex? = nil
     
     // A set of neighbours to the Node
     var neighbours:Set<Node> = []

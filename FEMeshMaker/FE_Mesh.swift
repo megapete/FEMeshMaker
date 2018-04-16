@@ -6,20 +6,22 @@
 //  Copyright © 2018 Peter Huber. All rights reserved.
 //
 
-// Base class for concrete finite element mesh classes
+// Base class for concrete finite element mesh classes. Note that the class offers support for either Double or Complex numbers. However, derived classes are free to enforce only one type if they wish (and they should throw up a warning or something if a routine calls a function of an unsupported type)
 
 import Foundation
 import Cocoa
+import Accelerate
 
 class FE_Mesh:Mesh
 {
     let precision:PCH_SparseMatrix.DataType
     var matrixA:PCH_SparseMatrix? = nil
-    var matrixB:[Complex] = []
+    var complexMatrixB:[Complex] = []
+    var doubleMatrixB:[Double] = []
     
     var bounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
     
-    init(precision:PCH_SparseMatrix.DataType, withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
+    init(precision:PCH_SparseMatrix.DataType,  withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
         self.precision = precision
         
@@ -46,29 +48,129 @@ class FE_Mesh:Mesh
         
     }
     
-    func Setup_A_Matrix() -> PCH_SparseMatrix
+    func Solve() -> [Double]
     {
-        self.matrixA = PCH_SparseMatrix(type: .complex, rows: self.nodes.count, cols: self.nodes.count)
-        // self.matrixA = PCH_Matrix(numRows: self.nodes.count, numCols: self.nodes.count, matrixPrecision: self.precision, matrixType: .generalMatrix)
+        // The first thing we do is convert A into a format recognized by the Apple routines
+        guard let Apch = self.matrixA else
+        {
+            DLog("The A matrix has not been defined")
+            return []
+        }
+        
+        if self.doubleMatrixB.count == 0
+        {
+            DLog("The B matrix has not been defined")
+            return []
+        }
+        
+        guard Apch.cols == Apch.rows && Apch.rows == self.doubleMatrixB.count else
+        {
+            DLog("Illegal dimensions!")
+            return []
+        }
+        
+        let Asp = Apch.CreateSparseMatrix()
+        
+        // Use QR factorization
+        let A = SparseFactor(SparseFactorizationQR, Asp)
+        
+        let B = PCH_SparseMatrix.CreateDenseVectorForDoubleVector(values: self.doubleMatrixB)
+        
+        let X = PCH_SparseMatrix.CreateEmptyVectorForDoubleVector(count: self.doubleMatrixB.count)
+        
+        SparseSolve(A, B, X)
+        
+        var result:[Double] = []
+        for i in 0..<self.doubleMatrixB.count
+        {
+            result.append(X.data[i])
+        }
+        
+        // The calling routine is responsible for getting rid of all the memory allocated by PCH_SparseMatrix routines. This is kind of ugly and I will consider moving this work back to the class.
+        Asp.data.deallocate()
+        Asp.structure.columnStarts.deallocate()
+        Asp.structure.rowIndices.deallocate()
+        
+        B.data.deallocate()
+        X.data.deallocate()
+        
+        // Apple routine for the factorization
+        SparseCleanup(A)
+        
+        return result
+    }
+    
+    func Solve() -> [Complex]
+    {
+        // The first thing we do is convert A into a format recognized by the Apple routines
+        guard let Apch = self.matrixA else
+        {
+            DLog("The A matrix has not been defined")
+            return []
+        }
+        
+        if self.complexMatrixB.count == 0
+        {
+            DLog("The B matrix has not been defined")
+            return []
+        }
+        
+        guard Apch.cols == Apch.rows && Apch.rows == self.complexMatrixB.count else
+        {
+            DLog("Illegal dimensions!")
+            return []
+        }
+        
+        let Asp = Apch.CreateSparseMatrix()
+        
+        // Use QR factorization
+        let A = SparseFactor(SparseFactorizationQR, Asp)
+        
+        let B = PCH_SparseMatrix.CreateDenseMatrixForComplexVector(values: self.complexMatrixB)
+        
+        let X = PCH_SparseMatrix.CreateEmptyMatrixForComplexVector(count: self.complexMatrixB.count)
+        
+        SparseSolve(A, B, X)
+        
+        var result:[Complex] = []
+        for i in 0..<self.complexMatrixB.count
+        {
+            let real = X.data[2 * i]
+            let imag = X.data[2 * i + 1]
+            
+            result.append(Complex(real: real, imag: imag))
+        }
+        
+        // The calling routine is responsible for getting rid of all the memory allocated by PCH_SparseMatrix routines. This is kind of ugly and I will consider moving this work back to the class.
+        Asp.data.deallocate()
+        Asp.structure.columnStarts.deallocate()
+        Asp.structure.rowIndices.deallocate()
+        
+        B.data.deallocate()
+        X.data.deallocate()
+        
+        // Apple routine for the factorization
+        SparseCleanup(A)
+        
+        return result
+    }
+    
+    func Setup_A_Matrix()
+    {
+        self.matrixA = PCH_SparseMatrix(type: self.precision, rows: self.nodes.count, cols: self.nodes.count)
         
         for nextNode in self.nodes
         {
             CalculateCouplingConstants(node: nextNode)
         }
-        
-        return self.matrixA!
     }
     
-    func Setup_B_Matrix() -> [Complex]
+    func SetupBmatrix()
     {
-        // self.matrixB = PCH_Matrix(numVectorElements: self.nodes.count, vectorPrecision: self.precision)
-        
         for nextNode in self.nodes
         {
             CalculateRHSforRow(row: nextNode.tag)
         }
-        
-        return self.matrixB
     }
     
     func CalculateCouplingConstants(node:Node)

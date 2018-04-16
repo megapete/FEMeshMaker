@@ -56,9 +56,9 @@ class Mesh
         self.nodeIndex = 0
         
         // Get all the vertexes (if any) and convert them to nodes
-        for nextVertex in vertices
+        for i in 0..<vertices.count
         {
-            let newNode = Node(tag: self.nodeIndex, vertex: nextVertex)
+            let newNode = Node(tag: self.nodeIndex, vertex: vertices[i])
             
             nodes.append(newNode)
             
@@ -121,7 +121,7 @@ class Mesh
                 }
                 else // must be .curveToBezierPathElement
                 {
-                    // Curves are a major pain in the butt. Since most of the curves we'll be using are relatively simple (they tend to be simple arcs, not weird splines), we use a simple flattening algorithm. NSBezierPath uses 4 control points to define a curve (ie: cubic Bezier curves). For now, we will arbitrarily split any curve into 5 lines (this may be adjusted for speed or accuracy at some point).
+                    // Curves are a major pain in the butt. Since most of the curves we'll be using are relatively simple (they tend to be simple arcs, not weird splines, and they are usually 90 degrees), we use a simple flattening algorithm. NSBezierPath uses 4 control points to define a curve (ie: cubic Bezier curves). For now, we will arbitrarily split any curve into 5 lines (this may be adjusted for speed or accuracy at some point). 
                     
                     let segmentCount = 5
                     let tInterval = CGFloat(1.0 / CGFloat(segmentCount))
@@ -149,6 +149,8 @@ class Mesh
             
             pointArray.deallocate()
         }
+        
+        
         
         self.regions = regions
         for nextRegion in regions
@@ -183,12 +185,37 @@ class Mesh
         let pointlist = UnsafeMutablePointer<Double>.allocate(capacity: 2 * self.nodes.count)
         let pointmarkerlist = UnsafeMutablePointer<Int32>.allocate(capacity: self.nodes.count)
         
+        // We adopt the method that Meeker uses in FEMM to come up with a DefaultMeshSize. See his source code in file bd_writepoly.cpp and search for 'DefaultMeshSize'. Note that he refers to a variable called 'BoundingBoxFraction' that is set to 100.0 elsewhere.
+        var xx = Complex(real: Double(self.nodes[0].vertex.x), imag: Double(self.nodes[0].vertex.y))
+        var yy = xx
+        let boundingBoxFraction = 100.0
+        
         for nextNode in self.nodes
         {
             pointlist[2 * nextNode.tag] = Double(nextNode.vertex.x)
             pointlist[2 * nextNode.tag + 1] = Double(nextNode.vertex.y)
             pointmarkerlist[nextNode.tag] = Int32(nextNode.marker)
+            
+            if Double(nextNode.vertex.x) < xx.real
+            {
+                xx.real = Double(nextNode.vertex.x)
+            }
+            if Double(nextNode.vertex.y) < xx.imag
+            {
+                xx.imag = Double(nextNode.vertex.y)
+            }
+            if Double(nextNode.vertex.x) > yy.real
+            {
+                yy.real = Double(nextNode.vertex.x)
+            }
+            if Double(nextNode.vertex.y) > yy.imag
+            {
+                yy.imag = Double(nextNode.vertex.y)
+            }
         }
+        
+        let defaultMeshSize = pow((yy - xx).cabs / boundingBoxFraction, 2.0)
+        // let defaultMeshSizeFlag = "a\(defaultMeshSize)"
         
         inStruct.pointee.pointlist = pointlist
         inStruct.pointee.pointmarkerlist = pointmarkerlist
@@ -282,7 +309,7 @@ class Mesh
         // on entry we don't send in edge-related data
         
         // Set up the flags that we will pass to the triangulate() call. We always use -z, -D, -j, -e, and -n. The two flags -p and -A are conditionally set above. The 'q' flag is followed by the requested minimum angle
-        let argString = "zDjen\(useSegmentsFlag)\(useRegionsFlag)q\(withMinAngle)"
+        let argString = "a\(defaultMeshSize)zDjen\(useSegmentsFlag)\(useRegionsFlag)q\(withMinAngle)"
         
         let outStruct = UnsafeMutablePointer<triangulateio>.allocate(capacity: 1)
         outStruct.initialize(to: zeroStruct)
