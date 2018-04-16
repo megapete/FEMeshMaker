@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D3800EF92083FBDF00356881 /* SparseMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3800EF82083FBDF00356881 /* SparseMatrix.swift */; };
 		D39987912077A3110052B863 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987902077A3110052B863 /* AppDelegate.swift */; };
 		D39987932077A3120052B863 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D39987922077A3120052B863 /* Assets.xcassets */; };
 		D39987962077A3120052B863 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = D39987942077A3120052B863 /* MainMenu.xib */; };
@@ -20,7 +21,6 @@
 		D39987B2207914D30052B863 /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B1207914D30052B863 /* Region.swift */; };
 		D39987B42079236D0052B863 /* Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B32079236D0052B863 /* Mesh.swift */; };
 		D39987B8207A8BEE0052B863 /* FE_Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B7207A8BEE0052B863 /* FE_Mesh.swift */; };
-		D39987BA207A8D4F0052B863 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987B9207A8D4F0052B863 /* Matrix.swift */; };
 		D39987BD207B94120052B863 /* GeometryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987BB207B94120052B863 /* GeometryViewController.swift */; };
 		D39987BE207B94120052B863 /* GeometryViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D39987BC207B94120052B863 /* GeometryViewController.xib */; };
 		D39987C2207B952C0052B863 /* GeometryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987C1207B952C0052B863 /* GeometryView.swift */; };
@@ -31,6 +31,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D3800EF82083FBDF00356881 /* SparseMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SparseMatrix.swift; sourceTree = "<group>"; };
 		D399878D2077A3110052B863 /* FEMeshMaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FEMeshMaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D39987902077A3110052B863 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D39987922077A3120052B863 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -49,7 +50,6 @@
 		D39987B1207914D30052B863 /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
 		D39987B32079236D0052B863 /* Mesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mesh.swift; sourceTree = "<group>"; };
 		D39987B7207A8BEE0052B863 /* FE_Mesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FE_Mesh.swift; sourceTree = "<group>"; };
-		D39987B9207A8D4F0052B863 /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
 		D39987BB207B94120052B863 /* GeometryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryViewController.swift; sourceTree = "<group>"; };
 		D39987BC207B94120052B863 /* GeometryViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GeometryViewController.xib; sourceTree = "<group>"; };
 		D39987C1207B952C0052B863 /* GeometryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryView.swift; sourceTree = "<group>"; };
@@ -103,7 +103,7 @@
 				D39987B32079236D0052B863 /* Mesh.swift */,
 				D3D3C294207EC05500EC5C83 /* MeshPath.swift */,
 				D39987B7207A8BEE0052B863 /* FE_Mesh.swift */,
-				D39987B9207A8D4F0052B863 /* Matrix.swift */,
+				D3800EF82083FBDF00356881 /* SparseMatrix.swift */,
 				D39987AF207910020052B863 /* triangle.h */,
 				D39987AE207910020052B863 /* triangle.c */,
 				D39987922077A3120052B863 /* Assets.xcassets */,
@@ -201,9 +201,9 @@
 				D39987C2207B952C0052B863 /* GeometryView.swift in Sources */,
 				D39987912077A3110052B863 /* AppDelegate.swift in Sources */,
 				D39987B42079236D0052B863 /* Mesh.swift in Sources */,
-				D39987BA207A8D4F0052B863 /* Matrix.swift in Sources */,
 				D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */,
 				D39987A32077A5DB0052B863 /* Edge.swift in Sources */,
+				D3800EF92083FBDF00356881 /* SparseMatrix.swift in Sources */,
 				D399879F2077A32E0052B863 /* AppController.swift in Sources */,
 				D3D3C295207EC05500EC5C83 /* MeshPath.swift in Sources */,
 				D39987A82077B0A70052B863 /* GlobalDefs.swift in Sources */,

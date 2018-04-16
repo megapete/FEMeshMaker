@@ -13,13 +13,13 @@ import Cocoa
 
 class FE_Mesh:Mesh
 {
-    let precision:PCH_Matrix.precisions
-    var matrixA:PCH_Matrix? = nil
-    var matrixB:PCH_Matrix? = nil
+    let precision:PCH_SparseMatrix.DataType
+    var matrixA:PCH_SparseMatrix? = nil
+    var matrixB:[Complex] = []
     
     var bounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
     
-    init(precision:PCH_Matrix.precisions, withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
+    init(precision:PCH_SparseMatrix.DataType, withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
         self.precision = precision
         
@@ -46,9 +46,10 @@ class FE_Mesh:Mesh
         
     }
     
-    func Setup_A_Matrix() -> PCH_Matrix
+    func Setup_A_Matrix() -> PCH_SparseMatrix
     {
-        self.matrixA = PCH_Matrix(numRows: self.nodes.count, numCols: self.nodes.count, matrixPrecision: self.precision, matrixType: .generalMatrix)
+        self.matrixA = PCH_SparseMatrix(type: .complex, rows: self.nodes.count, cols: self.nodes.count)
+        // self.matrixA = PCH_Matrix(numRows: self.nodes.count, numCols: self.nodes.count, matrixPrecision: self.precision, matrixType: .generalMatrix)
         
         for nextNode in self.nodes
         {
@@ -58,16 +59,16 @@ class FE_Mesh:Mesh
         return self.matrixA!
     }
     
-    func Setup_B_Matrix() -> PCH_Matrix
+    func Setup_B_Matrix() -> [Complex]
     {
-        self.matrixB = PCH_Matrix(numVectorElements: self.nodes.count, vectorPrecision: self.precision)
+        // self.matrixB = PCH_Matrix(numVectorElements: self.nodes.count, vectorPrecision: self.precision)
         
         for nextNode in self.nodes
         {
             CalculateRHSforRow(row: nextNode.tag)
         }
         
-        return self.matrixB!
+        return self.matrixB
     }
     
     func CalculateCouplingConstants(node:Node)
