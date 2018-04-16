@@ -143,7 +143,7 @@ class Element:Hashable
         return path.contains(point)
     }
     
-    // These cotan functions come from Humphries
+    // This cotan function comes from Humphries Eq. 2.47
     func CotanThetaA() -> Double
     {
         let area = self.Area()
@@ -161,7 +161,7 @@ class Element:Hashable
         return Double(result) / (2.0 * area)
     }
     
-    // These cotan functions come from Humphries
+    // This cotan function comes from Humphries Eq. 2.49
     func CotanThetaB() -> Double
     {
         let area = self.Area()
@@ -187,7 +187,7 @@ class Element:Hashable
         return NSPoint(x: resultX, y: resultY)
     }
     
-    // This comes from my ObjC version of this class, which comes from either Andersen or Humphries
+    // This comes from my ObjC version of this class, which comes from Humphries Eq. 2.39
     func Area() -> Double
     {
         let result = ((self.corners.n1.vertex.x - self.corners.n0.vertex.x) * (self.corners.n2.vertex.y - self.corners.n0.vertex.y) - (self.corners.n2.vertex.x - self.corners.n0.vertex.x) * (self.corners.n1.vertex.y - self.corners.n0.vertex.y)) / 2.0
@@ -226,7 +226,7 @@ class Element:Hashable
     // Return a new node, normalized on self
     func NormalizedOn(n0:Node) -> Element
     {
-        let result = Element(n0:self.corners.n0, n1:self.corners.n1, n2:self.corners.n2)
+        let result = Element(n0:self.corners.n0, n1:self.corners.n1, n2:self.corners.n2, region:self.region)
         
         result.NormalizeOn(n0: n0)
         

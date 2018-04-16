@@ -55,14 +55,9 @@ class AppController: NSObject, NSWindowDelegate
         meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 6.75, 0.0), boundary: hvElectrode))
         holes.append(NSPoint(x: 7.25, y: 10.0))
         
-        let feMesh = FE_Mesh(precision: .complex, withPaths: meshPaths, vertices: [], regions: [bulkOil], holes: holes)
-        guard feMesh.RefineMesh() else
-        {
-            DLog("RefineMesh failure!")
-            return
-        }
+        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, vertices: [], regions: [bulkOil], holes: holes)
         
-        self.currentMesh = feMesh
+        self.currentMesh = elStaticMesh
         
         self.geometryView = GeometryViewController(intoWindow: self.window, intoView:self.mainScrollView)
         self.currentGeometryViewBounds = self.geometryView!.view.bounds
@@ -73,7 +68,7 @@ class AppController: NSObject, NSWindowDelegate
             diskPaths.append(nextPath.path)
         }
         
-        self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: feMesh.elements)
+        self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: elStaticMesh.elements)
     }
     
     @IBAction func handleCreateDemo(_ sender: Any)

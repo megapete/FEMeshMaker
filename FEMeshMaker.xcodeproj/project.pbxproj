@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D313746C20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */; };
 		D3800EF92083FBDF00356881 /* SparseMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3800EF82083FBDF00356881 /* SparseMatrix.swift */; };
 		D39987912077A3110052B863 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987902077A3110052B863 /* AppDelegate.swift */; };
 		D39987932077A3120052B863 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D39987922077A3120052B863 /* Assets.xcassets */; };
@@ -31,6 +32,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlatElectrostaticComplexPotentialMesh.swift; sourceTree = "<group>"; };
 		D3800EF82083FBDF00356881 /* SparseMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SparseMatrix.swift; sourceTree = "<group>"; };
 		D399878D2077A3110052B863 /* FEMeshMaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FEMeshMaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D39987902077A3110052B863 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 				D39987B32079236D0052B863 /* Mesh.swift */,
 				D3D3C294207EC05500EC5C83 /* MeshPath.swift */,
 				D39987B7207A8BEE0052B863 /* FE_Mesh.swift */,
+				D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */,
 				D3800EF82083FBDF00356881 /* SparseMatrix.swift */,
 				D39987AF207910020052B863 /* triangle.h */,
 				D39987AE207910020052B863 /* triangle.c */,
@@ -194,6 +197,7 @@
 				D39987C6207EAA540052B863 /* Electrode.swift in Sources */,
 				D39987B2207914D30052B863 /* Region.swift in Sources */,
 				D39987BD207B94120052B863 /* GeometryViewController.swift in Sources */,
+				D313746C20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift in Sources */,
 				D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */,
 				D39987A12077A35C0052B863 /* Node.swift in Sources */,
 				D39987B0207910020052B863 /* triangle.c in Sources */,

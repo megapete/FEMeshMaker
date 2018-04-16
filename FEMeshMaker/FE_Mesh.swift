@@ -165,11 +165,21 @@ class FE_Mesh:Mesh
         }
     }
     
-    func SetupBmatrix()
+    func SetupComplexBmatrix()
     {
+        self.complexMatrixB = Array(repeating: Complex.ComplexNan, count: self.nodes.count)
         for nextNode in self.nodes
         {
-            CalculateRHSforRow(row: nextNode.tag)
+            CalculateRHSforNode(node: nextNode)
+        }
+    }
+    
+    func SetupDoubleBmatrix()
+    {
+        self.doubleMatrixB = Array(repeating: Double.greatestFiniteMagnitude, count: self.nodes.count)
+        for nextNode in self.nodes
+        {
+            CalculateRHSforNode(node: nextNode)
         }
     }
     
@@ -178,7 +188,7 @@ class FE_Mesh:Mesh
         ALog("This function must be overridden in concrete subclasses!")
     }
     
-    func CalculateRHSforRow(row:Int)
+    func CalculateRHSforNode(node:Node)
     {
         ALog("This function must be overridden in concrete subclasses!")
     }
