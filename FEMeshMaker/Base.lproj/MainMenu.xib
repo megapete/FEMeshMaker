@@ -638,6 +638,12 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="mjM-9O-cDK"/>
+                            <menuItem title="Solve Demo 1" id="eUa-eW-uWn">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="handleSolveDemo1:" target="Msw-Rr-Zan" id="bof-me-jH9"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>
@@ -726,7 +732,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="335" y="390" width="821" height="557"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1177"/>
             <view key="contentView" wantsLayer="YES" id="EiT-Mj-1SZ">
                 <rect key="frame" x="0.0" y="0.0" width="821" height="557"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -735,21 +741,21 @@
                         <rect key="frame" x="-1" y="-1" width="823" height="559"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <clipView key="contentView" ambiguous="YES" id="VI7-Ol-hrb">
-                            <rect key="frame" x="1" y="1" width="806" height="542"/>
+                            <rect key="frame" x="1" y="1" width="821" height="557"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <view fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hxs-VP-wvT">
-                                    <rect key="frame" x="0.0" y="0.0" width="791" height="527"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="806" height="542"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 </view>
                             </subviews>
                         </clipView>
                         <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="b7f-6B-J1M">
-                            <rect key="frame" x="1" y="543" width="806" height="15"/>
+                            <rect key="frame" x="1" y="542" width="821" height="16"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="T8q-t9-yS0">
-                            <rect key="frame" x="807" y="1" width="15" height="542"/>
+                            <rect key="frame" x="806" y="1" width="16" height="557"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>

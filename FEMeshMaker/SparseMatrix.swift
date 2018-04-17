@@ -219,32 +219,39 @@ class PCH_SparseMatrix:CustomStringConvertible
         
         // var columnStarts:[Int] = Array(repeating: -1, count: self.cols * typeMultiplier + 1)
         let columnStarts = UnsafeMutablePointer<Int>.allocate(capacity: self.cols * typeMultiplier + 1)
-        columnStarts.initialize(repeating: -1, count: self.cols * typeMultiplier + 1)
+        columnStarts.initialize(repeating: 0, count: self.cols * typeMultiplier + 1)
         
-        // We assume that the user has done SOME work and that every column has at least one entry in it...
-        var lastColumnStart = 0
-        columnStarts[0] = lastColumnStart
+        // Faster (I hope) method of setting up the fields.
         
-        var rowIndex = 0
-        for column in 0..<self.cols * typeMultiplier
-        {
-            var numRowValues:Int32 = 0
-            for row in 0..<self.rows * typeMultiplier
+        // First we sort the matrix Dictionary. I don't know how slow this call is.
+        let sortedMatrix = self.matrix.sorted {(aDic, bDic) -> Bool in
+            
+            let aCol = aDic.key.col
+            let aRow = aDic.key.row
+            let bCol = bDic.key.col
+            let bRow = bDic.key.row
+            
+            if aCol == bCol
             {
-                if let value = self.matrix[SparseKey(row: row, col: column)]
-                {
-                    if value != 0.0
-                    {
-                        rowIndices[rowIndex] = Int32(row)
-                        values[rowIndex] = value
-                        rowIndex += 1
-                        numRowValues += 1
-                    }
-                }
+                return aRow < bRow
             }
             
-            lastColumnStart += Int(numRowValues)
-            columnStarts[column + 1] = lastColumnStart
+            return aCol < bCol
+        }
+        
+        var valuesPerColumn:[Int] = Array(repeating: 0, count: self.cols * typeMultiplier)
+        var rowIndex = 0
+        for (key, value) in sortedMatrix
+        {
+            rowIndices[rowIndex] = Int32(key.row)
+            values[rowIndex] = value
+            rowIndex += 1
+            valuesPerColumn[key.col] += 1
+        }
+        
+        for i in 0..<valuesPerColumn.count
+        {
+            columnStarts[i + 1] = columnStarts[i] + valuesPerColumn[i]
         }
         
         // Do some slow checking in DEBUG builds only

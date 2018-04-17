@@ -18,7 +18,7 @@ class AppController: NSObject, NSWindowDelegate
     
     @IBOutlet weak var showTrianglesMenuItem: NSMenuItem!
     
-    var currentMesh:Mesh? = nil
+    var currentMesh:FE_Mesh? = nil
     
     var meshRectangle = NSRect(x: 0, y: 0, width: 0, height: 0)
     
@@ -70,6 +70,14 @@ class AppController: NSObject, NSWindowDelegate
         
         self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: elStaticMesh.elements)
     }
+    
+    @IBAction func handleSolveDemo1(_ sender: Any)
+    {
+        let result:[Complex] = self.currentMesh!.Solve()
+        
+        DLog("And it worked: \(result[0])")
+    }
+    
     
     @IBAction func handleCreateDemo(_ sender: Any)
     {
@@ -135,7 +143,7 @@ class AppController: NSObject, NSWindowDelegate
         }
         
         
-        let testMesh = Mesh(withPaths: meshPaths, vertices: [], regions: [bulkOil, diskPaper], holes:holes)
+        let testMesh = FE_Mesh(precision: .complex, withPaths: meshPaths, vertices: [], regions: [bulkOil, diskPaper], holes:holes)
         if !testMesh.RefineMesh()
         {
             DLog("Shoot, something didn't work")
