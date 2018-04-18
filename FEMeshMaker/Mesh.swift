@@ -12,11 +12,7 @@ import Foundation
 import Cocoa
 
 // A constant used during debugging
-#if DEBUG
-let PCH_USE_MAX_TRIANGLE_AREA = false
-#else
 let PCH_USE_MAX_TRIANGLE_AREA = true
-#endif
 
 class Mesh
 {
@@ -158,11 +154,20 @@ class Mesh
         }
         
         
-        
+        // Triangle requires a different tag number for each "region reference point" but we don't want to save a bunch of different Regions (when most will be say, 'paper' or something). We therefore come up with a special tag number just for Triangle which is equal to the Region's tagBase plus the index of the reference point in question.
         self.regions = regions
         for nextRegion in regions
         {
-            self.regionDict.updateValue(nextRegion, forKey: nextRegion.tag)
+            for i in 0..<nextRegion.refPoints.count
+            {
+                if self.regionDict[i + nextRegion.tagBase] != nil
+                {
+                    ALog("Duplicate region tag! Abort! Abort!")
+                    return
+                }
+                
+                self.regionDict[i + nextRegion.tagBase] = nextRegion
+            }
         }
         
         self.holes = holes
@@ -275,23 +280,12 @@ class Mesh
         var useRegionsFlag = ""
         if self.regions.count > 0
         {
-            var totalRegionDataCount = 0
-            for nextRegion in regions
-            {
-                guard nextRegion.refPoints.count > 0 else
-                {
-                    ALog("Illegal to create a region without any reference points!")
-                    return false
-                }
-                
-                totalRegionDataCount += nextRegion.refPoints.count
-            }
-            
-            let regionlist = UnsafeMutablePointer<Double>.allocate(capacity: 4 * totalRegionDataCount)
+            let regionlist = UnsafeMutablePointer<Double>.allocate(capacity: 4 * regionDict.count)
             
             var i = 0
             for nextRegion in regions
             {
+                var tagIndex = 0
                 for nextRefPoint in nextRegion.refPoints
                 {
                     if nextRefPoint.x == CGFloat(0.0) && nextRefPoint.y == CGFloat(0.0)
@@ -301,14 +295,15 @@ class Mesh
                     
                     regionlist[4 * i] = Double(nextRefPoint.x)
                     regionlist[4 * i + 1] = Double(nextRefPoint.y)
-                    regionlist[4 * i + 2] = Double(nextRegion.tag)
+                    regionlist[4 * i + 2] = Double(nextRegion.tagBase + tagIndex)
+                    tagIndex += 1
                     regionlist[4 * i + 3] = 0.0 // unused
                     i += 1
                 }
             }
             
             inStruct.pointee.regionlist = regionlist
-            inStruct.pointee.numberofregions = Int32(self.regions.count)
+            inStruct.pointee.numberofregions = Int32(self.regionDict.count)
             
             useRegionsFlag = "A"
         }
@@ -423,6 +418,11 @@ class Mesh
             }
             
             let newElement = Element(n0: nodes[Int(output.trianglelist[numCorners * i])], n1: nodes[Int(output.trianglelist[numCorners * i + 1])], n2: nodes[Int(output.trianglelist[numCorners * i + 2])], region: triangleRegion)
+            
+            if triangleAttribute == 0
+            {
+                ALog("Regionless triangle at CofM:\(newElement.CenterOfMass())")
+            }
             
             self.elements.append(newElement)
         }

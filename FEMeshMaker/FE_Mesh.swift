@@ -45,7 +45,6 @@ class FE_Mesh:Mesh
         }
         
         self.bounds = NSRect(origin: minPoint, size: NSSize(width: maxPoint.x - minPoint.x, height: maxPoint.y - minPoint.y))
-        
     }
     
     func Solve() -> [Double]
@@ -153,6 +152,34 @@ class FE_Mesh:Mesh
         SparseCleanup(A)
         
         return result
+    }
+    
+    func SetNodePhiValuesTo(_ values:[Double])
+    {
+        if values.count != self.nodes.count
+        {
+            ALog("Mismatched number of values to number of nodes")
+            return
+        }
+        
+        for i in 0..<values.count
+        {
+            self.nodes[i].phi = Complex(real: values[i])
+        }
+    }
+    
+    func SetNodePhiValuesTo(_ values:[Complex])
+    {
+        if values.count != self.nodes.count
+        {
+            ALog("Mismatched number of values to number of nodes")
+            return
+        }
+        
+        for i in 0..<values.count
+        {
+            self.nodes[i].phi = values[i]
+        }
     }
     
     func Setup_A_Matrix()

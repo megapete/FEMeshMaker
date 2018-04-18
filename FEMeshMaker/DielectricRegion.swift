@@ -9,9 +9,6 @@
 import Foundation
 import Cocoa
 
-// We define a constant so that we don't need to come up with a tag number every time
-let PCH_DIELECTRIC_TAG_BASE = 100
-
 class DielectricRegion: Region {
     
     enum CommonDielectrics:Int {
@@ -29,16 +26,16 @@ class DielectricRegion: Region {
     // relative dielectric constant (permittivity) (>= 1)
     let eRel:Complex
     
-    init(tag:Int = PCH_DIELECTRIC_TAG_BASE, description:String = "Vacuum", refPoints:[NSPoint] = [], eRel:Complex = Complex(real:1.0, imag:0.0), rho:Complex = Complex(real:0.0, imag:0.0))
+    init(tagBase:Int, description:String = "Vacuum", refPoints:[NSPoint] = [], eRel:Complex = Complex(real:1.0, imag:0.0), rho:Complex = Complex(real:0.0, imag:0.0))
     {
         self.rho = rho
         self.eRel = eRel
         
-        super.init(tag: tag, description: description, refPoints: refPoints)
+        super.init(tagBase: tagBase, description: description, refPoints: refPoints)
     }
     
     // Convenience initializer for common dielectric materials. Note that it is up the calling routine to manually set the reference point(s) for the region after its creation.
-    convenience init(dielectric:CommonDielectrics, rho:Complex = Complex(real:0.0, imag:0.0))
+    convenience init(tagBase:Int, dielectric:CommonDielectrics, rho:Complex = Complex(real:0.0, imag:0.0))
     {
         var eRel = 1.0
         var desc = "Vacuum"
@@ -69,6 +66,6 @@ class DielectricRegion: Region {
             eRel = 1.0 // vacuum
         }
         
-        self.init(tag: PCH_DIELECTRIC_TAG_BASE + dielectric.rawValue, description: desc, eRel: Complex(real: eRel, imag: 0.0), rho:rho)
+        self.init(tagBase: tagBase, description: desc, eRel: Complex(real: eRel, imag: 0.0), rho:rho)
     }
 }

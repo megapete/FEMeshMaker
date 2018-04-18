@@ -13,8 +13,10 @@ import Cocoa
 
 class Region
 {
-    // A numerical identifier for the region. NOTE: This MUST be GREATER or EQUAL to 1.
-    let tag:Int
+    // A BASE identifier for the region. NOTE: This MUST be GREATER or EQUAL to 1.
+    // Note the following relationship between region tags and refPoints:
+    // refPoint[i] has an ACTUAL tag number (as far as Triangle is concerned) = baseTag + i
+    let tagBase:Int
     
     // An optional string descriptor for the region
     var description:String = "Region"
@@ -23,14 +25,14 @@ class Region
     var refPoints:[NSPoint] = [] // all the points in the model that refer to this Region (there should be at least one)
     var associatedTriangles:[Element] = []
     
-    init(tag:Int, description:String = "Region", refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)])
+    init(tagBase:Int, description:String = "Region", refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)])
     {
-        if tag < 1
+        if tagBase < 1
         {
-            ALog("Region tag identifier must be greater than or equal to 1")
+            ALog("Region base-tag identifier must be greater than or equal to 1")
         }
         
-        self.tag = tag
+        self.tagBase = tagBase
         self.description = description
         // self.enclosingPath = enclosingPath
         self.refPoints = refPoints

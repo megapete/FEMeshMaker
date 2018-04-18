@@ -29,11 +29,13 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             }
         }
         
+        /*
         // Create the mesh
         if !self.RefineMesh()
         {
             ALog("Could not refine mesh!")
         }
+        */
         
         self.Setup_A_Matrix()
         self.SetupComplexBmatrix()

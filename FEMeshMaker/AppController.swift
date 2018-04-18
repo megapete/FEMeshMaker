@@ -36,8 +36,10 @@ class AppController: NSObject, NSWindowDelegate
         // Simple model
         self.meshRectangle = NSRect(x: 0.0, y: 0.0, width: 20.0, height: 40.0)
         
-        let bulkOil = DielectricRegion(dielectric: .TransformerOil)
+        var currentRegionTagBase = 1
+        let bulkOil = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerOil)
         bulkOil.refPoints = [NSPoint(x: 0.1, y: 0.1)]
+        currentRegionTagBase += bulkOil.refPoints.count
         
         let tankBoundary = Electrode(tag: 1, prescribedVoltage: Complex(real: 0.0, imag: 0.0), description: "Tank")
         let tankPath = MeshPath(path: NSBezierPath(rect: meshRectangle), boundary: tankBoundary)
@@ -50,12 +52,16 @@ class AppController: NSObject, NSWindowDelegate
         var meshPaths:[MeshPath] = [tankPath]
         var holes:[NSPoint] = []
         
+        let testRegion1 = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerBoard)
         meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 2.5, 0.0), boundary: lvElectrode))
-        holes.append(NSPoint(x: 3.0, y: 10.0))
+        testRegion1.refPoints.append(NSPoint(x: 3.0, y: 10.0))
+        // holes.append(NSPoint(x: 3.0, y: 10.0))
+        // let testRegion2 = DielectricRegion(dielectric: .TransformerBoard)
+        testRegion1.refPoints.append(NSPoint(x: 7.25, y: 10.0))
         meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 6.75, 0.0), boundary: hvElectrode))
-        holes.append(NSPoint(x: 7.25, y: 10.0))
+        // holes.append(NSPoint(x: 7.25, y: 10.0))
         
-        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, vertices: [], regions: [bulkOil], holes: holes)
+        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, vertices: [], regions: [bulkOil, testRegion1], holes: holes)
         
         self.currentMesh = elStaticMesh
         
@@ -79,13 +85,16 @@ class AppController: NSObject, NSWindowDelegate
     }
     
     
+    
     @IBAction func handleCreateDemo(_ sender: Any)
     {
         // More realistic model
         self.meshRectangle = NSRect(x: 0.0, y: 0.0, width: 20.0, height: 40.0)
         
-        let bulkOil = DielectricRegion(dielectric: .TransformerOil)
+        var currentRegionTagBase = 1
+        let bulkOil = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerOil)
         bulkOil.refPoints = [NSPoint(x: 0.1, y: 0.1)]
+        currentRegionTagBase += bulkOil.refPoints.count
         
         let tankBoundary = Electrode(tag: 1, prescribedVoltage: Complex(real: 0.0, imag: 0.0), description: "Tank")
         let tankPath = MeshPath(path: NSBezierPath(rect: meshRectangle), boundary: tankBoundary)
@@ -108,7 +117,7 @@ class AppController: NSObject, NSWindowDelegate
         var meshPaths:[MeshPath] = [tankPath]
         var holes:[NSPoint] = []
         
-        let diskPaper = DielectricRegion(dielectric: .PaperInOil)
+        let diskPaper = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .PaperInOil)
         
         for i in 0..<Int(numDisksPerCoil)
         {
@@ -122,17 +131,17 @@ class AppController: NSObject, NSWindowDelegate
             let hvDiskPaperPath = MeshPath(path: NSBezierPath(roundedRect: nextHVDiskRect, xRadius: 0.030, yRadius: 0.030), boundary: nil)
             diskPaper.refPoints.append(NSPoint(x: nextHVDiskRect.origin.x + 0.015, y: nextHVDiskRect.origin.y + 0.1875))
             
-            let nextLVCopperRect = NSInsetRect(nextLVDiskRect, -0.030, -0.030)
-            let nextHVCopperRect = NSInsetRect(nextHVDiskRect, -0.030, -0.030)
+            let nextLVCopperRect = NSInsetRect(nextLVDiskRect, 0.030, 0.030)
+            let nextHVCopperRect = NSInsetRect(nextHVDiskRect, 0.030, 0.030)
             
             holes.append(NSPoint(x: lvID + 1.125, y: diskBottom + 0.1875))
             holes.append(NSPoint(x: hVID + 1.125, y: diskBottom + 0.1875))
             
-            let lvDiskPath = MeshPath(path: NSBezierPath(rect: nextLVCopperRect), boundary: Electrode(tag: nextTag, prescribedVoltage: Complex(real: lvDiskV, imag: 0.0), description: nextLVDiskName))
+            let lvDiskPath = MeshPath(rect: nextLVCopperRect, boundary: Electrode(tag: nextTag, prescribedVoltage: Complex(real: lvDiskV, imag: 0.0), description: nextLVDiskName))
             
             nextTag += 1
             
-            let hvDiskPath = MeshPath(path: NSBezierPath(rect: nextHVCopperRect), boundary: Electrode(tag: nextTag, prescribedVoltage: Complex(real: hvDiskV, imag: 0.0), description: nextHVDiskName))
+            let hvDiskPath = MeshPath(rect: nextHVCopperRect, boundary: Electrode(tag: nextTag, prescribedVoltage: Complex(real: hvDiskV, imag: 0.0), description: nextHVDiskName))
             
             nextTag += 1
             meshPaths.append(contentsOf: [lvDiskPaperPath, lvDiskPath, hvDiskPaperPath, hvDiskPath])
@@ -142,7 +151,25 @@ class AppController: NSObject, NSWindowDelegate
             hvDiskV += hvVoltsPerDisk
         }
         
+        // This line added to indicate how we would add another Region
+        currentRegionTagBase += diskPaper.refPoints.count
         
+        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, vertices: [], regions: [bulkOil, diskPaper], holes: holes)
+        
+        self.currentMesh = elStaticMesh
+        
+        self.geometryView = GeometryViewController(intoWindow: self.window, intoView:self.mainScrollView)
+        self.currentGeometryViewBounds = self.geometryView!.view.bounds
+        
+        var diskPaths:[NSBezierPath] = [tankPath.path]
+        for nextPath in meshPaths
+        {
+            diskPaths.append(nextPath.path)
+        }
+        
+        self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: elStaticMesh.elements)
+        
+        /*
         let testMesh = FE_Mesh(precision: .complex, withPaths: meshPaths, vertices: [], regions: [bulkOil, diskPaper], holes:holes)
         if !testMesh.RefineMesh()
         {
@@ -163,7 +190,7 @@ class AppController: NSObject, NSWindowDelegate
         }
         
         self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: testMesh.elements)
-        
+        */
     }
     
     @IBAction func handleShowElements(_ sender: Any)
