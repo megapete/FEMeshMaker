@@ -46,7 +46,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         {
             if self.electrodes[node.marker] != nil
             {
-                self.matrixA![node.tag, node.tag] = 1.0
+                self.matrixA![node.tag, node.tag] = Complex(real: 1.0)
                 return
             }
             else
@@ -60,6 +60,18 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         var sumWi = Complex(real: 0.0)
         
         let sortedTriangles = node.SortedArrayOfTriangles()
+        
+        /* Debugging stuff
+        DLog("Node n0 vertex: \(node.vertex)")
+        var triIndex = 1
+        for theTriangle in sortedTriangles
+        {
+            let triangle = theTriangle.NormalizedOn(n0: node)
+            DLog("\nn0:\(triangle.corners.n0.vertex), n1:\(triangle.corners.n1.vertex), n2:\(triangle.corners.n2.vertex)")
+            DLog("\nTriangle #\(triIndex): (n0:\(triangle.corners.n0.tag), n1:\(triangle.corners.n1.tag), n2:\(triangle.corners.n2.tag); CofM:\(triangle.CenterOfMass())")
+            triIndex += 1
+        }
+        */
         
         for i in 0..<sortedTriangles.count
         {
@@ -80,7 +92,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             {
                 if nextTriangle.corners.n2.tag == sortedTriangles[0].corners.n1.tag
                 {
-                    nextTriangle = sortedTriangles[0]
+                    nextTriangle = sortedTriangles[0].NormalizedOn(n0: node)
                     
                     guard let region = nextTriangle.region as? DielectricRegion else
                     {
@@ -108,6 +120,13 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             
             self.matrixA![node.tag, colIndex] = Complex(real: -1.0) * coeff
         }
+        
+        /*
+        if sumWi.real < 1.0E-12
+        {
+            ALog("Got a ZERO!")
+        }
+        */
         
         self.matrixA![node.tag, node.tag] = sumWi
     }

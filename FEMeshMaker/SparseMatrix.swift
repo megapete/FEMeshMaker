@@ -45,13 +45,29 @@ class PCH_SparseMatrix:CustomStringConvertible
             {
                 if (j == self.cols - 1)
                 {
-                    let value:Complex = self[i,j]
-                    result += "\(value) |"
+                    if self.type == .complex
+                    {
+                        let value:Complex = self[i,j]
+                        result += "\(value) |"
+                    }
+                    else
+                    {
+                        let value:Double = self[i,j]
+                        result += "\(value) |"
+                    }
                 }
                 else
                 {
-                    let value:Complex = self[i,j]
-                    result += "\(value)   "
+                    if self.type == .complex
+                    {
+                        let value:Complex = self[i,j]
+                        result += "\(value)   "
+                    }
+                    else
+                    {
+                        let value:Double = self[i,j]
+                        result += "\(value)   "
+                    }
                 }
             }
         }
@@ -89,6 +105,12 @@ class PCH_SparseMatrix:CustomStringConvertible
     {
         get
         {
+            if self.type != .double
+            {
+                ALog("Illegal matrix type for value (should be Double")
+                return SPARSE_MATRIX_ERROR
+            }
+            
             if row >= self.rows || column >= self.cols
             {
                 ALog("Illegal index")
@@ -108,6 +130,13 @@ class PCH_SparseMatrix:CustomStringConvertible
         }
         set
         {
+            var theValue = newValue
+            if self.type != .double
+            {
+                ALog("Illegal matrix type for value (should be Double")
+                theValue = SPARSE_MATRIX_ERROR
+            }
+            
             if row >= self.rows || column >= self.cols
             {
                 ALog("Illegal index")
@@ -115,13 +144,13 @@ class PCH_SparseMatrix:CustomStringConvertible
             
             let key = SparseKey(row: row, col: column)
             
-            if newValue == 0.0
+            if fabs(theValue) < 1.0E-14
             {
                 self.matrix.removeValue(forKey: key)
             }
             else
             {
-                self.matrix[key] = newValue
+                self.matrix[key] = theValue
             }
             
         }
@@ -132,11 +161,18 @@ class PCH_SparseMatrix:CustomStringConvertible
     {
         get
         {
+            if self.type != .complex
+            {
+                ALog("Illegal matrix type for value (should be Complex")
+                return Complex.ComplexNan
+            }
+            
             if row >= self.rows || column >= self.cols
             {
                 ALog("Illegal index")
                 return Complex.ComplexNan
             }
+            
             let realKey = SparseKey(row: row * 2, col: column * 2)
             let imagKey = SparseKey(row: row * 2, col: column * 2 + 1)
             
@@ -151,6 +187,10 @@ class PCH_SparseMatrix:CustomStringConvertible
                     return Complex(real: realResult)
                 }
             }
+            else if let imagResult = self.matrix[imagKey]
+            {
+                return Complex(real: 0.0, imag: -imagResult)
+            }
             else
             {
                 return Complex(real:0.0)
@@ -158,6 +198,13 @@ class PCH_SparseMatrix:CustomStringConvertible
         }
         set
         {
+            var theValue = newValue
+            if self.type != .complex
+            {
+                ALog("Illegal matrix type for value (should be Double")
+                theValue = Complex.ComplexNan
+            }
+            
             if row >= self.rows || column >= self.cols
             {
                 ALog("Illegal index")
@@ -168,7 +215,7 @@ class PCH_SparseMatrix:CustomStringConvertible
             let imagKey1 = SparseKey(row: row * 2, col: column * 2 + 1) // negative imaginary term
             let imagKey2 = SparseKey(row: row * 2 + 1, col: column * 2)
             
-            if newValue.real == 0.0
+            if fabs(theValue.real) < 1.0E-12
             {
                 self.matrix.removeValue(forKey: realKey1)
                 self.matrix.removeValue(forKey: realKey2)
@@ -179,7 +226,7 @@ class PCH_SparseMatrix:CustomStringConvertible
                 self.matrix[realKey2] = newValue.real
             }
             
-            if newValue.imag == 0.0
+            if fabs(theValue.imag) < 1.0E-12
             {
                 self.matrix.removeValue(forKey: imagKey1)
                 self.matrix.removeValue(forKey: imagKey2)
@@ -210,12 +257,30 @@ class PCH_SparseMatrix:CustomStringConvertible
             typeMultiplier = 2
         }
         
+        // Debug (slow) checking
+        #if DEBUG
+        
+            var columnCheck:[Bool] = Array(repeating: false, count: self.cols * typeMultiplier)
+        
+            for (key, _) in self.matrix
+            {
+                columnCheck[key.col] = true
+            }
+        
+            if columnCheck.contains(false)
+            {
+                ALog("Illegal blank column in matrix!")
+            }
+        
+        #endif
+        
         // var rowIndices:[Int32] = Array(repeating: -1, count: self.matrix.count)
         let rowIndices = UnsafeMutablePointer<Int32>.allocate(capacity: self.matrix.count)
         rowIndices.initialize(repeating: -1, count: self.matrix.count)
         
         // var values:[Double] = Array(repeating: Double.greatestFiniteMagnitude, count: self.matrix.count)
         let values = UnsafeMutablePointer<Double>.allocate(capacity: self.matrix.count)
+        values.initialize(repeating:0.0, count: self.matrix.count)
         
         // var columnStarts:[Int] = Array(repeating: -1, count: self.cols * typeMultiplier + 1)
         let columnStarts = UnsafeMutablePointer<Int>.allocate(capacity: self.cols * typeMultiplier + 1)
@@ -257,32 +322,34 @@ class PCH_SparseMatrix:CustomStringConvertible
         // Do some slow checking in DEBUG builds only
         #if DEBUG
         
-        for i in 0..<self.matrix.count
-        {
-            if rowIndices[i] < 0
+            for i in 0..<self.matrix.count
             {
-                ALog("Illegal value in 'rowIndices'")
+                if rowIndices[i] < 0
+                {
+                    ALog("Illegal value in 'rowIndices'")
+                }
+                
+                if values[i] == Double.greatestFiniteMagnitude
+                {
+                    ALog("Illegal value in 'values'")
+                }
             }
-            
-            if values[i] == Double.greatestFiniteMagnitude
-            {
-                ALog("Illegal value in 'values'")
-            }
-        }
         
-        for i in 0..<self.cols * typeMultiplier + 1
-        {
-            if columnStarts[i] < 0
+            for i in 1...self.cols * typeMultiplier
             {
-                ALog("Illegal value in 'columnStarts'")
+                if columnStarts[i] == 0
+                {
+                    ALog("Illegal value in 'columnStarts'")
+                }
             }
-        }
         
         #endif
         
         let sparseStruct = SparseMatrixStructure(rowCount: Int32(self.rows * typeMultiplier), columnCount: Int32(self.cols * typeMultiplier), columnStarts: columnStarts, rowIndices: rowIndices, attributes: SparseAttributes_t(), blockSize: 1)
         
-        return SparseMatrix_Double(structure: sparseStruct, data: values)
+        let result = SparseMatrix_Double(structure: sparseStruct, data: values)
+        
+        return result
     }
     
     static func CreateEmptyMatrixForComplexVector(count:Int) -> DenseMatrix_Double

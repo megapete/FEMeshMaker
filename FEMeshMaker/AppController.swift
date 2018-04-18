@@ -75,7 +75,7 @@ class AppController: NSObject, NSWindowDelegate
     {
         let result:[Complex] = self.currentMesh!.Solve()
         
-        DLog("And it worked: \(result[0])")
+        DLog("And it worked: \(result[295])")
     }
     
     

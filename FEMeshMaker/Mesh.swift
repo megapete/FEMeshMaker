@@ -11,6 +11,13 @@
 import Foundation
 import Cocoa
 
+// A constant used during debugging
+#if DEBUG
+let PCH_USE_MAX_TRIANGLE_AREA = false
+#else
+let PCH_USE_MAX_TRIANGLE_AREA = true
+#endif
+
 class Mesh
 {
     // Counter for the tag number of newly created nodes
@@ -309,7 +316,13 @@ class Mesh
         // on entry we don't send in edge-related data
         
         // Set up the flags that we will pass to the triangulate() call. We always use -z, -D, -j, -e, and -n. The two flags -p and -A are conditionally set above. The 'q' flag is followed by the requested minimum angle
-        let argString = "a\(defaultMeshSize)zDjen\(useSegmentsFlag)\(useRegionsFlag)q\(withMinAngle)"
+        var areaFlag = "a\(defaultMeshSize)"
+        if !PCH_USE_MAX_TRIANGLE_AREA
+        {
+            areaFlag = ""
+        }
+        
+        let argString = "\(areaFlag)zDjen\(useSegmentsFlag)\(useRegionsFlag)q\(withMinAngle)"
         
         let outStruct = UnsafeMutablePointer<triangulateio>.allocate(capacity: 1)
         outStruct.initialize(to: zeroStruct)
