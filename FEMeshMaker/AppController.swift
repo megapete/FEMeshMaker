@@ -52,16 +52,16 @@ class AppController: NSObject, NSWindowDelegate
         var meshPaths:[MeshPath] = [tankPath]
         var holes:[NSPoint] = []
         
-        let testRegion1 = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerBoard)
+        // let testRegion1 = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerBoard)
         meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 2.5, 0.0), boundary: lvElectrode))
-        testRegion1.refPoints.append(NSPoint(x: 3.0, y: 10.0))
-        // holes.append(NSPoint(x: 3.0, y: 10.0))
+        // testRegion1.refPoints.append(NSPoint(x: 3.0, y: 10.0))
+        holes.append(NSPoint(x: 3.0, y: 10.0))
         // let testRegion2 = DielectricRegion(dielectric: .TransformerBoard)
-        testRegion1.refPoints.append(NSPoint(x: 7.25, y: 10.0))
+        // testRegion1.refPoints.append(NSPoint(x: 7.25, y: 10.0))
         meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 6.75, 0.0), boundary: hvElectrode))
-        // holes.append(NSPoint(x: 7.25, y: 10.0))
+        holes.append(NSPoint(x: 7.25, y: 10.0))
         
-        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, vertices: [], regions: [bulkOil, testRegion1], holes: holes)
+        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, vertices: [], regions: [bulkOil], holes: holes)
         
         self.currentMesh = elStaticMesh
         

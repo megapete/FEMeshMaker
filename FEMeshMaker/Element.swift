@@ -234,4 +234,56 @@ class Element:Hashable
         
         return result
     }
+    
+    func HasEdge(A:Node, B:Node) -> Bool
+    {
+        if self.corners.n0 == A
+        {
+            if self.corners.n1 == B || self.corners.n2 == B
+            {
+                return true
+            }
+        }
+        else if self.corners.n1 == A
+        {
+            if self.corners.n0 == B || self.corners.n2 == B
+            {
+                return true
+            }
+        }
+        else if self.corners.n2 == A
+        {
+            if self.corners.n0 == B || self.corners.n1 == B
+            {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    // For the edge n0-n1 of this triangle, there will be either zero (if the edge is on a boundary) or one triangle that shares that edge. Return that triangle, if any.
+    func TriangleThatShares(edge:(A:Node, B:Node)) -> Element?
+    {
+        let resultSet = self.corners.n0.elements.intersection(self.corners.n1.elements)
+        
+        if resultSet.count == 0
+        {
+            return nil
+        }
+        else if resultSet.count > 1
+        {
+            ALog("WTF???")
+            return nil
+        }
+        
+        return resultSet.first!
+    }
 }
+
+
+
+
+
+
+

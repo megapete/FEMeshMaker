@@ -12,17 +12,73 @@ import Foundation
 import Cocoa
 import Accelerate
 
+
+
+// This struct is used to help do hit testing in FIndTriangleWithPoint() in the FE_mesh class below
+fileprivate struct TriangleEdge {
+    
+    let triangle:Element
+    
+    var eOrg:Node    // n0
+    var eDest:Node   // n1
+    var eOther:Node  // n2
+    
+    var eOnext:(A:Node, B:Node) {
+        get
+        {
+            return (eOrg, eOther)
+        }
+    }
+    
+    var eDprev:(A:Node, B:Node) {
+        get
+        {
+            return (eOther, eDest)
+        }
+    }
+    
+    var e:(A:Node, B:Node) {
+        get
+        {
+            return (eOrg, eDest)
+        }
+    }
+    
+    init(withTriangle:Element)
+    {
+        self.triangle = withTriangle
+        self.eOrg = withTriangle.corners.n0
+        self.eDest = withTriangle.corners.n1
+        self.eOther = withTriangle.corners.n2
+    }
+    
+    func TriangleThatShares(edge:(A:Node, B:Node)) -> Element?
+    {
+        var sharedSet = edge.A.elements.intersection(edge.B.elements)
+        
+        if sharedSet.count == 1
+        {
+            return nil
+        }
+        
+        sharedSet.remove(self.triangle)
+        
+        return sharedSet.first
+    }
+}
+
 // This function is used by the FindTriangleWithPoint(:) function in the FE_Mesh class below. It returns true if the point X is STRICTLY to the right of the line AB.
-fileprivate func IsRightOf(edge:(A:NSPoint, B:NSPoint), X:NSPoint) -> Bool
+fileprivate func IsRightOf(edge:(A:Node, B:Node), X:NSPoint) -> Bool
 {
     // For a vector from A to B, and point X,
     // let result = ((Bx - Ax) * (Xy - Ay) - (By - Ay) * (Xx - Ax))
     // if result > 0, X is to the left of AB, < 0 to the Right, =0 on the line
     
-    let result = ((edge.B.x - edge.A.x) * (X.y - edge.A.y) - (edge.B.y - edge.A.y) * (X.x - edge.A.x))
+    let result = ((edge.B.vertex.x - edge.A.vertex.x) * (X.y - edge.A.vertex.y) - (edge.B.vertex.y - edge.A.vertex.y) * (X.x - edge.A.vertex.x))
     
     return result < 0.0
 }
+
 
 class FE_Mesh:Mesh
 {
@@ -33,6 +89,9 @@ class FE_Mesh:Mesh
     var holeZones:[MeshPath] = []
     
     var bounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
+    
+    // We store the index of triangle of the last "hit" point that was queried and use it as the start point for the next query
+    var lastHitTriangle:Element? = nil
     
     init(precision:PCH_SparseMatrix.DataType,  withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
@@ -267,9 +326,118 @@ class FE_Mesh:Mesh
     }
     
     // This function uses the "better" algorithm on page 10 of this document: http://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-728.pdf
-    func FindTriangleWithPoint(X:NSPoint)
+    // The point could be in a triangle or in a "hole" (usually a section with a prescribed-value boundary zone), which means we can return either one.
+    func FindZoneWithPoint(X:NSPoint) -> Zone
     {
+        var result = Zone(triangle: nil, zone: nil)
+        // check first to make sure the point is within our mesh's boundaries
+        if !self.bounds.contains(X)
+        {
+            DLog("Point is outside the mesh bounds!")
+            return result
+        }
         
+        // Now do the simple test to see if X is in one of the mesh "holes"
+        for nextHole in self.holeZones
+        {
+            if nextHole.path.contains(X)
+            {
+                return Zone(triangle: nil, zone: nextHole.boundary)
+            }
+        }
+        
+        // As a start point, we'll choose a random triangle in the mesh UNLESS we've already done a search in which case we'll use the last triangle as our start point
+        
+        let triangleIndex = (self.lastHitTriangle == nil ? Int(drand48() * Double(self.elements.count - 1)) : -1)
+        
+        var currentTriangle = (self.lastHitTriangle != nil ? self.lastHitTriangle! : self.elements[triangleIndex])
+        
+        // Maybe our initial guess was the right one!
+        if currentTriangle.ElementAsPath().contains(X)
+        {
+            return Zone(triangle: currentTriangle, zone: nil)
+        }
+        
+        var edge = TriangleEdge(withTriangle: currentTriangle)
+        if IsRightOf(edge: edge.e, X: X)
+        {
+            if let newTriangle = edge.TriangleThatShares(edge: edge.e)
+            {
+                newTriangle.NormalizeOn(n0: edge.eDest)
+                currentTriangle = newTriangle
+                edge = TriangleEdge(withTriangle: currentTriangle)
+            }
+            else
+            {
+                // TODO: Fix this to take care of holes! This is where the real fun will happen
+                DLog("The edge is on a boundary!")
+                return result
+            }
+        }
+        
+        while true
+        {
+            if currentTriangle.ElementAsPath().contains(X)
+            {
+                return Zone(triangle: currentTriangle, zone: nil)
+            }
+            
+            var whichOp = 0
+            if !IsRightOf(edge: edge.eOnext, X: X)
+            {
+                whichOp += 1
+            }
+            if !IsRightOf(edge: edge.eDprev, X: X)
+            {
+                whichOp += 2
+            }
+            
+            if whichOp == 0
+            {
+                return Zone(triangle: currentTriangle, zone: nil)
+            }
+            else if whichOp == 1
+            {
+                if let newTriangle = edge.TriangleThatShares(edge: edge.eOnext)
+                {
+                    newTriangle.NormalizeOn(n0: edge.eOrg)
+                    currentTriangle = newTriangle
+                    edge = TriangleEdge(withTriangle: currentTriangle)
+                }
+                else
+                {
+                    // TODO: Fix this to take care of holes! This is where the real fun will happen
+                    DLog("The edge is on a boundary!")
+                    return result
+                }
+            }
+            else if whichOp == 2
+            {
+                if let newTriangle = edge.TriangleThatShares(edge: edge.eDprev)
+                {
+                    newTriangle.NormalizeOn(n0: edge.eOther)
+                    currentTriangle = newTriangle
+                    edge = TriangleEdge(withTriangle: currentTriangle)
+                }
+                else
+                {
+                    // TODO: Fix this to take care of holes! This is where the real fun will happen
+                    DLog("The edge is on a boundary!")
+                    return result
+                }
+            }
+            
+            
+        }
+        
+        
+        //return result
+    }
+    
+    struct Zone {
+        
+        var triangle:Element? = nil
+        var zone:Boundary? = nil
     }
     
     func CalculateCouplingConstants(node:Node)
