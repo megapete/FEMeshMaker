@@ -12,12 +12,25 @@ import Foundation
 import Cocoa
 import Accelerate
 
+// This function is used by the FindTriangleWithPoint(:) function in the FE_Mesh class below. It returns true if the point X is STRICTLY to the right of the line AB.
+fileprivate func IsRightOf(edge:(A:NSPoint, B:NSPoint), X:NSPoint) -> Bool
+{
+    // For a vector from A to B, and point X,
+    // let result = ((Bx - Ax) * (Xy - Ay) - (By - Ay) * (Xx - Ax))
+    // if result > 0, X is to the left of AB, < 0 to the Right, =0 on the line
+    
+    let result = ((edge.B.x - edge.A.x) * (X.y - edge.A.y) - (edge.B.y - edge.A.y) * (X.x - edge.A.x))
+    
+    return result < 0.0
+}
+
 class FE_Mesh:Mesh
 {
     let precision:PCH_SparseMatrix.DataType
     var matrixA:PCH_SparseMatrix? = nil
     var complexMatrixB:[Complex] = []
     var doubleMatrixB:[Double] = []
+    var holeZones:[MeshPath] = []
     
     var bounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
     
@@ -45,6 +58,49 @@ class FE_Mesh:Mesh
         }
         
         self.bounds = NSRect(origin: minPoint, size: NSSize(width: maxPoint.x - minPoint.x, height: maxPoint.y - minPoint.y))
+        
+        // Hole zones are saved to do hit-testing later on.
+        for nextHole in holes
+        {
+            var holeContainers:[MeshPath] = []
+            for i in 0..<withPaths.count
+            {
+                if withPaths[i].path.contains(nextHole)
+                {
+                    holeContainers.append(withPaths[i])
+                }
+            }
+            
+            if holeContainers.count == 1
+            {
+                self.holeZones.append(holeContainers[0])
+                continue
+            }
+            
+            while holeContainers.count > 1
+            {
+                let pathToCheck = holeContainers.removeFirst()
+                var pathIsInnermost = true
+                for nextContainer in holeContainers
+                {
+                    if pathToCheck.path.bounds.contains(nextContainer.path.bounds)
+                    {
+                        pathIsInnermost = false
+                        break
+                    }
+                }
+                
+                if pathIsInnermost
+                {
+                    holeContainers.removeAll()
+                    holeContainers.append(pathToCheck)
+                }
+            }
+            
+            self.holeZones.append(holeContainers[0])
+        }
+        
+        
     }
     
     func Solve() -> [Double]
@@ -208,6 +264,12 @@ class FE_Mesh:Mesh
         {
             CalculateRHSforNode(node: nextNode)
         }
+    }
+    
+    // This function uses the "better" algorithm on page 10 of this document: http://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-728.pdf
+    func FindTriangleWithPoint(X:NSPoint)
+    {
+        
     }
     
     func CalculateCouplingConstants(node:Node)

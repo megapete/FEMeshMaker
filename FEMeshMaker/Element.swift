@@ -88,6 +88,8 @@ class Element:Hashable
     
     var region:Region?
     
+    var neighbours:[Element] = []
+    
     var corners:(n0:Node, n1:Node, n2:Node)
     
     var value:Complex = Complex(real: 0.0, imag: 0.0)

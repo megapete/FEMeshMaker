@@ -427,6 +427,30 @@ class Mesh
             self.elements.append(newElement)
         }
         
+        DLog("Num triangles: \(self.elements.count)")
+        
+        // Set the neighbour triangles for each triangle
+        for i in 0..<self.elements.count
+        {
+            let neigh0 = Int(output.neighborlist[i * 3])
+            if neigh0 >= 0
+            {
+                elements.append(elements[neigh0])
+            }
+            
+            let neigh1 = Int(output.neighborlist[i * 3 + 1])
+            if neigh1 >= 0
+            {
+                elements.append(elements[neigh1])
+            }
+            
+            let neigh2 = Int(output.neighborlist[i * 3 + 2])
+            if neigh2 >= 0
+            {
+                elements.append(elements[neigh2])
+            }
+        }
+        
         // We need to free all the memory that triangle (may have) malloc'd
         free(output.pointlist)
         free(output.pointattributelist)
