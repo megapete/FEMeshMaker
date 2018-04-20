@@ -65,6 +65,35 @@ fileprivate struct TriangleEdge {
         
         return sharedSet.first
     }
+    
+    // Returns a UNIT vector that represents the direction of edge.e
+    func DirectionVector() -> NSPoint
+    {
+        let resultVector = NSPoint(x: eDest.vertex.x - eOrg.vertex.x, y: eDest.vertex.y - eOrg.vertex.y)
+        let distance = DistanceBetween(A: self.eOrg, B: self.eDest)
+        
+        return NSPoint(x: resultVector.x / distance, y: resultVector.y / distance)
+    }
+    
+    func IsOnBoundary() -> Bool
+    {
+        if eOrg.marker != 0 && eDest.marker != 0
+        {
+            return true
+        }
+        
+        return false
+    }
+}
+
+fileprivate func DistanceBetween(A:Node, B:Node) -> CGFloat
+{
+    let dX = B.vertex.x - A.vertex.x
+    let dY = B.vertex.y - A.vertex.y
+    
+    let result = sqrt(dX * dX + dY * dY)
+    
+    return result
 }
 
 // This function is used by the FindTriangleWithPoint(:) function in the FE_Mesh class below. It returns true if the point X is STRICTLY to the right of the line AB.
@@ -346,11 +375,27 @@ class FE_Mesh:Mesh
             }
         }
         
-        // As a start point, we'll choose a random triangle in the mesh UNLESS we've already done a search in which case we'll use the last triangle as our start point
+        // As a start point, we'll choose a random triangle in the mesh UNLESS we've already done a search in which case we'll use the last triangle as our start point. We also want to avoid a triangle where any of the points are on a boundary.
+        var startingTriangle:Element? = self.lastHitTriangle
+        while startingTriangle == nil
+        {
+            let triangleIndex = (self.lastHitTriangle == nil ? Int(drand48() * Double(self.elements.count - 1)) : -1)
+            startingTriangle = self.elements[triangleIndex]
+            
+            if let corners = startingTriangle?.corners
+            {
+                if corners.n0.marker != 0 || corners.n1.marker != 0 || corners.n2.marker != 0
+                {
+                    startingTriangle = nil
+                }
+            }
+        }
         
-        let triangleIndex = (self.lastHitTriangle == nil ? Int(drand48() * Double(self.elements.count - 1)) : -1)
-        
-        var currentTriangle = (self.lastHitTriangle != nil ? self.lastHitTriangle! : self.elements[triangleIndex])
+        guard var currentTriangle = startingTriangle else
+        {
+            DLog("Couldn't come up with a suitable element to start!")
+            return result
+        }
         
         // Maybe our initial guess was the right one!
         if currentTriangle.ElementAsPath().contains(X)
@@ -369,14 +414,29 @@ class FE_Mesh:Mesh
             }
             else
             {
-                // TODO: Fix this to take care of holes! This is where the real fun will happen
-                DLog("The edge is on a boundary!")
+                DLog("This should NOT happen!")
                 return result
             }
         }
         
+        // At this point, X is guaranteed to be to the LEFT of edge.
+        
+        // Strategy to get around holes:
+        // If edge is on a boundary:
+        // Goto eDest and find its next neighbour (if any) that is also on the boundary. Continue until there is no neighbour on the boundary. Choose the neighbor that is in the same general direction as the last boundary edge and set it to edge.
+        
         while true
         {
+            if edge.IsOnBoundary()
+            {
+                let direction = edge.DirectionVector()
+                
+                // 1) find a neighbor node to eDest that is on the same boundary and in the same direction
+                // 2) repeat until no neighbour nodes in the same direction that are on teh boundary
+                // 3) choose a node that is in the same general direction
+                // 4) Create the new edge with the triangle that has eOrg on the boundary and eDest that is not
+            }
+            
             if currentTriangle.ElementAsPath().contains(X)
             {
                 return Zone(triangle: currentTriangle, zone: nil)
@@ -426,10 +486,7 @@ class FE_Mesh:Mesh
                     return result
                 }
             }
-            
-            
         }
-        
         
         //return result
     }
