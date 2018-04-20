@@ -432,22 +432,23 @@ class Mesh
         // Set the neighbour triangles for each triangle
         for i in 0..<self.elements.count
         {
+            elements[i].neighbours = []
             let neigh0 = Int(output.neighborlist[i * 3])
             if neigh0 >= 0
             {
-                elements.append(elements[neigh0])
+                elements[i].neighbours.append(elements[neigh0])
             }
             
             let neigh1 = Int(output.neighborlist[i * 3 + 1])
             if neigh1 >= 0
             {
-                elements.append(elements[neigh1])
+                elements[i].neighbours.append(elements[neigh1])
             }
             
             let neigh2 = Int(output.neighborlist[i * 3 + 2])
             if neigh2 >= 0
             {
-                elements.append(elements[neigh2])
+                elements[i].neighbours.append(elements[neigh2])
             }
         }
         

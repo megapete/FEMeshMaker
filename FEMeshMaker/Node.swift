@@ -8,8 +8,13 @@
 
 import Foundation
 
-class Node:Hashable
+class Node:Hashable, CustomStringConvertible
 {
+    var description: String
+    {
+        let result = "N\(self.tag)(\(self.vertex.x), \(self.vertex.y))"
+        return result
+    }
     // To get the class to conform to Hashable, we need to define hashValue and ==
     
     var hashValue: Int

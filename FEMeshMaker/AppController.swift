@@ -75,6 +75,8 @@ class AppController: NSObject, NSWindowDelegate
         }
         
         self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: elStaticMesh.elements)
+        
+        let testTriangle = elStaticMesh.FindZoneWithPoint(X: NSPoint(x: 5.5, y: 20.0))
     }
     
     @IBAction func handleSolveDemo1(_ sender: Any)

@@ -11,8 +11,15 @@
 import Foundation
 import Cocoa
 
-class Element:Hashable
+class Element:Hashable, CustomStringConvertible
 {
+    
+    var description: String
+    {
+        let cOfM = self.CenterOfMass()
+        return "CofM(\(cOfM.x), \(cOfM.y))"
+    }
+    
     // To get the class to conform to Hashable, we need to define hashValue and ==
     
     var hashValue: Int
@@ -72,7 +79,7 @@ class Element:Hashable
                     return true
                 }
             }
-            else if leftN2 == rightN1
+            else if leftN1 == rightN1
             {
                 if leftN2 == rightN0
                 {
