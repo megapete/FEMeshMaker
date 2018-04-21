@@ -518,140 +518,59 @@ class FE_Mesh:Mesh
         // At this point, X is guaranteed to be to the LEFT of edge.
         
         // Strategy to get around holes:
-        // If edge is on a boundary:
-        // Goto eDest and find its next neighbour (if any) that is also on the boundary. Continue until there is no neighbour on the boundary. Choose the neighbor that is in the same general direction as the last boundary edge and set it to edge.
+        // If e.Onext is on a boundary (either check its node's markers or confirm that only a single triangle can be made with it) then
+        // Make a new triangle such that newTriangle.e.Org is equal to oldTriangle.e.Onext.end. There will (likely) be more than one triangle that can be created. If there is one such that newTriangle.eOnext is on the same boundary, then choose that one and break. Otherwise, choose the first one that satisfies !IsRightOf() and continue using the cited paper's algorithm
         
         while true
         {
-            DLog("\(edge)")
-            
-            if edge.TriangleEdgeIsOnBoundary()
+            // check if edge is abutted on a hole
+            while edge.eOrg.marker > 0 && edge.eOther.marker > 0
             {
-                var boundaryEdge = edge.BoundaryEdge()!
-                var boundaryEdgeDirection = Direction(A: boundaryEdge.A, B: boundaryEdge.B)
+                let newOrg = edge.eOther
                 
-                let edgeDirection = edge.DirectionVector()
-                // For dominant direction, 0 is x, 1 is y
-                let dominantDirection = (fabs(edgeDirection.x) > fabs(edgeDirection.y) ? 0 : 1)
+                var firstNonBoundaryTriangle:Element? = nil
+                var boundaryEdge:TriangleEdge? = nil
                 
-                if dominantDirection == 0
+                for nextNeighbour in newOrg.neighbours
                 {
-                    // check if the boundary edge is going in the same direction as the dominant and if not, invert things
-                    if edgeDirection.x * boundaryEdgeDirection.x < 0
+                    var nextTriangleSet = newOrg.elements.intersection(nextNeighbour.elements)
+                    
+                    while nextTriangleSet.count > 0
                     {
-                        boundaryEdge = (boundaryEdge.B, boundaryEdge.A)
-                        boundaryEdgeDirection = Direction(A: boundaryEdge.A, B: boundaryEdge.B)
-                    }
-                    else if boundaryEdgeDirection.x == 0.0 // the edge goes perfectly up-down, so set Y instead
-                    {
-                        if edgeDirection.y * boundaryEdgeDirection.y < 0
+                        let nextTriangle = nextTriangleSet.removeFirst().NormalizedOn(n0: newOrg)
+                        let nextEdge = TriangleEdge(withTriangle: nextTriangle)
+                        
+                        if nextEdge.eOther.marker > 0
                         {
-                            boundaryEdge = (boundaryEdge.B, boundaryEdge.A)
-                            boundaryEdgeDirection = Direction(A: boundaryEdge.A, B: boundaryEdge.B)
+                            boundaryEdge = nextEdge
+                            break
                         }
-                    }
-                }
-                else
-                {
-                    // check if the boundary edge is going in the same direction as the dominant and if not, invert things
-                    if edgeDirection.y * boundaryEdgeDirection.y < 0
-                    {
-                        boundaryEdge = (boundaryEdge.B, boundaryEdge.A)
-                        boundaryEdgeDirection = Direction(A: boundaryEdge.A, B: boundaryEdge.B)
-                    }
-                    else if boundaryEdgeDirection.y == 0.0 //the edge goes perfectly left-right, so set X instead
-                    {
-                        if edgeDirection.x * boundaryEdgeDirection.x < 0
+                        else if firstNonBoundaryTriangle == nil
                         {
-                            boundaryEdge = (boundaryEdge.B, boundaryEdge.A)
-                            boundaryEdgeDirection = Direction(A: boundaryEdge.A, B: boundaryEdge.B)
-                        }
-                    }
-                }
-                
-                var direction = boundaryEdgeDirection
-                
-                var nextNode = boundaryEdge.B
-                
-                while nextNode.marker != 0
-                {
-                    // 1) find a neighbor node to eDest that is on the same boundary and in the same direction
-                    // 2) repeat until no neighbour nodes in the same direction that are on the boundary
-                    var gotBoundaryNode = false
-                    for nextNeighbour in nextNode.neighbours
-                    {
-                        if nextNeighbour.marker == nextNode.marker
-                        {
-                            if Direction(A: nextNode, B: nextNeighbour) == direction
+                            if !IsRightOf(edge: nextEdge.eOnext, X: X)
                             {
-                                nextNode = nextNeighbour
-                                gotBoundaryNode = true
-                                break
+                                firstNonBoundaryTriangle = nextTriangle
                             }
                         }
                     }
                     
-                    if !gotBoundaryNode
+                    if boundaryEdge != nil
                     {
-                        // 3) Choose a node that is in the same general direction as X. That means we find the node whose direction vector is closest to that direction.
-                        var vectorDiff = NSPoint(x: Double.greatestFiniteMagnitude, y: Double.greatestFiniteMagnitude)
-                        let directionToX = Direction(A: nextNode, Bpt: X)
-                        var bestNode = nextNode // dummy assign to satisfy the compiler
-                        for nextNeighbour in nextNode.neighbours
-                        {
-                            let nextDirection = Direction(A: nextNode, B: nextNeighbour)
-                            let nextDirectionDiff = NSPoint(x: nextDirection.x - directionToX.x, y: nextDirection.y - directionToX.y)
-                            if nextDirectionDiff.x < vectorDiff.x && nextDirectionDiff.y < vectorDiff.y
-                            {
-                                vectorDiff = nextDirectionDiff
-                                bestNode = nextNeighbour
-                            }
-                        }
-                        
-                        /*It is possible that bestNode is still on the boundary, only in a different direction, so check for that possibility
-                        if bestNode.marker > 0
-                        {
-                            direction = Direction(A: nextNode, B: bestNode)
-                            nextNode = bestNode
-                        }
-                        else
-                        { */
-                            // 4) Create the new edge with the triangle that has eOrg on the boundary and eDest that is not
-                            // There will be up to two triangles that share edge.eDest and bestNode, choose the one that is NOT right of X
-                        var triangleSet = nextNode.elements.intersection(bestNode.elements)
-                        
-                        if triangleSet.count == 0
-                        {
-                            DLog("An impossible condition has occurred")
-                            return zeroResult
-                        }
-                        
-                        let newTriangle = triangleSet.removeFirst()
-                        let testEdge = TriangleEdge(withTriangle: newTriangle)
-                        
-                        // Be an optimist:
-                        if newTriangle.ElementAsPath().contains(X)
-                        {
-                            return Zone(triangle: newTriangle, zone: nil)
-                        }
-                        
-                        if IsRightOf(edge: testEdge.e, X: X)
-                        {
-                            if triangleSet.count == 0
-                            {
-                                DLog("Arrrggghhhh! That didn't work!")
-                                return zeroResult
-                            }
-                            
-                            currentTriangle = triangleSet.removeFirst().NormalizedOn(n0: testEdge.eDest)
-                            edge = TriangleEdge(withTriangle: currentTriangle)
-                            DLog("Current triangle: \(currentTriangle)")
-                        }
-                        
+                        edge = boundaryEdge!
+                    }
+                    else if firstNonBoundaryTriangle != nil
+                    {
+                        edge = TriangleEdge(withTriangle: firstNonBoundaryTriangle!)
+                    }
+                    else
+                    {
+                        DLog("That did not work as expected")
+                        return zeroResult
                     }
                 }
             }
             
+            // The algorithm laid out in the paper cited in the description of this function starts here
             if currentTriangle.ElementAsPath().contains(X)
             {
                 return Zone(triangle: currentTriangle, zone: nil)
@@ -752,6 +671,7 @@ class FE_Mesh:Mesh
                         let test = edge.eOther.elements.intersection(edge.eDest.elements)
                         DLog("Oh, that's a bad one")
                     }
+                    /*
                     else if triangleSet.count == 1
                     {
                         if triangleSet.first! == currentTriangle
@@ -760,7 +680,8 @@ class FE_Mesh:Mesh
                             return zeroResult
                         }
                     }
-                    else
+                    */
+                    else if triangleSet.count > 1
                     {
                         DLog("Current: \(currentTriangle)")
                         for nTri in triangleSet
