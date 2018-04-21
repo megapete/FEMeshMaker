@@ -140,6 +140,14 @@ fileprivate func Direction(A:Node, B:Node) -> NSPoint
     return NSPoint(x: resultVector.x / distance, y: resultVector.y / distance)
 }
 
+fileprivate func Direction(A:Node, Bpt:NSPoint) -> NSPoint
+{
+    let resultVector = NSPoint(x: Bpt.x - A.vertex.x, y: Bpt.y - A.vertex.y)
+    let distance = DistanceBetween(A: A, Bpt: Bpt)
+    
+    return NSPoint(x: resultVector.x / distance, y: resultVector.y / distance)
+}
+
 fileprivate func DistanceBetween(A:Node, B:Node) -> CGFloat
 {
     let dX = B.vertex.x - A.vertex.x
@@ -585,13 +593,14 @@ class FE_Mesh:Mesh
                     
                     if !gotBoundaryNode
                     {
-                        // 3) Choose a node that is in the same general direction. That means we find the node whose direction vector is closest to the the direction we've been following
+                        // 3) Choose a node that is in the same general direction as X. That means we find the node whose direction vector is closest to that direction.
                         var vectorDiff = NSPoint(x: Double.greatestFiniteMagnitude, y: Double.greatestFiniteMagnitude)
+                        let directionToX = Direction(A: nextNode, Bpt: X)
                         var bestNode = nextNode // dummy assign to satisfy the compiler
                         for nextNeighbour in nextNode.neighbours
                         {
                             let nextDirection = Direction(A: nextNode, B: nextNeighbour)
-                            let nextDirectionDiff = NSPoint(x: nextDirection.x - direction.x, y: nextDirection.y - direction.y)
+                            let nextDirectionDiff = NSPoint(x: nextDirection.x - directionToX.x, y: nextDirection.y - directionToX.y)
                             if nextDirectionDiff.x < vectorDiff.x && nextDirectionDiff.y < vectorDiff.y
                             {
                                 vectorDiff = nextDirectionDiff
@@ -599,46 +608,46 @@ class FE_Mesh:Mesh
                             }
                         }
                         
-                        // It is possible that bestNode is still on the boundary, only in a different direction, so check for that possibility
+                        /*It is possible that bestNode is still on the boundary, only in a different direction, so check for that possibility
                         if bestNode.marker > 0
                         {
                             direction = Direction(A: nextNode, B: bestNode)
                             nextNode = bestNode
                         }
                         else
-                        {
+                        { */
                             // 4) Create the new edge with the triangle that has eOrg on the boundary and eDest that is not
                             // There will be up to two triangles that share edge.eDest and bestNode, choose the one that is NOT right of X
-                            var triangleSet = edge.eDest.elements.intersection(bestNode.elements)
-                            
+                        var triangleSet = nextNode.elements.intersection(bestNode.elements)
+                        
+                        if triangleSet.count == 0
+                        {
+                            DLog("An impossible condition has occurred")
+                            return zeroResult
+                        }
+                        
+                        let newTriangle = triangleSet.removeFirst()
+                        let testEdge = TriangleEdge(withTriangle: newTriangle)
+                        
+                        // Be an optimist:
+                        if newTriangle.ElementAsPath().contains(X)
+                        {
+                            return Zone(triangle: newTriangle, zone: nil)
+                        }
+                        
+                        if IsRightOf(edge: testEdge.e, X: X)
+                        {
                             if triangleSet.count == 0
                             {
-                                DLog("An impossible condition has occurred")
+                                DLog("Arrrggghhhh! That didn't work!")
                                 return zeroResult
                             }
                             
-                            let newTriangle = triangleSet.removeFirst()
-                            let testEdge = TriangleEdge(withTriangle: newTriangle)
-                            
-                            // Be an optimist:
-                            if newTriangle.ElementAsPath().contains(X)
-                            {
-                                return Zone(triangle: newTriangle, zone: nil)
-                            }
-                            
-                            if IsRightOf(edge: testEdge.e, X: X)
-                            {
-                                if triangleSet.count == 0
-                                {
-                                    DLog("Arrrggghhhh! That didn't work!")
-                                    return zeroResult
-                                }
-                                
-                                currentTriangle = triangleSet.removeFirst().NormalizedOn(n0: testEdge.eDest)
-                                edge = TriangleEdge(withTriangle: currentTriangle)
-                                DLog("Current triangle: \(currentTriangle)")
-                            }
+                            currentTriangle = triangleSet.removeFirst().NormalizedOn(n0: testEdge.eDest)
+                            edge = TriangleEdge(withTriangle: currentTriangle)
+                            DLog("Current triangle: \(currentTriangle)")
                         }
+                        
                     }
                 }
             }
@@ -672,14 +681,6 @@ class FE_Mesh:Mesh
                     DLog("Current triangle: \(currentTriangle)")
                     DLog("\(edge)")
                 }
-                /*
-                else
-                {
-                    // TODO: Fix this to take care of holes! This is where the real fun will happen
-                    DLog("The edge is on a boundary!")
-                    return result
-                }
-                */
             }
             else if whichOp == 2
             {
@@ -691,7 +692,6 @@ class FE_Mesh:Mesh
                     DLog("Current triangle: \(currentTriangle)")
                     DLog("\(edge)")
                 }
-                
                 else
                 {
                     let test = edge.TriangleThatShares(edge: edge.eDprev)
