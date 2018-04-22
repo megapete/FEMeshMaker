@@ -12,197 +12,6 @@ import Foundation
 import Cocoa
 import Accelerate
 
-
-
-// This struct is used to help do hit testing in FIndTriangleWithPoint() in the FE_mesh class below
-fileprivate struct TriangleEdge:CustomStringConvertible
-{
-    var description: String
-    {
-        return "Edge(\(self.eOrg) - \(self.eDest)"
-    }
-    
-    let triangle:Element
-    
-    var eOrg:Node    // n0
-    var eDest:Node   // n1
-    var eOther:Node  // n2
-    
-    var eOnext:(A:Node, B:Node) {
-        get
-        {
-            return (eOrg, eOther)
-        }
-    }
-    
-    var eDprev:(A:Node, B:Node) {
-        get
-        {
-            return (eOther, eDest)
-        }
-    }
-    
-    var e:(A:Node, B:Node) {
-        get
-        {
-            return (eOrg, eDest)
-        }
-    }
-    
-    init(withTriangle:Element)
-    {
-        self.triangle = withTriangle
-        self.eOrg = withTriangle.corners.n0
-        self.eDest = withTriangle.corners.n1
-        self.eOther = withTriangle.corners.n2
-    }
-    
-    func TriangleThatShares(edge:(A:Node, B:Node)) -> Element?
-    {
-        var sharedSet = edge.A.elements.intersection(edge.B.elements)
-        
-        /*
-        if sharedSet.count == 1
-        {
-            return nil
-        }
-        */
-        
-        sharedSet.remove(self.triangle)
-        
-        return sharedSet.first
-    }
-    
-    // Returns a UNIT vector that represents the direction of edge.e
-    func DirectionVector() -> NSPoint
-    {
-        return Direction(A: eOrg, B: eDest)
-        
-    }
-    
-    func IsOnBoundary() -> Bool
-    {
-        if eOrg.marker != 0 && eDest.marker != 0
-        {
-            return true
-        }
-        
-        return false
-    }
-    
-    func BoundaryEdge() -> (A:Node, B:Node)?
-    {
-        var result:(A:Node, B:Node)? = nil
-        
-        if eOrg.marker > 0 && eDest.marker > 0
-        {
-            result = (eOrg, eDest)
-        }
-        else if eOrg.marker > 0 && eOther.marker > 0
-        {
-            result = (eOrg, eOther)
-        }
-        else if eOther.marker > 0 && eDest.marker > 0
-        {
-            result = (eOther, eDest)
-        }
-        
-        return result
-    }
-    
-    func TriangleEdgeIsOnBoundary() -> Bool
-    {
-        var boundaryCounter = 0
-        
-        if eOrg.marker > 0
-        {
-            boundaryCounter += 1
-        }
-        if eDest.marker > 0
-        {
-            boundaryCounter += 1
-        }
-        if eOther.marker > 0
-        {
-            boundaryCounter += 1
-        }
-        
-        return boundaryCounter >= 2
-    }
-}
-
-// Assumes the edge goes from A to B
-fileprivate func Direction(A:Node, B:Node) -> NSPoint
-{
-    let resultVector = NSPoint(x: B.vertex.x - A.vertex.x, y: B.vertex.y - A.vertex.y)
-    let distance = DistanceBetween(A: A, B: B)
-    
-    return NSPoint(x: resultVector.x / distance, y: resultVector.y / distance)
-}
-
-fileprivate func Direction(A:Node, Bpt:NSPoint) -> NSPoint
-{
-    let resultVector = NSPoint(x: Bpt.x - A.vertex.x, y: Bpt.y - A.vertex.y)
-    let distance = DistanceBetween(A: A, Bpt: Bpt)
-    
-    return NSPoint(x: resultVector.x / distance, y: resultVector.y / distance)
-}
-
-fileprivate func DistanceBetween(A:Node, B:Node) -> CGFloat
-{
-    let dX = B.vertex.x - A.vertex.x
-    let dY = B.vertex.y - A.vertex.y
-    
-    let result = sqrt(dX * dX + dY * dY)
-    
-    return result
-}
-
-fileprivate func DistanceBetween(A:Node, Bpt:NSPoint) -> CGFloat
-{
-    let dX = Bpt.x - A.vertex.x
-    let dY = Bpt.y - A.vertex.y
-    
-    let result = sqrt(dX * dX + dY * dY)
-    
-    return result
-}
-
-fileprivate func DistanceBetween(edge:(A:Node, B:Node), Bpt:NSPoint) -> CGFloat
-{
-    let edgeCenterX = (edge.A.vertex.x + edge.B.vertex.x) / 2.0
-    let edgeCenterY = (edge.A.vertex.y + edge.B.vertex.y) / 2.0
-    
-    let dX = Bpt.x - edgeCenterX
-    let dY = Bpt.y - edgeCenterY
-    
-    let result = sqrt(dX * dX + dY * dY)
-    
-    return result
-}
-
-// This function is used by the FindTriangleWithPoint(:) function in the FE_Mesh class below. It returns true if the point X is STRICTLY to the right of the line AB.
-fileprivate func IsRightOf(edge:(A:Node, B:Node), X:NSPoint) -> Bool
-{
-    // For a vector from A to B, and point X,
-    // let result = ((Bx - Ax) * (Xy - Ay) - (By - Ay) * (Xx - Ax))
-    // if result > 0, X is to the left of AB, < 0 to the Right, =0 on the line
-    let x1 = edge.A.vertex.x
-    let y1 = edge.A.vertex.y
-    let x2 = edge.B.vertex.x
-    let y2 = edge.B.vertex.y
-    
-    let x = X.x
-    let y = X.y
-    
-    let result = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1)
-    
-    return result > 0.0
-}
-
-
-
-
 class FE_Mesh:Mesh
 {
     let precision:PCH_SparseMatrix.DataType
@@ -473,6 +282,7 @@ class FE_Mesh:Mesh
         var startingTriangle:Element? = self.lastHitTriangle
         while startingTriangle == nil
         {
+            // Note that normally, drand48() should be seeded so that it is actually random from one time to the next. I don't think that this will generally be a problem, and it makes debugging easier to always have the same value, so for now I am avoiding the seeding of the random number generator.
             let triangleIndex = (self.lastHitTriangle == nil ? Int(drand48() * Double(self.elements.count - 1)) : -1)
             startingTriangle = self.elements[triangleIndex]
             
@@ -485,229 +295,50 @@ class FE_Mesh:Mesh
             }
         }
         
-        guard var currentTriangle = startingTriangle else
+        guard let startTriangle = startingTriangle else
         {
             DLog("Couldn't come up with a suitable element to start!")
             return zeroResult
         }
         
         // Maybe our initial guess was the right one!
-        if currentTriangle.ElementAsPath().contains(X)
+        if startTriangle.ElementAsPath().contains(X)
         {
-            return Zone(triangle: currentTriangle, zone: nil)
+            return Zone(triangle: startTriangle, zone: nil)
         }
         
-        var edge = TriangleEdge(withTriangle: currentTriangle)
-        if IsRightOf(edge: edge.e, X: X)
+        // Set the n0-n1 edge of our triangle as 'e'
+        let currentNodes = startTriangle.corners
+        var triangleEdge = TriangleEdge(e: (currentNodes.n0, currentNodes.n1), Other: currentNodes.n2)
+        
+        if TriangleEdge.IsRightOf(edge: triangleEdge.e, X: X)
         {
-            if let newTriangle = edge.TriangleThatShares(edge: edge.e)
+            if let symEdge = triangleEdge.SymmetricEdge()
             {
-                newTriangle.NormalizeOn(n0: edge.eDest)
-                currentTriangle = newTriangle
-                edge = TriangleEdge(withTriangle: currentTriangle)
+                triangleEdge = symEdge
             }
             else
             {
-                DLog("This should NOT happen!")
+                ALog("Could not get SymmetricEdge of starting triangle!")
                 return zeroResult
             }
         }
         
-        DLog("Current triangle: \(currentTriangle)")
-        
-        // At this point, X is guaranteed to be to the LEFT of edge.
-        
-        // Strategy to get around holes:
-        // If e.Onext is on a boundary (either check its node's markers or confirm that only a single triangle can be made with it) then
-        // Make a new triangle such that newTriangle.e.Org is equal to oldTriangle.e.Onext.end. There will (likely) be more than one triangle that can be created. If there is one such that newTriangle.eOnext is on the same boundary, then choose that one and break. Otherwise, choose the first one that satisfies !IsRightOf() and continue using the cited paper's algorithm
-        
-        while true
+        var foundResult = false
+        while !foundResult
         {
-            // check if edge is abutted on a hole
-            while edge.eOrg.marker > 0 && edge.eOther.marker > 0
-            {
-                let newOrg = edge.eOther
-                
-                var firstNonBoundaryTriangle:Element? = nil
-                var boundaryEdge:TriangleEdge? = nil
-                
-                for nextNeighbour in newOrg.neighbours
-                {
-                    var nextTriangleSet = newOrg.elements.intersection(nextNeighbour.elements)
-                    
-                    while nextTriangleSet.count > 0
-                    {
-                        let nextTriangle = nextTriangleSet.removeFirst().NormalizedOn(n0: newOrg)
-                        let nextEdge = TriangleEdge(withTriangle: nextTriangle)
-                        
-                        if nextEdge.eOther.marker > 0
-                        {
-                            boundaryEdge = nextEdge
-                            break
-                        }
-                        else if firstNonBoundaryTriangle == nil
-                        {
-                            if !IsRightOf(edge: nextEdge.eOnext, X: X)
-                            {
-                                firstNonBoundaryTriangle = nextTriangle
-                            }
-                        }
-                    }
-                    
-                    if boundaryEdge != nil
-                    {
-                        edge = boundaryEdge!
-                    }
-                    else if firstNonBoundaryTriangle != nil
-                    {
-                        edge = TriangleEdge(withTriangle: firstNonBoundaryTriangle!)
-                    }
-                    else
-                    {
-                        DLog("That did not work as expected")
-                        return zeroResult
-                    }
-                }
-            }
+            // Check if we're on the edge of a hole
             
-            // The algorithm laid out in the paper cited in the description of this function starts here
-            if currentTriangle.ElementAsPath().contains(X)
-            {
-                return Zone(triangle: currentTriangle, zone: nil)
-            }
+            // The algorithm in the paper
             
-            var whichOp = 0
-            if !IsRightOf(edge: edge.eOnext, X: X)
+            if triangleEdge.Org.vertex == X || triangleEdge.Dest.vertex == X
             {
-                whichOp += 1
-            }
-            if !IsRightOf(edge: edge.eDprev, X: X)
-            {
-                whichOp += 2
-            }
-            
-            if whichOp == 0
-            {
-                return Zone(triangle: currentTriangle, zone: nil)
-            }
-            else if whichOp == 1
-            {
-                if let newTriangle = edge.TriangleThatShares(edge: edge.eOnext)
-                {
-                    newTriangle.NormalizeOn(n0: edge.eOrg)
-                    currentTriangle = newTriangle
-                    edge = TriangleEdge(withTriangle: currentTriangle)
-                    DLog("Current triangle: \(currentTriangle)")
-                    DLog("\(edge)")
-                }
-            }
-            else if whichOp == 2
-            {
-                if let newTriangle = edge.TriangleThatShares(edge: edge.eDprev)
-                {
-                    newTriangle.NormalizeOn(n0: edge.eOther)
-                    currentTriangle = newTriangle
-                    edge = TriangleEdge(withTriangle: currentTriangle)
-                    DLog("Current triangle: \(currentTriangle)")
-                    DLog("\(edge)")
-                }
-                else
-                {
-                    let test = edge.TriangleThatShares(edge: edge.eDprev)
-                    DLog("Returned triangle: \(test!)")
-                    
-                    return zeroResult
-                }
-                
-            }
-            else if whichOp == 3
-            {
-                if DistanceBetween(edge: edge.eOnext, Bpt: X) < DistanceBetween(edge: edge.eDprev, Bpt: X)
-                {
-                    // edge = edge.Onext
-                    var triangleSet = edge.eOrg.elements.intersection(edge.eOther.elements)
-                    if triangleSet.count == 0
-                    {
-                        let test = edge.eOrg.elements.intersection(edge.eOther.elements)
-                        DLog("Oh, that's a bad one")
-                    }
-                    else if triangleSet.count == 1
-                    {
-                        if triangleSet.first! == currentTriangle
-                        {
-                            DLog("Fuckin' shit!")
-                            return zeroResult
-                        }
-                    }
-                    else
-                    {
-                        DLog("Current: \(currentTriangle)")
-                        for nTri in triangleSet
-                        {
-                            DLog("\(nTri)")
-                        }
-                        
-                        var trianglesToRemove:[Element] = []
-                        for nextTriangle in triangleSet
-                        {
-                            if nextTriangle == currentTriangle
-                            {
-                                trianglesToRemove.append(nextTriangle)
-                            }
-                        }
-                        triangleSet.subtract(trianglesToRemove)
-                    }
-                    currentTriangle = triangleSet.removeFirst().NormalizedOn(n0: edge.eOrg)
-                    edge = TriangleEdge(withTriangle: currentTriangle)
-                    DLog("Current triangle: \(currentTriangle)")
-                    DLog("\(edge)")
-                }
-                else
-                {
-                    // edge = edge.Dprev
-                    var triangleSet = edge.eOther.elements.intersection(edge.eDest.elements)
-                    if triangleSet.count == 0
-                    {
-                        let test = edge.eOther.elements.intersection(edge.eDest.elements)
-                        DLog("Oh, that's a bad one")
-                    }
-                    /*
-                    else if triangleSet.count == 1
-                    {
-                        if triangleSet.first! == currentTriangle
-                        {
-                            DLog("Fuckin' shit!")
-                            return zeroResult
-                        }
-                    }
-                    */
-                    else if triangleSet.count > 1
-                    {
-                        DLog("Current: \(currentTriangle)")
-                        for nTri in triangleSet
-                        {
-                            DLog("\(nTri)")
-                        }
-                        
-                        var trianglesToRemove:[Element] = []
-                        for nextTriangle in triangleSet
-                        {
-                            if nextTriangle == currentTriangle
-                            {
-                                trianglesToRemove.append(nextTriangle)
-                            }
-                        }
-                        triangleSet.subtract(trianglesToRemove)
-                    }
-                    currentTriangle = triangleSet.removeFirst().NormalizedOn(n0: edge.eOther)
-                    edge = TriangleEdge(withTriangle: currentTriangle)
-                    DLog("Current triangle: \(currentTriangle)")
-                    DLog("\(edge)")
-                }
+                return Zone(triangle: triangleEdge.triangle, zone: nil)
             }
         }
         
-        //return result
+        ALog("An error has occured")
+        return zeroResult
     }
     
     struct Zone {

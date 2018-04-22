@@ -89,4 +89,34 @@ class Node:Hashable, CustomStringConvertible
         
         return result
     }
+    
+    // Return the direction from self to toPoint as a unit vector
+    func Direction(toNode:Node) -> NSPoint
+    {
+        return self.Direction(toPoint: toNode.vertex)
+    }
+    
+    // Return the direction from self to toPoint as a unit vector
+    func Direction(toPoint:NSPoint) -> NSPoint
+    {
+        let resultVector = NSPoint(x: toPoint.x - self.vertex.x, y: toPoint.y - self.vertex.y)
+        let distance = Distance(toPoint: toPoint)
+        
+        return NSPoint(x: resultVector.x / distance, y: resultVector.y / distance)
+    }
+    
+    func Distance(toNode:Node) -> CGFloat
+    {
+        return self.Distance(toPoint: toNode.vertex)
+    }
+    
+    func Distance(toPoint:NSPoint) -> CGFloat
+    {
+        let dX = toPoint.x - self.vertex.x
+        let dY = toPoint.y - self.vertex.y
+        
+        let result = sqrt(dX * dX + dY * dY)
+        
+        return result
+    }
 }
