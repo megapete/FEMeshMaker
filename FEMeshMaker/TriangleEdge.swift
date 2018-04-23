@@ -104,6 +104,16 @@ struct TriangleEdge:CustomStringConvertible
         return edge.A.Direction(toNode: edge.B)
     }
     
+    
+    static func DirectionDifference(dir1:NSPoint, dir2:NSPoint) -> NSPoint
+    {
+        let diffX = fabs(dir1.x - dir2.x)
+        let diffY = fabs(dir1.y - dir2.y)
+        
+        return NSPoint(x: diffX, y: diffY)
+    }
+    
+    
     // The distance between an edge and a point is the distance from the edge's center point and the other point
     static func DistanceBetween(edge:(A:Node, B:Node), Bpt:NSPoint) -> CGFloat
     {

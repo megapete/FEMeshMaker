@@ -324,17 +324,137 @@ class FE_Mesh:Mesh
             }
         }
         
-        var foundResult = false
-        while !foundResult
+        var badResult = false
+        var OnextIsOnBoundary = false
+        var DprevIsOnBoundary = false
+        while !badResult
         {
-            // Check if we're on the edge of a hole
+            // Check if we're on the edge of a boundary (ie: a hole)
+            if OnextIsOnBoundary || DprevIsOnBoundary
+            {
+                // Onext or Dprev is on a boundary, and the algorithm wants to set 'e' to it. The strategy is fairly simple. Keep going in the same direction as whichever has been chosen until one of the Nodes is no longer on the boundary.
+                var destNode = triangleEdge.Other
+                var orgNode = triangleEdge.Org
+                
+                if DprevIsOnBoundary
+                {
+                    destNode = triangleEdge.Dest
+                    orgNode = triangleEdge.Other
+                }
+                
+                let direction = orgNode.Direction(toNode: destNode)
+                
+                while destNode.marker > 0
+                {
+                    var directionDifference = NSPoint(x: Double.greatestFiniteMagnitude, y: Double.greatestFiniteMagnitude)
+                    
+                    var bestNode = destNode
+                    for nextNode in destNode.neighbours
+                    {
+                        let newDirection = TriangleEdge.Direction(edge: (A:destNode, B:nextNode))
+                        let newDiff = TriangleEdge.DirectionDifference(dir1: direction, dir2: newDirection)
+                        
+                        if newDiff.x < directionDifference.x && newDiff.y < directionDifference.y
+                        {
+                            bestNode = nextNode
+                            directionDifference = newDiff
+                        }
+                    }
+                    
+                    orgNode = destNode
+                    destNode = bestNode
+                }
+                
+                // At this point, we want to create a TriangleEdge with orgNode as Org and destNode as Dest. There will be up to two possible triangles that satisfy this, with (hopefully) at least one that also satisfies !IsRightOf()
+                let triangleSet = orgNode.elements.intersection(destNode.elements)
+                var foundSuitableTriangle = false
+                for nextTriangle in triangleSet
+                {
+                    let checkTriangle =  nextTriangle.NormalizedOn(n0: orgNode)
+                    let checkTriangleEdge = TriangleEdge(e: (Org:orgNode, Dest:destNode), Other: checkTriangle.corners.n2)
+                    
+                    if !TriangleEdge.IsRightOf(edge: checkTriangleEdge.e, X: X)
+                    {
+                        triangleEdge = checkTriangleEdge
+                        foundSuitableTriangle = true
+                        break
+                    }
+                }
+                
+                if !foundSuitableTriangle
+                {
+                    ALog("This is a problem!")
+                    return zeroResult
+                }
+            }
+            
             
             // The algorithm in the paper
-            
             if triangleEdge.Org.vertex == X || triangleEdge.Dest.vertex == X
             {
                 return Zone(triangle: triangleEdge.triangle, zone: nil)
             }
+            
+            let OnextTest = !TriangleEdge.IsRightOf(edge: triangleEdge.Onext, X: X)
+            let DprevTest = !TriangleEdge.IsRightOf(edge: triangleEdge.Dprev, X: X)
+            
+            if OnextTest && DprevTest
+            {
+                // whichop = 3
+                if TriangleEdge.DistanceBetween(edge: triangleEdge.Onext, Bpt: X) < TriangleEdge.DistanceBetween(edge: triangleEdge.Dprev, Bpt: X)
+                {
+                    if let newEdge = TriangleEdge(oldTriangleEdge: triangleEdge, new_e: (Org:triangleEdge.Org, Dest:triangleEdge.Other))
+                    {
+                        triangleEdge = newEdge
+                    }
+                    else
+                    {
+                        OnextIsOnBoundary = true
+                    }
+                }
+                else
+                {
+                    if let newEdge = TriangleEdge(oldTriangleEdge: triangleEdge, new_e: (Org:triangleEdge.Other, Dest:triangleEdge.Dest))
+                    {
+                        triangleEdge = newEdge
+                    }
+                    else
+                    {
+                        DprevIsOnBoundary = true
+                    }
+                }
+            }
+            else if OnextTest
+            {
+                // whichop = 1
+                if let newEdge = TriangleEdge(oldTriangleEdge: triangleEdge, new_e: (Org:triangleEdge.Org, Dest:triangleEdge.Other))
+                {
+                    triangleEdge = newEdge
+                }
+                else
+                {
+                    OnextIsOnBoundary = true
+                }
+            }
+            else if DprevTest
+            {
+                // whichop = 2
+                if let newEdge = TriangleEdge(oldTriangleEdge: triangleEdge, new_e: (Org:triangleEdge.Other, Dest:triangleEdge.Dest))
+                {
+                    triangleEdge = newEdge
+                }
+                else
+                {
+                    DprevIsOnBoundary = true
+                }
+            }
+            else
+            {
+                // whichop = 0
+                return Zone(triangle: triangleEdge.triangle, zone: nil)
+            }
+            
+            // badResult = true
         }
         
         ALog("An error has occured")
