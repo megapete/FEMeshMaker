@@ -105,12 +105,18 @@ struct TriangleEdge:CustomStringConvertible
     }
     
     
-    static func DirectionDifference(dir1:NSPoint, dir2:NSPoint) -> NSPoint
+    static func DirectionDifference(dir1:NSPoint, dir2:NSPoint) -> CGFloat
     {
-        let diffX = fabs(dir1.x - dir2.x)
-        let diffY = fabs(dir1.y - dir2.y)
+        let angle1 = atan2(dir1.y, dir1.x)
+        let angle2 = atan2(dir2.y, dir2.x)
         
-        return NSPoint(x: diffX, y: diffY)
+        var result = fabs(Double(angle1 - angle2))
+        if result > π
+        {
+            result = 2.0 * π - result
+        }
+        
+        return CGFloat(result)
     }
     
     

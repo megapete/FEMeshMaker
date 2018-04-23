@@ -324,10 +324,10 @@ class FE_Mesh:Mesh
             }
         }
         
-        var badResult = false
+        // var badResult = false
         var OnextIsOnBoundary = false
         var DprevIsOnBoundary = false
-        while !badResult
+        while true
         {
             // Check if we're on the edge of a boundary (ie: a hole)
             if OnextIsOnBoundary || DprevIsOnBoundary
@@ -346,7 +346,7 @@ class FE_Mesh:Mesh
                 
                 while destNode.marker > 0
                 {
-                    var directionDifference = NSPoint(x: Double.greatestFiniteMagnitude, y: Double.greatestFiniteMagnitude)
+                    var directionDifference:CGFloat = CGFloat.greatestFiniteMagnitude
                     
                     var bestNode = destNode
                     for nextNode in destNode.neighbours
@@ -354,10 +354,16 @@ class FE_Mesh:Mesh
                         let newDirection = TriangleEdge.Direction(edge: (A:destNode, B:nextNode))
                         let newDiff = TriangleEdge.DirectionDifference(dir1: direction, dir2: newDirection)
                         
-                        if newDiff.x < directionDifference.x && newDiff.y < directionDifference.y
+                        if newDiff < directionDifference
                         {
                             bestNode = nextNode
                             directionDifference = newDiff
+                            
+                            if directionDifference == 0
+                            {
+                                // it ain't gonna get better than this
+                                break
+                            }
                         }
                     }
                     
@@ -365,19 +371,26 @@ class FE_Mesh:Mesh
                     destNode = bestNode
                 }
                 
-                // At this point, we want to create a TriangleEdge with orgNode as Org and destNode as Dest. There will be up to two possible triangles that satisfy this, with (hopefully) at least one that also satisfies !IsRightOf()
+                // At this point, we want to create a TriangleEdge with orgNode as Org and destNode as Dest. There will be up to two possible triangles that satisfy this, with (hopefully) at least one that also satisfies !IsRightOf(). We need to choose the triangle using the paper's algorithm (so basically, everything gets coded twice...)
                 let triangleSet = orgNode.elements.intersection(destNode.elements)
                 var foundSuitableTriangle = false
                 for nextTriangle in triangleSet
                 {
                     let checkTriangle =  nextTriangle.NormalizedOn(n0: orgNode)
-                    let checkTriangleEdge = TriangleEdge(e: (Org:orgNode, Dest:destNode), Other: checkTriangle.corners.n2)
                     
-                    if !TriangleEdge.IsRightOf(edge: checkTriangleEdge.e, X: X)
+                    // DLog("Org: \(orgNode), Dest:\(destNode)")
+                    // DLog("n0:\(checkTriangle.corners.n0); n1:\(checkTriangle.corners.n1); n2:\(checkTriangle.corners.n2)")
+                    
+                    if checkTriangle.corners.n0 == orgNode && checkTriangle.corners.n1 == destNode
                     {
-                        triangleEdge = checkTriangleEdge
-                        foundSuitableTriangle = true
-                        break
+                        let checkTriangleEdge = TriangleEdge(e: (Org:orgNode, Dest:destNode), Other: checkTriangle.corners.n2)
+                        
+                        if !TriangleEdge.IsRightOf(edge: checkTriangleEdge.e, X: X)
+                        {
+                            triangleEdge = checkTriangleEdge
+                            foundSuitableTriangle = true
+                            break
+                        }
                     }
                 }
                 
@@ -388,11 +401,15 @@ class FE_Mesh:Mesh
                 }
             }
             
+            OnextIsOnBoundary = false
+            DprevIsOnBoundary = false
             
             // The algorithm in the paper
             if triangleEdge.Org.vertex == X || triangleEdge.Dest.vertex == X
             {
-                return Zone(triangle: triangleEdge.triangle, zone: nil)
+                let goodTriangle = triangleEdge.triangle
+                self.lastHitTriangle = goodTriangle
+                return Zone(triangle: goodTriangle, zone: nil)
             }
             
             let OnextTest = !TriangleEdge.IsRightOf(edge: triangleEdge.Onext, X: X)
@@ -451,14 +468,13 @@ class FE_Mesh:Mesh
             else
             {
                 // whichop = 0
-                return Zone(triangle: triangleEdge.triangle, zone: nil)
+                let goodTriangle = triangleEdge.triangle
+                self.lastHitTriangle = goodTriangle
+                return Zone(triangle: goodTriangle, zone: nil)
             }
             
             // badResult = true
         }
-        
-        ALog("An error has occured")
-        return zeroResult
     }
     
     struct Zone {
