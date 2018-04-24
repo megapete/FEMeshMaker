@@ -366,6 +366,16 @@ class FE_Mesh:Mesh
                     
                     orgNode = destNode
                     
+                    if let bestNeighbour = neighbourArray.first
+                    {
+                        if TriangleEdge.DirectionDifference(dir1: targetDirection, dir2: TriangleEdge.Direction(edge: (A:orgNode, B:bestNeighbour))) == 0.0
+                        {
+                            destNode = bestNeighbour
+                            pathToPoint.line(to: destNode.vertex)
+                            continue
+                        }
+                    }
+                    
                     for nextNode in neighbourArray
                     {
                         destNode = nextNode
