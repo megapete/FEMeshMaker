@@ -130,7 +130,7 @@ class AppController: NSObject, NSWindowDelegate
         var holes:[NSPoint] = []
         
         let diskPaper = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .PaperInOil)
-        
+        DLog("Creating discs...")
         for i in 0..<Int(numDisksPerCoil)
         {
             let nextLVDiskRect = NSRect(origin: NSPoint(x: lvID, y: diskBottom), size: diskSize)
@@ -166,8 +166,10 @@ class AppController: NSObject, NSWindowDelegate
         // This line added to indicate how we would add another Region
         currentRegionTagBase += diskPaper.refPoints.count
         
+        DLog("Creating mesh...")
         let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, vertices: [], regions: [bulkOil, diskPaper], holes: holes)
         
+        DLog("Done. \n Creating geometry...")
         self.currentMesh = elStaticMesh
         
         self.geometryView = GeometryViewController(intoWindow: self.window, intoView:self.mainScrollView)
@@ -181,28 +183,17 @@ class AppController: NSObject, NSWindowDelegate
         
         self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: elStaticMesh.elements)
         
-        /*
-        let testMesh = FE_Mesh(precision: .complex, withPaths: meshPaths, vertices: [], regions: [bulkOil, diskPaper], holes:holes)
-        if !testMesh.RefineMesh()
+        DLog("Done. \nSearching for point 1...")
+        if let testTriangle1 = elStaticMesh.FindZoneWithPoint(X: NSPoint(x: 5.5, y: 23.0)).triangle
         {
-            DLog("Shoot, something didn't work")
+            DLog("Got triangle 1 with \(testTriangle1) and n0:\(testTriangle1.corners.n0); n2:\(testTriangle1.corners.n1); n3:\(testTriangle1.corners.n2)")
         }
         
-        self.currentMesh = testMesh
-        
-        // DLog("Window frame: \(self.window.frame); ContentViewFrame: \(self.window.contentView!.frame)")
-        
-        self.geometryView = GeometryViewController(intoWindow: self.window, intoView:self.mainScrollView)
-        self.currentGeometryViewBounds = self.geometryView!.view.bounds
-        
-        var diskPaths:[NSBezierPath] = [tankPath.path]
-        for nextPath in meshPaths
+        DLog("Done. \nSearching for point 2...")
+        if let testTriangle2 = elStaticMesh.FindZoneWithPoint(X: NSPoint(x: 9.3, y: 8.25)).triangle
         {
-            diskPaths.append(nextPath.path)
+            DLog("Got triangle 2 with \(testTriangle2) and n0:\(testTriangle2.corners.n0); n2:\(testTriangle2.corners.n1); n3:\(testTriangle2.corners.n2)")
         }
-        
-        self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: testMesh.elements)
-        */
     }
     
     @IBAction func handleShowElements(_ sender: Any)

@@ -427,7 +427,7 @@ class Mesh
             self.elements.append(newElement)
         }
         
-        DLog("Num triangles: \(self.elements.count)")
+        DLog("Num triangles: \(self.elements.count)\n\nSetting triangle neighbours...")
         
         // Set the neighbour triangles for each triangle
         for i in 0..<self.elements.count

@@ -344,7 +344,7 @@ class FE_Mesh:Mesh
                 
                 let direction = orgNode.Direction(toNode: destNode)
                 
-                while destNode.marker > 0
+                while destNode.marker == orgNode.marker
                 {
                     var directionDifference:CGFloat = CGFloat.greatestFiniteMagnitude
                     
