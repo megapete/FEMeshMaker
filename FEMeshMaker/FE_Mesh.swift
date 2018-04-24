@@ -329,6 +329,7 @@ class FE_Mesh:Mesh
             }
         }
         
+        DLog("Starting triangle: \(triangleEdge.triangle!)")
         pathToPoint.move(to: triangleEdge.triangle!.CenterOfMass())
         
         // var badResult = false
@@ -349,8 +350,65 @@ class FE_Mesh:Mesh
                     orgNode = triangleEdge.Other
                 }
                 
-                let direction = orgNode.Direction(toNode: destNode)
+                let targetDirection = orgNode.Direction(toNode: destNode)
+                var foundSuitableTriangle = false
                 
+                while !foundSuitableTriangle
+                {
+                    let neighbourArray = destNode.neighbours.sorted(by: {(node1:Node, node2:Node) -> Bool in
+                    
+                        let direction1 = TriangleEdge.Direction(edge: (A:destNode, B:node1))
+                        let direction2 = TriangleEdge.Direction(edge: (A:destNode, B:node2))
+                        
+                        return TriangleEdge.DirectionDifference(dir1: targetDirection, dir2: direction1) < TriangleEdge.DirectionDifference(dir1: targetDirection, dir2: direction2)
+                        
+                        })
+                    
+                    orgNode = destNode
+                    
+                    for nextNode in neighbourArray
+                    {
+                        destNode = nextNode
+                        
+                        let triangleSet = orgNode.elements.intersection(destNode.elements)
+                        // var foundSuitableTriangle = false
+                        for nextTriangle in triangleSet
+                        {
+                            let checkTriangle =  nextTriangle.NormalizedOn(n0: orgNode)
+                            
+                            // DLog("Org: \(orgNode), Dest:\(destNode)")
+                            // DLog("n0:\(checkTriangle.corners.n0); n1:\(checkTriangle.corners.n1); n2:\(checkTriangle.corners.n2)")
+                            
+                            if checkTriangle.corners.n0 == orgNode && checkTriangle.corners.n1 == destNode
+                            {
+                                let checkTriangleEdge = TriangleEdge(e: (Org:orgNode, Dest:destNode), Other: checkTriangle.corners.n2)
+                                
+                                if !TriangleEdge.IsRightOf(edge: checkTriangleEdge.e, X: X)
+                                {
+                                    triangleEdge = checkTriangleEdge
+                                    foundSuitableTriangle = true
+                                    break
+                                }
+                            }
+                        }
+                        
+                        if foundSuitableTriangle
+                        {
+                            break
+                        }
+                    }
+                    
+                    if !foundSuitableTriangle
+                    {
+                        DLog("This is a problem!")
+                        return Zone(triangle: nil, zone: nil, pathFollowed: pathToPoint)
+                    }
+                    
+                }
+                
+                
+                
+                /* OLD CODE
                 while destNode.marker == orgNode.marker
                 {
                     var directionDifference:CGFloat = CGFloat.greatestFiniteMagnitude
@@ -402,12 +460,15 @@ class FE_Mesh:Mesh
                         }
                     }
                 }
+ 
                 
                 if !foundSuitableTriangle
                 {
-                    ALog("This is a problem!")
-                    return zeroResult
+                    // The "bestNode" discovered above was in the best "direction" but a suitable triangle cannot be made using it.
+                    DLog("This is a problem!")
+                    return Zone(triangle: nil, zone: nil, pathFollowed: pathToPoint)
                 }
+                */
             }
             
             OnextIsOnBoundary = false

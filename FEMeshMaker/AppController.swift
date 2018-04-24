@@ -194,16 +194,31 @@ class AppController: NSObject, NSWindowDelegate
         self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: elStaticMesh.elements)
         
         DLog("Done. \nSearching for point 1...")
-        if let testTriangle1 = elStaticMesh.FindZoneWithPoint(X: NSPoint(x: 5.5, y: 23.0)).triangle
+        let zone1 = elStaticMesh.FindZoneWithPoint(X: NSPoint(x: 5.5, y: 23.0))
+        if let testTriangle1 = zone1.triangle
         {
             DLog("Got triangle 1 with \(testTriangle1) and n0:\(testTriangle1.corners.n0); n2:\(testTriangle1.corners.n1); n3:\(testTriangle1.corners.n2)")
         }
+        if let path = zone1.pathFollowed
+        {
+            self.geometryView?.AppendOtherPaths(otherPaths: [path], otherColors: [NSColor.red])
+        }
         
-        DLog("Done. \nSearching for point 2...")
-        if let testTriangle2 = elStaticMesh.FindZoneWithPoint(X: NSPoint(x: 9.3, y: 8.25)).triangle
+        let zone2 = elStaticMesh.FindZoneWithPoint(X: NSPoint(x: 9.3, y: 8.25))
+        if let testTriangle2 = zone2.triangle
         {
             DLog("Got triangle 2 with \(testTriangle2) and n0:\(testTriangle2.corners.n0); n2:\(testTriangle2.corners.n1); n3:\(testTriangle2.corners.n2)")
         }
+        else
+        {
+            DLog("An error occurred")
+        }
+        if let path = zone2.pathFollowed
+        {
+            self.geometryView?.AppendOtherPaths(otherPaths: [path], otherColors: [NSColor.blue])
+        }
+        
+        
     }
     
     @IBAction func handleShowElements(_ sender: Any)
