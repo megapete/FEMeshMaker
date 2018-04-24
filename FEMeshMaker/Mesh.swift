@@ -429,9 +429,11 @@ class Mesh
         
         DLog("Num triangles: \(self.elements.count)\n\nSetting triangle neighbours...")
         
-        // Set the neighbour triangles for each triangle
-        for i in 0..<self.elements.count
-        {
+        
+        // Set the neighbour triangles for each triangle. As a for-loop this can be slow, so let's try GCD.
+        // for i in 0..<self.elements.count
+        DispatchQueue.concurrentPerform(iterations: self.elements.count, execute: { (i:Int) -> Void in
+        
             elements[i].neighbours = []
             let neigh0 = Int(output.neighborlist[i * 3])
             if neigh0 >= 0
@@ -450,7 +452,8 @@ class Mesh
             {
                 elements[i].neighbours.append(elements[neigh2])
             }
-        }
+        })
+ 
         
         // We need to free all the memory that triangle (may have) malloc'd
         free(output.pointlist)
@@ -470,6 +473,8 @@ class Mesh
         free(output.normlist)
         
         outStruct.deallocate()
+        
+        
         
         return true
     }

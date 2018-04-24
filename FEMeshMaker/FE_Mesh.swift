@@ -231,12 +231,16 @@ class FE_Mesh:Mesh
     
     func Setup_A_Matrix()
     {
+        // For a large number of nodes, this call is excruciatingly slow. I've done a quick try to see if I can use a concurrentPerform call instead of the for-loop, but ther is some kind of race condition and things crash in SparseMatrix (while using subscripts). Maybe one day I'll try to find and fix the problem.
+        
         self.matrixA = PCH_SparseMatrix(type: self.precision, rows: self.nodes.count, cols: self.nodes.count)
         
-        for nextNode in self.nodes
-        {
+        // TODO: Make this faster (by using concurrency??)
+        for nextNode in self.nodes {
+            
             CalculateCouplingConstants(node: nextNode)
         }
+        
     }
     
     func SetupComplexBmatrix()
@@ -355,6 +359,7 @@ class FE_Mesh:Mesh
                 
                 while !foundSuitableTriangle
                 {
+                    // Sort the neighbours so that the node that causes the closest direction to the target is first in line.
                     let neighbourArray = destNode.neighbours.sorted(by: {(node1:Node, node2:Node) -> Bool in
                     
                         let direction1 = TriangleEdge.Direction(edge: (A:destNode, B:node1))
@@ -370,12 +375,14 @@ class FE_Mesh:Mesh
                     {
                         if TriangleEdge.DirectionDifference(dir1: targetDirection, dir2: TriangleEdge.Direction(edge: (A:orgNode, B:bestNeighbour))) == 0.0
                         {
+                            // There is a point that is in exactly the same direction and it is very likely that it is on the same boundary, so:
                             destNode = bestNeighbour
                             pathToPoint.line(to: destNode.vertex)
                             continue
                         }
                     }
                     
+                    // There was no node in exactly the same direction, so go through the neighbour array and choose the first node which, when we create an edge with it, satisfies our condition that the point 'X' be to the left of edge.e. The continue with the algorithm in the paper.
                     for nextNode in neighbourArray
                     {
                         destNode = nextNode
