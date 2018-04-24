@@ -261,7 +261,7 @@ class FE_Mesh:Mesh
     // The point could be in a triangle or in a "hole" (usually a section with a prescribed-value boundary zone), which means we can return either one.
     func FindZoneWithPoint(X:NSPoint) -> Zone
     {
-        let zeroResult = Zone(triangle: nil, zone: nil)
+        let zeroResult = Zone(triangle: nil, zone: nil, pathFollowed:nil)
         // check first to make sure the point is within our mesh's boundaries
         if !self.bounds.contains(X)
         {
@@ -274,9 +274,12 @@ class FE_Mesh:Mesh
         {
             if nextHole.path.contains(X)
             {
-                return Zone(triangle: nil, zone: nextHole.boundary)
+                return Zone(triangle: nil, zone: nextHole.boundary, pathFollowed:nil)
             }
         }
+        
+        // calling routines can trace the path followed
+        let pathToPoint = NSBezierPath()
         
         // As a start point, we'll choose a random triangle in the mesh UNLESS we've already done a search in which case we'll use the last triangle as our start point. We also want to avoid a triangle where any of the points are on a boundary.
         var startingTriangle:Element? = self.lastHitTriangle
@@ -301,10 +304,12 @@ class FE_Mesh:Mesh
             return zeroResult
         }
         
+        
+        
         // Maybe our initial guess was the right one!
         if startTriangle.ElementAsPath().contains(X)
         {
-            return Zone(triangle: startTriangle, zone: nil)
+            return Zone(triangle: startTriangle, zone: nil, pathFollowed:nil)
         }
         
         // Set the n0-n1 edge of our triangle as 'e'
@@ -323,6 +328,8 @@ class FE_Mesh:Mesh
                 return zeroResult
             }
         }
+        
+        pathToPoint.move(to: triangleEdge.triangle!.CenterOfMass())
         
         // var badResult = false
         var OnextIsOnBoundary = false
@@ -369,6 +376,8 @@ class FE_Mesh:Mesh
                     
                     orgNode = destNode
                     destNode = bestNode
+                    
+                    pathToPoint.line(to: destNode.vertex)
                 }
                 
                 // At this point, we want to create a TriangleEdge with orgNode as Org and destNode as Dest. There will be up to two possible triangles that satisfy this, with (hopefully) at least one that also satisfies !IsRightOf(). We need to choose the triangle using the paper's algorithm (so basically, everything gets coded twice...)
@@ -404,12 +413,14 @@ class FE_Mesh:Mesh
             OnextIsOnBoundary = false
             DprevIsOnBoundary = false
             
+            pathToPoint.line(to: triangleEdge.triangle!.CenterOfMass())
+            
             // The algorithm in the paper
             if triangleEdge.Org.vertex == X || triangleEdge.Dest.vertex == X
             {
                 let goodTriangle = triangleEdge.triangle
                 self.lastHitTriangle = goodTriangle
-                return Zone(triangle: goodTriangle, zone: nil)
+                return Zone(triangle: goodTriangle, zone: nil, pathFollowed:pathToPoint)
             }
             
             let OnextTest = !TriangleEdge.IsRightOf(edge: triangleEdge.Onext, X: X)
@@ -470,7 +481,7 @@ class FE_Mesh:Mesh
                 // whichop = 0
                 let goodTriangle = triangleEdge.triangle
                 self.lastHitTriangle = goodTriangle
-                return Zone(triangle: goodTriangle, zone: nil)
+                return Zone(triangle: goodTriangle, zone: nil, pathFollowed:pathToPoint)
             }
             
             // badResult = true
@@ -481,6 +492,8 @@ class FE_Mesh:Mesh
         
         var triangle:Element? = nil
         var zone:Boundary? = nil
+        
+        var pathFollowed:NSBezierPath? = nil
     }
     
     func CalculateCouplingConstants(node:Node)

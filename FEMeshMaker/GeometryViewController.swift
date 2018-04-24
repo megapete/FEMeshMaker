@@ -17,6 +17,10 @@ class GeometryViewController: NSViewController
     var triangles:[Element] = []
     var trianglesAreVisible:Bool = false
     
+    // use the otherPaths member to draw whatever you want (should be used for debugging only - if there's something concrete required, give it it's own iVar)
+    var otherPaths:[NSBezierPath] = []
+    var otherPathsColors:[NSColor] = []
+    
     var parentWindow:NSWindow? = nil
     
     // Initializer to stick the new input geometry view right into a window. Optionally, the new view can be added as a subView to a scroll view within the window. If nil is passed as intoView, the new view replaces the lowest-level view in the contentView of the window.
@@ -73,6 +77,30 @@ class GeometryViewController: NSViewController
             // geoView.triangles = triangles
             
             //numTriangles.stringValue = "Triangles: \(triangles.count)"
+        }
+    }
+    
+    func SetOtherPaths(otherPaths:[NSBezierPath], otherColors:[NSColor])
+    {
+        self.otherPaths = []
+        self.otherPathsColors = []
+        
+        self.AppendOtherPaths(otherPaths: otherPaths, otherColors: otherColors)
+    }
+    
+    func AppendOtherPaths(otherPaths:[NSBezierPath], otherColors:[NSColor])
+    {
+        self.otherPaths.append(contentsOf: otherPaths)
+        self.otherPathsColors.append(contentsOf: otherColors)
+        
+        if self.isViewLoaded
+        {
+            let geoView = self.view as! GeometryView
+            
+            geoView.otherPaths = self.otherPaths
+            geoView.otherPathsColors = self.otherPathsColors
+            
+            geoView.needsDisplay = true
         }
     }
     
@@ -171,6 +199,9 @@ class GeometryViewController: NSViewController
         {
             geoView.geometry.append((path:nextPath, color:NSColor.black))
         }
+        
+        geoView.otherPaths = self.otherPaths
+        geoView.otherPathsColors = self.otherPathsColors
         
         // geoView.triangles = self.triangles
         

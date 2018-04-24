@@ -19,6 +19,10 @@ class GeometryView: NSView {
     var triangles:[Element] = []
     let triangleColor = NSColor.yellow
     
+    // use the otherPaths member to draw whatever you want (should be used for debugging only - if there's something concrete required, give it it's own iVar)
+    var otherPaths:[NSBezierPath] = []
+    var otherPathsColors:[NSColor] = []
+    
     override func draw(_ dirtyRect: NSRect)
     {
         super.draw(dirtyRect)
@@ -42,6 +46,14 @@ class GeometryView: NSView {
             nextPath.color.setStroke()
             nextPath.path.lineWidth = self.lineWidth
             nextPath.path.stroke()
+        }
+        
+        // draw any 'debug' paths using the current line width
+        for i in 0..<otherPaths.count
+        {
+            self.otherPathsColors[i].setStroke()
+            self.otherPaths[i].lineWidth = self.lineWidth
+            self.otherPaths[i].stroke()
         }
         
         NSBezierPath.defaultLineWidth = oldLineWidth
