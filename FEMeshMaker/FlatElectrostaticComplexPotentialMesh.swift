@@ -123,13 +123,6 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             self.matrixA![node.tag, colIndex] = Complex(real: -1.0) * coeff
         }
         
-        /*
-        if sumWi.real < 1.0E-12
-        {
-            ALog("Got a ZERO!")
-        }
-        */
-        
         self.matrixA![node.tag, node.tag] = sumWi
     }
     

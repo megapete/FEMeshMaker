@@ -231,11 +231,12 @@ class FE_Mesh:Mesh
     
     func Setup_A_Matrix()
     {
-        // For a large number of nodes, this call is excruciatingly slow. I've done a quick try to see if I can use a concurrentPerform call instead of the for-loop, but ther is some kind of race condition and things crash in SparseMatrix (while using subscripts). Maybe one day I'll try to find and fix the problem.
+        // For a large number of nodes, this call is excruciatingly slow. I did a quick try to see if I can use a concurrentPerform call instead of the for-loop, but accessing entries caused a crash in SparseMatrix. I made the accessors in Sparsematrix thread-safe and retested, but the concurrentPerform call was even slower than the simple for-loop (I guess making SparseMatrix access thread-safe slowed it down like hell. I reverted both).
         
         self.matrixA = PCH_SparseMatrix(type: self.precision, rows: self.nodes.count, cols: self.nodes.count)
         
-        // TODO: Make this faster (by using concurrency??)
+        // TODO: Try to this faster.
+        //
         for nextNode in self.nodes {
             
             CalculateCouplingConstants(node: nextNode)
