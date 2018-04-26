@@ -261,13 +261,13 @@ class AppController: NSObject, NSWindowDelegate
     }
     */
     func windowDidResize(_ notification: Notification) {
-        /*
+        
         DLog("Clip view frame: \(self.scrollClipView.frame); Bounds:\(self.scrollClipView.bounds)")
         if let gView = self.geometryView
         {
             DLog("Geometry view frame: \(gView.view.frame); Bounds:\(gView.view.bounds)")
         }
- */
+ 
     }
  
 }
