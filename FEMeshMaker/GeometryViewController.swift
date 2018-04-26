@@ -21,38 +21,16 @@ class GeometryViewController: NSViewController
     var otherPaths:[NSBezierPath] = []
     var otherPathsColors:[NSColor] = []
     
-    var parentWindow:NSWindow? = nil
+    var scrollClipView:NSClipView? = nil
+    var placeholderView:GeometryView? = nil
     
     // Initializer to stick the new input geometry view right into a window. Optionally, the new view can be added as a subView to a scroll view within the window. If nil is passed as intoView, the new view replaces the lowest-level view in the contentView of the window.
-    convenience init(intoWindow:NSWindow, intoView:NSScrollView? = nil)
+    convenience init(scrollClipView:NSClipView, placeholderView:GeometryView)
     {
-        if !intoWindow.isVisible
-        {
-            intoWindow.makeKeyAndOrderFront(nil)
-        }
-        
-        // DLog("Is the window visible: \(intoWindow.isVisible)")
         self.init(nibName: nil, bundle: nil)
         
-        self.parentWindow = intoWindow
-        
-        if let parentView = intoView
-        {
-            self.view.frame = parentView.contentView.frame
-            parentView.documentView = self.view
-        }
-        else if let winView = intoWindow.contentView
-        {
-            if winView.subviews.count > 0
-            {
-                // DLog("Window already has subview! Removing...")
-                winView.subviews = []
-            }
-            
-            // This next line is required so that the new view completely takes up the space of the window's content view
-            self.view.frame = winView.frame
-            winView.addSubview(self.view)
-        }
+        self.scrollClipView = scrollClipView
+        self.placeholderView = placeholderView
     }
     
     func SetGeometry(meshBounds:NSRect, paths:[NSBezierPath], triangles:[Element])
@@ -73,10 +51,6 @@ class GeometryViewController: NSViewController
             {
                 geoView.geometry.append((path:nextPath, color:NSColor.black))
             }
-            
-            // geoView.triangles = triangles
-            
-            //numTriangles.stringValue = "Triangles: \(triangles.count)"
         }
     }
     
@@ -107,7 +81,9 @@ class GeometryViewController: NSViewController
     // Zoom routines
     func ZoomAll(meshBounds:NSRect)
     {
-        // We always want the outr mesh boundary to be inset by 5 points.
+        self.view.frame = self.scrollClipView!.frame
+        
+        // We always want the outer mesh boundary to be inset by 5 points.
         let insetPoints = CGFloat(5.0)
         
         // let selfViewFrame = self.view.frame
@@ -178,6 +154,20 @@ class GeometryViewController: NSViewController
         self.trianglesAreVisible = !self.trianglesAreVisible
         
         return self.trianglesAreVisible
+    }
+    
+    // Override loadView() to replace the dummy view with our view
+    override func loadView()
+    {
+        super.loadView()
+        
+        if let dummyView = self.placeholderView
+        {
+            self.view.frame = dummyView.frame
+            
+            self.scrollClipView!.replaceSubview(dummyView, with: self.view)
+            self.scrollClipView!.documentView = self.view
+        }
     }
 
     override func viewDidLoad()

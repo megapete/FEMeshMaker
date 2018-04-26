@@ -11,7 +11,10 @@ import Cocoa
 class AppController: NSObject, NSWindowDelegate
 {
     @IBOutlet weak var window: NSWindow!
-    @IBOutlet weak var mainScrollView: NSScrollView!
+    @IBOutlet weak var scrollClipView: NSClipView!
+    @IBOutlet weak var dummyGeoView: GeometryView!
+    
+    @IBOutlet weak var testScrollView: NSScrollView!
     
     var geometryView:GeometryViewController? = nil
     var currentGeometryViewBounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
@@ -65,7 +68,12 @@ class AppController: NSObject, NSWindowDelegate
         
         self.currentMesh = elStaticMesh
         
-        self.geometryView = GeometryViewController(intoWindow: self.window, intoView:self.mainScrollView)
+        // var scrollDocView = self.testScrollView.documentView
+        self.geometryView = GeometryViewController(scrollClipView: self.scrollClipView, placeholderView: self.dummyGeoView)
+        
+        // let actualGeoView = self.geometryView!.view
+        // scrollDocView = self.testScrollView.documentView
+        
         self.currentGeometryViewBounds = self.geometryView!.view.bounds
         
         var diskPaths:[NSBezierPath] = [tankPath.path]
@@ -182,7 +190,7 @@ class AppController: NSObject, NSWindowDelegate
         DLog("Done. \n Creating geometry...")
         self.currentMesh = elStaticMesh
         
-        self.geometryView = GeometryViewController(intoWindow: self.window, intoView:self.mainScrollView)
+        self.geometryView = GeometryViewController(scrollClipView: self.scrollClipView, placeholderView: self.dummyGeoView)
         self.currentGeometryViewBounds = self.geometryView!.view.bounds
         
         var diskPaths:[NSBezierPath] = [tankPath.path]
@@ -230,7 +238,7 @@ class AppController: NSObject, NSWindowDelegate
             self.showTrianglesMenuItem.state = (currentState ? .on : .off)
         }
     }
-    
+    /*
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize
     {
         let sizeDiff = NSSize(width: frameSize.width - self.window.frame.width, height: frameSize.height - self.window.frame.height)
@@ -251,10 +259,15 @@ class AppController: NSObject, NSWindowDelegate
         
         return frameSize
     }
-    
+    */
     func windowDidResize(_ notification: Notification) {
-        
-        self.geometryView?.ZoomRect(newRect: self.currentGeometryViewBounds)
-        
+        /*
+        DLog("Clip view frame: \(self.scrollClipView.frame); Bounds:\(self.scrollClipView.bounds)")
+        if let gView = self.geometryView
+        {
+            DLog("Geometry view frame: \(gView.view.frame); Bounds:\(gView.view.bounds)")
+        }
+ */
     }
+ 
 }
