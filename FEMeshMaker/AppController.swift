@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class AppController: NSObject, NSWindowDelegate
+class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
 {
     @IBOutlet weak var window: NSWindow!
     @IBOutlet weak var scrollClipView: NSClipView!
@@ -22,9 +22,42 @@ class AppController: NSObject, NSWindowDelegate
     @IBOutlet weak var showTrianglesMenuItem: NSMenuItem!
     
     var currentMesh:FE_Mesh? = nil
+    var currentMeshIsSolved = false
     
     var meshRectangle = NSRect(x: 0, y: 0, width: 0, height: 0)
     
+    // GeometryViewControllerDelegate functions
+    func DataForPoint(point: NSPoint) -> GeometryViewController.PointData? {
+        
+        var result = GeometryViewController.PointData(location: point, data: [])
+        
+        guard let mesh = self.currentMesh else
+        {
+            return result
+        }
+        
+        if self.currentMeshIsSolved
+        {
+            
+        }
+        
+        return result
+    }
+    
+    func FindTriangleWithPoint(point: NSPoint) -> Element? {
+        
+        if let mesh = self.currentMesh
+        {
+            let zone = mesh.FindZoneWithPoint(X: point)
+            
+            if let triangle = zone.triangle
+            {
+                return triangle
+            }
+        }
+        
+        return nil
+    }
     
     @IBAction func handleZoomOut(_ sender: Any)
     {
@@ -85,7 +118,8 @@ class AppController: NSObject, NSWindowDelegate
         self.currentMesh = elStaticMesh
         
         // var scrollDocView = self.testScrollView.documentView
-        self.geometryView = GeometryViewController(scrollClipView: self.scrollClipView, placeholderView: self.dummyGeoView)
+        self.geometryView = GeometryViewController(scrollClipView: self.scrollClipView, placeholderView: self.dummyGeoView, delegate:self)
+        
         
         // let actualGeoView = self.geometryView!.view
         // scrollDocView = self.testScrollView.documentView
@@ -100,6 +134,7 @@ class AppController: NSObject, NSWindowDelegate
         
         self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: elStaticMesh.elements)
         
+        /* Debugging code
         let testZone = elStaticMesh.FindZoneWithPoint(X: NSPoint(x: 5.5, y: 20.0))
         if let testTriangle = testZone.triangle
         {
@@ -120,6 +155,7 @@ class AppController: NSObject, NSWindowDelegate
                 self.geometryView?.AppendOtherPaths(otherPaths: [path], otherColors: [NSColor.blue])
             }
         }
+        */
         
     }
     
@@ -275,15 +311,11 @@ class AppController: NSObject, NSWindowDelegate
         
         return frameSize
     }
-    */
+ 
     func windowDidResize(_ notification: Notification) {
         
-        DLog("Clip view frame: \(self.scrollClipView.frame); Bounds:\(self.scrollClipView.bounds)")
-        if let gView = self.geometryView
-        {
-            DLog("Geometry view frame: \(gView.view.frame); Bounds:\(gView.view.bounds)")
-        }
+        
  
     }
- 
+    */
 }

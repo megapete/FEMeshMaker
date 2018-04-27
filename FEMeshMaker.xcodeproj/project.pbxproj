@@ -30,6 +30,7 @@
 		D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */; };
 		D3D3C295207EC05500EC5C83 /* MeshPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C294207EC05500EC5C83 /* MeshPath.swift */; };
 		D3D3C297207EC11700EC5C83 /* Boundary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C296207EC11700EC5C83 /* Boundary.swift */; };
+		D3E78486209361B80012A882 /* GeometryViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E78485209361B80012A882 /* GeometryViewControllerDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +62,7 @@
 		D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DielectricRegion.swift; sourceTree = "<group>"; };
 		D3D3C294207EC05500EC5C83 /* MeshPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshPath.swift; sourceTree = "<group>"; };
 		D3D3C296207EC11700EC5C83 /* Boundary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Boundary.swift; sourceTree = "<group>"; };
+		D3E78485209361B80012A882 /* GeometryViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryViewControllerDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +117,7 @@
 				D39987922077A3120052B863 /* Assets.xcassets */,
 				D39987942077A3120052B863 /* MainMenu.xib */,
 				D39987BB207B94120052B863 /* GeometryViewController.swift */,
+				D3E78485209361B80012A882 /* GeometryViewControllerDelegate.swift */,
 				D39987BC207B94120052B863 /* GeometryViewController.xib */,
 				D39987C1207B952C0052B863 /* GeometryView.swift */,
 				D39987972077A3120052B863 /* Info.plist */,
@@ -212,6 +215,7 @@
 				D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */,
 				D39987A32077A5DB0052B863 /* Edge.swift in Sources */,
 				D313746E20876B16006AC4A6 /* SparseMatrix.swift in Sources */,
+				D3E78486209361B80012A882 /* GeometryViewControllerDelegate.swift in Sources */,
 				D399879F2077A32E0052B863 /* AppController.swift in Sources */,
 				D3D3C295207EC05500EC5C83 /* MeshPath.swift in Sources */,
 				D39987A82077B0A70052B863 /* GlobalDefs.swift in Sources */,

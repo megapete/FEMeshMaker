@@ -125,6 +125,38 @@ class Element:Hashable, CustomStringConvertible
         return result
     }
     
+    func ValuesAtPoint(_ point:NSPoint) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
+    {
+        if !self.ElementAsPath().contains(point)
+        {
+            DLog("This triangle does not contain the point!")
+            return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
+        }
+        
+        // The method employed here comes from Humphries, Table 7.2. Note that he calls the method "coarse" and suggests that it would be better to use a least-squares method with more vertices. Since we adopted Meeker's method of having more triangles, I think we should be okay, but if things become problematic, I will consider using least-squares.
+        let x0 = Complex(real: Double(self.corners.n0.vertex.x))
+        let x1 = Complex(real: Double(self.corners.n1.vertex.x))
+        let x2 = Complex(real: Double(self.corners.n2.vertex.x))
+        
+        let y0 = Complex(real: Double(self.corners.n0.vertex.y))
+        let y1 = Complex(real: Double(self.corners.n1.vertex.y))
+        let y2 = Complex(real: Double(self.corners.n2.vertex.y))
+        
+        let q0 = self.corners.n0.phi
+        let q1 = self.corners.n1.phi
+        let q2 = self.corners.n2.phi
+        
+        let A = ((q1 - q0) * (y2 - y0) - (q2 - q0) * (y1 - y0)) / ((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0))
+        let B = ((q1 - q0) * (x2 - x0) - (q2 - q0) * (x1 - x0)) / ((y1 - y0) * (x2 - x0) - (y2 - y0) * (x1 - x0))
+        
+        let xIn = Complex(real: point.x)
+        let yIn = Complex(real: point.y)
+        
+        let phi = A * (xIn - x1) + B * (yIn - y1) + q0
+        
+        return (phi, -A, -B)
+    }
+    
     func Height() -> Double
     {
         let minY = min(self.corners.n0.vertex.y, self.corners.n1.vertex.y, self.corners.n2.vertex.y)

@@ -575,6 +575,16 @@ class FE_Mesh:Mesh
         var pathFollowed:NSBezierPath? = nil
     }
     
+    func DataAtPoint(_ point:NSPoint) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
+    {
+        let enclosingZone = FindZoneWithPoint(X: point)
+        
+        if let boundary = enclosingZone.zone
+        {
+            
+        }
+    }
+    
     func CalculateCouplingConstants(node:Node)
     {
         ALog("This function must be overridden in concrete subclasses!")

@@ -24,17 +24,56 @@ class GeometryViewController: NSViewController
     var scrollClipView:NSClipView? = nil
     var placeholderView:GeometryView? = nil
     
+    // My first-ever delegate! (I think)
+    var delegate:GeometryViewControllerDelegate? = nil
+    
+    
+    
+    override var acceptsFirstResponder: Bool
+    {
+        return true
+    }
+    
+    struct PointData
+    {
+        let location:NSPoint
+        
+        var data:[(name:String, value:Complex, units:String)] = []
+    }
+    
+    
     // Initializer to stick the new input geometry view right into a window. Optionally, the new view can be added as a subView to a scroll view within the window. If nil is passed as intoView, the new view replaces the lowest-level view in the contentView of the window.
-    convenience init(scrollClipView:NSClipView, placeholderView:GeometryView)
+    convenience init(scrollClipView:NSClipView, placeholderView:GeometryView, delegate:GeometryViewControllerDelegate? = nil)
     {
         self.init(nibName: nil, bundle: nil)
         
         self.scrollClipView = scrollClipView
         self.placeholderView = placeholderView
+        self.delegate = delegate
         
         // we need to access self.view to get the view to actually load on accounta its lazy
         let _ = self.view
     }
+    
+    
+    override func mouseDown(with event: NSEvent)
+    {
+        let pointInView = self.view.convert(event.locationInWindow, from: nil)
+        DLog("Got mouseDown with point: \(pointInView)")
+        
+        if let delegate = self.delegate
+        {
+            if let element = delegate.FindTriangleWithPoint(point: pointInView)
+            {
+                DLog("Triangle: \(element)")
+            }
+        }
+    }
+    
+    override func rightMouseDown(with event: NSEvent) {
+        
+    }
+    
     
     func SetGeometry(meshBounds:NSRect, paths:[NSBezierPath], triangles:[Element])
     {
