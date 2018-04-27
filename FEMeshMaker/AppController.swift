@@ -17,7 +17,7 @@ class AppController: NSObject, NSWindowDelegate
     @IBOutlet weak var testScrollView: NSScrollView!
     
     var geometryView:GeometryViewController? = nil
-    var currentGeometryViewBounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
+    // var currentGeometryViewBounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
     
     @IBOutlet weak var showTrianglesMenuItem: NSMenuItem!
     
@@ -26,11 +26,27 @@ class AppController: NSObject, NSWindowDelegate
     var meshRectangle = NSRect(x: 0, y: 0, width: 0, height: 0)
     
     
+    @IBAction func handleZoomOut(_ sender: Any)
+    {
+        if let gView = self.geometryView
+        {
+            gView.ZoomWithFactor(1.0 / 1.5)
+        }
+    }
+    
+    @IBAction func handleZoomIn(_ sender: Any)
+    {
+        if let gView = self.geometryView
+        {
+            gView.ZoomWithFactor(1.5)
+        }
+    }
+    
     @IBAction func handleZoomAll(_ sender: Any)
     {
         if let gView = self.geometryView
         {
-            gView.ZoomAll(meshBounds: self.meshRectangle)
+            gView.ZoomAll()
         }
     }
     
@@ -74,7 +90,7 @@ class AppController: NSObject, NSWindowDelegate
         // let actualGeoView = self.geometryView!.view
         // scrollDocView = self.testScrollView.documentView
         
-        self.currentGeometryViewBounds = self.geometryView!.view.bounds
+        // let currentGeometryViewBounds = self.geometryView!.view.bounds
         
         var diskPaths:[NSBezierPath] = [tankPath.path]
         for nextPath in meshPaths
@@ -191,7 +207,7 @@ class AppController: NSObject, NSWindowDelegate
         self.currentMesh = elStaticMesh
         
         self.geometryView = GeometryViewController(scrollClipView: self.scrollClipView, placeholderView: self.dummyGeoView)
-        self.currentGeometryViewBounds = self.geometryView!.view.bounds
+        //self.currentGeometryViewBounds = self.geometryView!.view.bounds
         
         var diskPaths:[NSBezierPath] = [tankPath.path]
         for nextPath in meshPaths

@@ -31,6 +31,9 @@ class GeometryViewController: NSViewController
         
         self.scrollClipView = scrollClipView
         self.placeholderView = placeholderView
+        
+        // we need to access self.view to get the view to actually load on accounta its lazy
+        let _ = self.view
     }
     
     func SetGeometry(meshBounds:NSRect, paths:[NSBezierPath], triangles:[Element])
@@ -43,14 +46,16 @@ class GeometryViewController: NSViewController
         {
             let geoView = self.view as! GeometryView
             
-            ZoomAll(meshBounds: meshBounds)
-            
             geoView.geometry = []
             
             for nextPath in paths
             {
                 geoView.geometry.append((path:nextPath, color:NSColor.black))
             }
+            
+            geoView.bounds = meshBounds
+            
+            ZoomAll()
         }
     }
     
@@ -78,7 +83,49 @@ class GeometryViewController: NSViewController
         }
     }
     
+    func ZoomAll()
+    {
+        guard let clipView = self.scrollClipView else
+        {
+            DLog("No clip view!")
+            return
+        }
+        
+        ZoomRect(newFrame: clipView.bounds)
+    }
+    
+    func ZoomRect(newFrame:NSRect)
+    {
+        // NOTE: If newFrame is less than clipView.bounds, this next call won't do anything
+        self.view.frame = newFrame
+        
+        let inset = CGFloat(5.0)
+        
+        let xScale = self.meshBounds.width / (newFrame.width - 2.0 * inset)
+        let yScale = self.meshBounds.height / (newFrame.height - 2.0 * inset)
+        
+        let newScale = max(xScale, yScale)
+        self.currentScale = newScale
+        
+        self.view.bounds.origin.x = -inset * newScale
+        self.view.bounds.origin.y = -inset * newScale
+        self.view.bounds.size.width = newFrame.width * newScale
+        self.view.bounds.size.height = newFrame.height * newScale
+        
+        guard let geoView = self.view as? GeometryView else
+        {
+            DLog("Bad view!")
+            return
+        }
+        
+        geoView.lineWidth = newScale
+    
+        self.view.needsDisplay = true
+    }
+    
     // Zoom routines
+    
+    /* Old code
     func ZoomAll(meshBounds:NSRect)
     {
         self.view.frame = self.scrollClipView!.frame
@@ -112,20 +159,23 @@ class GeometryViewController: NSViewController
         
         ZoomRect(newRect: scaledMeshRect)
     }
+    */
     
     // To zoom in, factor should be >1, to zoom out it should be <1. For now, we "cheap out" and leave the origin wherever it is and zoom in or out (it would be nicer to maintain the center of the view instead of the origin).
     func ZoomWithFactor(_ factor:Double)
     {
         let zoomFactor = CGFloat(factor)
         
-        self.currentScale *= zoomFactor
+        // self.currentScale /= zoomFactor
         
-        let newRect = NSRect(origin: self.view.bounds.origin, size: NSSize(width: self.view.bounds.width * zoomFactor, height: self.view.bounds.height * zoomFactor))
+        let oldFrame = self.view.frame
+        let newRect = NSRect(origin: oldFrame.origin, size: NSSize(width: oldFrame.width * zoomFactor, height: oldFrame.height * zoomFactor))
         
-        ZoomRect(newRect: newRect)
+        ZoomRect(newFrame: newRect)
         
     }
     
+    /* Old Code
     func ZoomRect(newRect:NSRect)
     {
         self.view.bounds = newRect
@@ -135,6 +185,7 @@ class GeometryViewController: NSViewController
         
         self.view.needsDisplay = true
     }
+    */
     
     // show/hide the triangles and return whether or not they are currently visible
     func ToggleTriangles() -> Bool
@@ -181,9 +232,9 @@ class GeometryViewController: NSViewController
         
         let geoView = self.view as! GeometryView
         
-        ZoomAll(meshBounds: self.meshBounds)
-        
         geoView.geometry = []
+        
+        geoView.bounds = self.meshBounds
         
         for nextPath in self.paths
         {
@@ -192,6 +243,8 @@ class GeometryViewController: NSViewController
         
         geoView.otherPaths = self.otherPaths
         geoView.otherPathsColors = self.otherPathsColors
+        
+        ZoomAll()
         
         // geoView.triangles = self.triangles
         
