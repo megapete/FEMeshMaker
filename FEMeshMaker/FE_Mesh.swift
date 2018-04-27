@@ -14,20 +14,28 @@ import Accelerate
 
 class FE_Mesh:Mesh
 {
+    enum Units {
+        case inch
+        case mm
+    }
+    
     let precision:PCH_SparseMatrix.DataType
     var matrixA:PCH_SparseMatrix? = nil
     var complexMatrixB:[Complex] = []
     var doubleMatrixB:[Double] = []
     var holeZones:[MeshPath] = []
     
+    let units:Units
+    
     var bounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
     
     // We store the index of triangle of the last "hit" point that was queried and use it as the start point for the next query
     var lastHitTriangle:Element? = nil
     
-    init(precision:PCH_SparseMatrix.DataType,  withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
+    init(precision:PCH_SparseMatrix.DataType, units:Units, withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
         self.precision = precision
+        self.units = units
         
         super.init(withPaths: withPaths, vertices: vertices, regions: regions, holes: holes)
         
@@ -90,8 +98,6 @@ class FE_Mesh:Mesh
             
             self.holeZones.append(holeContainers[0])
         }
-        
-        
     }
     
     func Solve() -> [Double]
@@ -575,14 +581,21 @@ class FE_Mesh:Mesh
         var pathFollowed:NSBezierPath? = nil
     }
     
-    func DataAtPoint(_ point:NSPoint) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
+    func ValuesAtPoint(_ point:NSPoint) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
     {
         let enclosingZone = FindZoneWithPoint(X: point)
         
         if let boundary = enclosingZone.zone
         {
-            
+            return (boundary.fixedValue, Complex(real: 0.0), Complex(real: 0.0))
         }
+        
+        if let triangle = enclosingZone.triangle
+        {
+            return triangle.ValuesAtPoint(point)
+        }
+        
+        return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
     }
     
     func CalculateCouplingConstants(node:Node)

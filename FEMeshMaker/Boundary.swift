@@ -16,9 +16,12 @@ class Boundary
     
     let description:String
     
-    init(tag:Int, description:String)
+    var fixedValue:Complex
+    
+    init(tag:Int, fixedValue:Complex, description:String)
     {
         self.tag = tag
         self.description = description
+        self.fixedValue = fixedValue
     }
 }

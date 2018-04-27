@@ -27,7 +27,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
     var meshRectangle = NSRect(x: 0, y: 0, width: 0, height: 0)
     
     // GeometryViewControllerDelegate functions
-    func DataForPoint(point: NSPoint) -> GeometryViewController.PointData? {
+    func DataForPoint(point: NSPoint) -> GeometryViewController.PointData {
         
         var result = GeometryViewController.PointData(location: point, data: [])
         
@@ -38,6 +38,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         
         if self.currentMeshIsSolved
         {
+            
             
         }
         

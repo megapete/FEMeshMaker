@@ -12,12 +12,21 @@ import Foundation
 
 class Electrode:Boundary
 {
-    let prescribedVoltage:Complex
+    var prescribedVoltage:Complex {
+        
+        get
+        {
+            return self.fixedValue
+        }
+        
+        set
+        {
+            self.fixedValue = newValue
+        }
+    }
     
     init(tag:Int, prescribedVoltage:Complex, description:String)
     {
-        self.prescribedVoltage = prescribedVoltage
-        
-        super.init(tag: tag, description: description)
+        super.init(tag: tag, fixedValue:prescribedVoltage, description: description)
     }
 }

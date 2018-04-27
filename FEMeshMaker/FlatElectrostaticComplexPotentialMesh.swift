@@ -13,6 +13,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
 {
     var electrodes:[Int:Electrode] = [:]
     
+    
     init(withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
         super.init(precision: .complex, withPaths: withPaths, vertices: vertices, regions: regions, holes: holes)
@@ -39,6 +40,25 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         
         self.Setup_A_Matrix()
         self.SetupComplexBmatrix()
+    }
+    
+    func DataAtPoint(_ point:NSPoint) -> [(name:String, value:Complex, units:String)]
+    {
+        let pointValues = self.ValuesAtPoint(point)
+        
+        let volts = ("V:", pointValues.phi, "Volts")
+        let absVolts = ("|V|:", Complex(real:pointValues.phi.cabs), "Volts")
+        
+        let Ex = pointValues.slopeX
+        let Ey = pointValues.slopeY
+        let Eabs = (Ex + Ey).cabs
+        
+        let units = (self.units == .inch ? "in" : "mm")
+        let absField = ("|E|:", Complex(real:Eabs), "V/\(units)")
+        let fieldX = ("Ex:", Ex, "V/\(units)")
+        let fieldY = ("Ey:", Ey, "V/\(units)")
+        
+        return [volts, absVolts, fieldX, fieldY, absField]
     }
     
     override func CalculateCouplingConstants(node: Node)
