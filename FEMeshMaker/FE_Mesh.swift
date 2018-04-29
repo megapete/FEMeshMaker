@@ -6,7 +6,7 @@
 //  Copyright © 2018 Peter Huber. All rights reserved.
 //
 
-// Base class for concrete finite element mesh classes. Note that the class offers support for either Double or Complex numbers. However, derived classes are free to enforce only one type if they wish (and they should throw up a warning or something if a routine calls a function of an unsupported type)
+// Base class for concrete finite element mesh classes. Note that the class offers support for either Double or Complex numbers. However, derived classes are free to enforce only one type if they wish (and they should throw up a warning or something if a routine calls a function of an unsupported type). Note that derived classes MUST also adopt the FE_MeshProtocol to enforce a standardized way of accessing the mesh data.
 
 import Foundation
 import Cocoa
@@ -100,7 +100,7 @@ class FE_Mesh:Mesh
         }
     }
     
-    func Solve() -> [Double]
+    func SolveMatrix() -> [Double]
     {
         // The first thing we do is convert A into a format recognized by the Apple routines
         guard let Apch = self.matrixA else
@@ -152,7 +152,7 @@ class FE_Mesh:Mesh
         return result
     }
     
-    func Solve() -> [Complex]
+    func SolveMatrix() -> [Complex]
     {
         // The first thing we do is convert A into a format recognized by the Apple routines
         guard let Apch = self.matrixA else
@@ -232,6 +232,14 @@ class FE_Mesh:Mesh
         for i in 0..<values.count
         {
             self.nodes[i].phi = values[i]
+            
+            if let prescribed = self.nodes[i].phiPrescribed
+            {
+                if values[i] != prescribed
+                {
+                    DLog("Got one")
+                }
+            }
         }
     }
     
@@ -241,7 +249,7 @@ class FE_Mesh:Mesh
         
         self.matrixA = PCH_SparseMatrix(type: self.precision, rows: self.nodes.count, cols: self.nodes.count)
         
-        // TODO: Try to this faster.
+        // TODO: Try to make this faster.
         //
         for nextNode in self.nodes {
             
@@ -596,6 +604,18 @@ class FE_Mesh:Mesh
         }
         
         return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
+    }
+    
+    func Solve()
+    {
+        ALog("This function must be overridden in concrete subclasses!")
+    }
+    
+    func DataAtPoint(_ point:NSPoint) -> [(name:String, value:Complex, units:String)]
+    {
+        ALog("This function must be overridden in concrete subclasses!")
+        
+        return []
     }
     
     func CalculateCouplingConstants(node:Node)

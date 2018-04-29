@@ -13,10 +13,9 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
 {
     var electrodes:[Int:Electrode] = [:]
     
-    
-    init(withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
+    init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
-        super.init(precision: .complex, withPaths: withPaths, vertices: vertices, regions: regions, holes: holes)
+        super.init(precision: .complex, units:units, withPaths: withPaths, vertices: vertices, regions: regions, holes: holes)
         
         // save the electrodes into a dictionary to make it easy to look them up
         for nextPath in withPaths
@@ -30,19 +29,18 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             }
         }
         
-        /*
-        // Create the mesh
-        if !self.RefineMesh()
-        {
-            ALog("Could not refine mesh!")
-        }
-        */
-        
         self.Setup_A_Matrix()
         self.SetupComplexBmatrix()
     }
     
-    func DataAtPoint(_ point:NSPoint) -> [(name:String, value:Complex, units:String)]
+    override func Solve()
+    {
+        let solutionVector:[Complex] = self.SolveMatrix()
+        
+        self.SetNodePhiValuesTo(solutionVector)
+    }
+    
+    override func DataAtPoint(_ point:NSPoint) -> [(name:String, value:Complex, units:String)]
     {
         let pointValues = self.ValuesAtPoint(point)
         
@@ -53,7 +51,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         let Ey = pointValues.slopeY
         let Eabs = (Ex + Ey).cabs
         
-        let units = (self.units == .inch ? "in" : "mm")
+        let units = (self.units == .inch ? "inch" : "mm")
         let absField = ("|E|:", Complex(real:Eabs), "V/\(units)")
         let fieldX = ("Ex:", Ex, "V/\(units)")
         let fieldY = ("Ey:", Ey, "V/\(units)")
@@ -95,6 +93,9 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         }
         */
         
+        
+        
+        let firstTriangle = sortedTriangles[0].NormalizedOn(n0: node)
         for i in 0..<sortedTriangles.count
         {
             var nextTriangle = sortedTriangles[i].NormalizedOn(n0: node)
@@ -107,14 +108,14 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
                 return
             }
             
-            var coeff = region.eRel * Complex(real: Double(nextTriangle.CenterOfMass().x)) * Complex(real: nextTriangle.CotanThetaA()) * Complex(real: 0.5)
+            var coeff = region.eRel /* Complex(real: Double(nextTriangle.CenterOfMass().x)) */ * Complex(real: nextTriangle.CotanThetaA()) * Complex(real: 0.5)
             
             // We've come all the way around, back to the first triangle
             if i == sortedTriangles.count - 1
             {
-                if nextTriangle.corners.n2.tag == sortedTriangles[0].corners.n1.tag
+                if nextTriangle.corners.n2.tag == firstTriangle.corners.n1.tag
                 {
-                    nextTriangle = sortedTriangles[0].NormalizedOn(n0: node)
+                    nextTriangle = firstTriangle
                     
                     guard let region = nextTriangle.region as? DielectricRegion else
                     {
@@ -122,7 +123,12 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
                         return
                     }
                     
-                    coeff += region.eRel * Complex(real: Double(nextTriangle.CenterOfMass().x)) * Complex(real: nextTriangle.CotanThetaB()) * Complex(real: 0.5)
+                    coeff += region.eRel /* Complex(real: Double(nextTriangle.CenterOfMass().x)) */ * Complex(real: nextTriangle.CotanThetaB()) * Complex(real: 0.5)
+                }
+                else
+                {
+                    DLog("Break (or boundary) at node: \(node)")
+                    
                 }
             }
             else // do the next adjacent triangle
@@ -135,7 +141,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
                     return
                 }
                 
-                coeff += region.eRel * Complex(real: Double(nextTriangle.CenterOfMass().x)) * Complex(real: nextTriangle.CotanThetaB()) * Complex(real: 0.5)
+                coeff += region.eRel /* Complex(real: Double(nextTriangle.CenterOfMass().x)) */ * Complex(real: nextTriangle.CotanThetaB()) * Complex(real: 0.5)
             }
             
             sumWi += coeff
@@ -145,6 +151,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         
         self.matrixA![node.tag, node.tag] = sumWi
     }
+    
     
     override func CalculateRHSforNode(node: Node)
     {
@@ -165,7 +172,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         
         // It's a regular node, so we do Humphries Eq. 2.67 (RHS)
         var result = Complex(real: 0.0)
-        let constant = Complex(real: 1.0/(3.0 * ε0))
+        let constant = Complex(real: 1.0 / (3.0 * ε0))
         for nextElement in node.elements
         {
             var rho = Complex(real: 0.0)

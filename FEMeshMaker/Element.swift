@@ -152,7 +152,7 @@ class Element:Hashable, CustomStringConvertible
         let xIn = Complex(real: point.x)
         let yIn = Complex(real: point.y)
         
-        let phi = A * (xIn - x1) + B * (yIn - y1) + q0
+        let phi = A * (xIn - x0) + B * (yIn - y0) + q0
         
         return (phi, -A, -B)
     }
@@ -215,7 +215,7 @@ class Element:Hashable, CustomStringConvertible
         let y2MinusY1 = self.corners.n2.vertex.y - self.corners.n1.vertex.y
         let x2MinusX1 = self.corners.n2.vertex.x - self.corners.n1.vertex.x
         
-        let result = ((self.corners.n2.vertex.y - self.corners.n0.vertex.y) * y2MinusY1 - (self.corners.n2.vertex.x - self.corners.n0.vertex.x) * x2MinusX1)
+        let result = ((self.corners.n2.vertex.y - self.corners.n0.vertex.y) * y2MinusY1 + (self.corners.n2.vertex.x - self.corners.n0.vertex.x) * x2MinusX1)
         
         return Double(result) / (2.0 * area)
     }

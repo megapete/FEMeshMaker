@@ -38,8 +38,9 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         
         if self.currentMeshIsSolved
         {
+            let data = mesh.DataAtPoint(point)
             
-            
+            result.data = data
         }
         
         return result
@@ -99,8 +100,8 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         
         let coilRect = NSRect(x: 0.0, y: 5.0, width: 2.25, height: 30.0)
         
-        let lvElectrode = Electrode(tag: 1, prescribedVoltage: Complex(real: 26400.0), description: "LV")
-        let hvElectrode = Electrode(tag: 2, prescribedVoltage: Complex(real: 120000.0 / SQRT3), description: "HV")
+        let lvElectrode = Electrode(tag: 2, prescribedVoltage: Complex(real: 26400.0), description: "LV")
+        let hvElectrode = Electrode(tag: 3, prescribedVoltage: Complex(real: 120000.0 / SQRT3), description: "HV")
         
         var meshPaths:[MeshPath] = [tankPath]
         var holes:[NSPoint] = []
@@ -114,7 +115,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 6.75, 0.0), boundary: hvElectrode))
         holes.append(NSPoint(x: 7.25, y: 10.0))
         
-        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, vertices: [], regions: [bulkOil], holes: holes)
+        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, units: .inch, vertices: [], regions: [bulkOil], holes: holes)
         
         self.currentMesh = elStaticMesh
         
@@ -162,9 +163,9 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
     
     @IBAction func handleSolveDemo1(_ sender: Any)
     {
-        let result:[Complex] = self.currentMesh!.Solve()
+        self.currentMesh!.Solve()
         
-        DLog("And it worked: \(result[295])")
+        self.currentMeshIsSolved = true
     }
     
     
@@ -238,7 +239,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         currentRegionTagBase += diskPaper.refPoints.count
         
         DLog("Creating mesh...")
-        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, vertices: [], regions: [bulkOil, diskPaper], holes: holes)
+        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, units: .inch, vertices: [], regions: [bulkOil, diskPaper], holes: holes)
         
         DLog("Done. \n Creating geometry...")
         self.currentMesh = elStaticMesh

@@ -70,8 +70,21 @@ class GeometryViewController: NSViewController
         }
     }
     
-    override func rightMouseDown(with event: NSEvent) {
+    override func rightMouseDown(with event: NSEvent)
+    {
+        let point = self.view.convert(event.locationInWindow, from: nil)
         
+        if let delegate = self.delegate
+        {
+            let data = delegate.DataForPoint(point: point)
+            
+            DLog("Point: (\(data.location))", file: "", function: "")
+            
+            for nextData in data.data
+            {
+                DLog("\(nextData.name) \(nextData.value) \(nextData.units)", file: "", function: "")
+            }
+        }
     }
     
     
