@@ -17,14 +17,26 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
     @IBOutlet weak var testScrollView: NSScrollView!
     
     var geometryView:GeometryViewController? = nil
-    // var currentGeometryViewBounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
     
     @IBOutlet weak var showTrianglesMenuItem: NSMenuItem!
+    @IBOutlet weak var showContourLinesMenuItem: NSMenuItem!
+    
     
     var currentMesh:FE_Mesh? = nil
     var currentMeshIsSolved = false
     
     var meshRectangle = NSRect(x: 0, y: 0, width: 0, height: 0)
+    
+    
+    @IBAction func handleShowContourLines(_ sender: Any)
+    {
+        if let gView = self.geometryView
+        {
+            let currentState = gView.ToggleContourLines()
+            
+            self.showContourLinesMenuItem.state = (currentState ? .on : .off)
+        }
+    }
     
     // GeometryViewControllerDelegate functions
     func DataForPoint(point: NSPoint) -> GeometryViewController.PointData {
@@ -166,6 +178,20 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         self.currentMesh!.Solve()
         
         self.currentMeshIsSolved = true
+        
+        DLog("Matrices solved...")
+        
+        let lines = self.currentMesh!.CreateContourLines()
+        
+        if let gView = self.geometryView
+        {
+            for nextLine in lines
+            {
+                gView.contourLines.append((path: nextLine.path , color: NSColor.blue))
+            }
+        }
+        
+        DLog("Contour lines created...")
     }
     
     

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		D313746C20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */; };
 		D313746E20876B16006AC4A6 /* SparseMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D313746D20876B16006AC4A6 /* SparseMatrix.swift */; };
+		D31FCF5720964BB900166A42 /* ContourLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31FCF5620964BB900166A42 /* ContourLine.swift */; };
 		D36668A8208CC79C00D5DB92 /* TriangleEdge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36668A7208CC79C00D5DB92 /* TriangleEdge.swift */; };
 		D39987912077A3110052B863 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987902077A3110052B863 /* AppDelegate.swift */; };
 		D39987932077A3120052B863 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D39987922077A3120052B863 /* Assets.xcassets */; };
@@ -36,6 +37,7 @@
 /* Begin PBXFileReference section */
 		D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlatElectrostaticComplexPotentialMesh.swift; sourceTree = "<group>"; };
 		D313746D20876B16006AC4A6 /* SparseMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SparseMatrix.swift; sourceTree = "<group>"; };
+		D31FCF5620964BB900166A42 /* ContourLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContourLine.swift; sourceTree = "<group>"; };
 		D36668A7208CC79C00D5DB92 /* TriangleEdge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriangleEdge.swift; sourceTree = "<group>"; };
 		D399878D2077A3110052B863 /* FEMeshMaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FEMeshMaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D39987902077A3110052B863 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 				D39987B32079236D0052B863 /* Mesh.swift */,
 				D3D3C294207EC05500EC5C83 /* MeshPath.swift */,
 				D39987B7207A8BEE0052B863 /* FE_Mesh.swift */,
+				D31FCF5620964BB900166A42 /* ContourLine.swift */,
 				D36668A7208CC79C00D5DB92 /* TriangleEdge.swift */,
 				D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */,
 				D313746D20876B16006AC4A6 /* SparseMatrix.swift */,
@@ -199,6 +202,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D31FCF5720964BB900166A42 /* ContourLine.swift in Sources */,
 				D39987B8207A8BEE0052B863 /* FE_Mesh.swift in Sources */,
 				D39987C6207EAA540052B863 /* Electrode.swift in Sources */,
 				D39987B2207914D30052B863 /* Region.swift in Sources */,

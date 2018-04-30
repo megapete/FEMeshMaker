@@ -21,6 +21,7 @@
             <connections>
                 <outlet property="dummyGeoView" destination="m2U-Xs-iiB" id="82W-yB-pUa"/>
                 <outlet property="scrollClipView" destination="AWf-fW-Olk" id="bnB-pU-dds"/>
+                <outlet property="showContourLinesMenuItem" destination="i5b-D3-62e" id="kGk-tF-NLx"/>
                 <outlet property="showTrianglesMenuItem" destination="nKz-pZ-27R" id="Opw-V8-Uhp"/>
                 <outlet property="testScrollView" destination="PTr-KI-2E8" id="vSd-SS-61Q"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="BEI-OJ-Lsl"/>
@@ -646,6 +647,13 @@
                                     <action selector="handleSolveDemo1:" target="Msw-Rr-Zan" id="bof-me-jH9"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="1En-PI-pYP"/>
+                            <menuItem title="Show Contour Lines" id="i5b-D3-62e">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="handleShowContourLines:" target="Msw-Rr-Zan" id="eSM-Ld-EWY"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>
@@ -775,7 +783,8 @@
             <connections>
                 <outlet property="delegate" destination="Msw-Rr-Zan" id="kfr-lc-kUz"/>
             </connections>
-            <point key="canvasLocation" x="218.5" y="-114.5"/>
+            <point key="canvasLocation" x="218" y="-44"/>
         </window>
+        <menuItem isSeparatorItem="YES" id="Y1f-jZ-Ewe"/>
     </objects>
 </document>

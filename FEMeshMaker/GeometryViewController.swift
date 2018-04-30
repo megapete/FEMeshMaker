@@ -17,6 +17,9 @@ class GeometryViewController: NSViewController
     var triangles:[Element] = []
     var trianglesAreVisible:Bool = false
     
+    var contourLines:[(path:NSBezierPath, color:NSColor)] = []
+    var contourLinesAreVisible = false
+    
     // use the otherPaths member to draw whatever you want (should be used for debugging only - if there's something concrete required, give it it's own iVar)
     var otherPaths:[NSBezierPath] = []
     var otherPathsColors:[NSColor] = []
@@ -40,7 +43,6 @@ class GeometryViewController: NSViewController
         
         var data:[(name:String, value:Complex, units:String)] = []
     }
-    
     
     // Initializer to stick the new input geometry view right into a window. Optionally, the new view can be added as a subView to a scroll view within the window. If nil is passed as intoView, the new view replaces the lowest-level view in the contentView of the window.
     convenience init(scrollClipView:NSClipView, placeholderView:GeometryView, delegate:GeometryViewControllerDelegate? = nil)
@@ -238,6 +240,25 @@ class GeometryViewController: NSViewController
         self.view.needsDisplay = true
     }
     */
+    
+    func ToggleContourLines() -> Bool
+    {
+        let geoView = self.view as! GeometryView
+        
+        if self.contourLinesAreVisible
+        {
+            geoView.contourLines = []
+        }
+        else
+        {
+            geoView.contourLines = self.contourLines
+        }
+        
+        geoView.needsDisplay = true
+        self.contourLinesAreVisible = !self.contourLinesAreVisible
+        
+        return self.contourLinesAreVisible
+    }
     
     // show/hide the triangles and return whether or not they are currently visible
     func ToggleTriangles() -> Bool

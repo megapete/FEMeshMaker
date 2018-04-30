@@ -90,6 +90,26 @@ class Node:Hashable, CustomStringConvertible
         return result
     }
     
+    func LocationOfValue(_ value:Double, toNode other:Node) -> NSPoint?
+    {
+        if (self.phi.cabs < value && other.phi.cabs < value) ||
+            (self.phi.cabs > value && other.phi.cabs > value)
+        {
+            return nil
+        }
+        
+        let deltaQother = other.phi.cabs - self.phi.cabs
+        let deltaQvalue = value - self.phi.cabs
+        let deltaQvalueFraction = deltaQvalue / deltaQother
+        
+        let deltaXother = Double(other.vertex.x - self.vertex.x)
+        let deltaYother = Double(other.vertex.y - self.vertex.y)
+        
+        let result = NSPoint(x: deltaQvalueFraction * deltaXother + Double(self.vertex.x), y: deltaQvalueFraction * deltaYother + Double(self.vertex.y))
+        
+        return result
+    }
+    
     // Return the direction from self to toPoint as a unit vector
     func Direction(toNode:Node) -> NSPoint
     {

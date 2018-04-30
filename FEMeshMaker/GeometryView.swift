@@ -19,6 +19,8 @@ class GeometryView: NSView {
     var triangles:[Element] = []
     let triangleColor = NSColor.yellow
     
+    var contourLines:[(path:NSBezierPath, color:NSColor)] = []
+    
     // use the otherPaths member to draw whatever you want (should be used for debugging only - if there's something concrete required, give it it's own iVar)
     var otherPaths:[NSBezierPath] = []
     var otherPathsColors:[NSColor] = []
@@ -46,6 +48,14 @@ class GeometryView: NSView {
             nextPath.color.setStroke()
             nextPath.path.lineWidth = self.lineWidth
             nextPath.path.stroke()
+        }
+        
+        for nextLine in self.contourLines
+        {
+            let path = nextLine.path
+            nextLine.color.setStroke()
+            path.lineWidth = self.lineWidth
+            path.stroke()
         }
         
         // draw any 'debug' paths using the current line width

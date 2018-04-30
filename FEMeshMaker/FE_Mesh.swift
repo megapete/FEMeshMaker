@@ -27,6 +27,9 @@ class FE_Mesh:Mesh
     
     let units:Units
     
+    var minAbsPhiInMesh:Double = Double.greatestFiniteMagnitude
+    var maxAbsPhiInMesh:Double = -Double.greatestFiniteMagnitude
+    
     var bounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
     
     // We store the index of triangle of the last "hit" point that was queried and use it as the start point for the next query
@@ -97,6 +100,69 @@ class FE_Mesh:Mesh
             }
             
             self.holeZones.append(holeContainers[0])
+        }
+    }
+    
+    func CreateContourLines(numLines:Int = 20) -> [ContourLine]
+    {
+        if self.minAbsPhiInMesh == Double.greatestFiniteMagnitude || self.maxAbsPhiInMesh == Double.greatestFiniteMagnitude
+        {
+            DLog("Phi values have not been assigned to nodes!")
+            return []
+        }
+        
+        let voltsBetweenLines = (self.maxAbsPhiInMesh - self.minAbsPhiInMesh) / Double(numLines - 1)
+        
+        var paths:[NSBezierPath] = Array(repeating: NSBezierPath(), count: numLines)
+        var nextPhiToCreate = self.minAbsPhiInMesh
+        
+        // I will try to parallelize this, which is why I have separted it from the loop below that actually creates the contour line array
+        for i in 0..<numLines
+        {
+            SetContourPath(path: paths[i], forValue: nextPhiToCreate)
+            
+            nextPhiToCreate += voltsBetweenLines
+        }
+        
+        var result:[ContourLine] = []
+        nextPhiToCreate = self.minAbsPhiInMesh
+        for nextPath in paths
+        {
+            result.append(ContourLine(path: nextPath, value: nextPhiToCreate))
+            nextPhiToCreate += voltsBetweenLines
+        }
+        
+        return result
+    }
+    
+    func SetContourPath(path:NSBezierPath, forValue value:Double)
+    {
+        for nextElement in self.elements
+        {
+            var points:[NSPoint] = []
+            
+            if let n0n1 = nextElement.corners.n0.LocationOfValue(value, toNode: nextElement.corners.n1)
+            {
+                points.append(n0n1)
+            }
+            
+            if let n0n2 = nextElement.corners.n0.LocationOfValue(value, toNode: nextElement.corners.n2)
+            {
+                points.append(n0n2)
+            }
+            
+            if let n1n2 = nextElement.corners.n1.LocationOfValue(value, toNode: nextElement.corners.n2)
+            {
+                points.append(n1n2)
+            }
+            
+            // This is pretty inefficient - it might be better to try and sort things so we just have a bunch of lineto's instead...
+            if points.count == 2
+            {
+                path.move(to: points[0])
+                path.line(to: points[1])
+            }
+            // else if points.count == 3 // I don't see how this could ever happen...
         }
     }
     
@@ -218,6 +284,17 @@ class FE_Mesh:Mesh
         for i in 0..<values.count
         {
             self.nodes[i].phi = Complex(real: values[i])
+            
+            // While we're at it, set the max and min values of phi in the mesh
+            if values[i] > self.maxAbsPhiInMesh
+            {
+                self.maxAbsPhiInMesh = values[i]
+            }
+            
+            if values[i] < self.minAbsPhiInMesh
+            {
+                self.minAbsPhiInMesh = values[i]
+            }
         }
     }
     
@@ -233,6 +310,18 @@ class FE_Mesh:Mesh
         {
             self.nodes[i].phi = values[i]
             
+            // While we're at it, set the max and min absolute values of phi in the mesh
+            if values[i].cabs > self.maxAbsPhiInMesh
+            {
+                self.maxAbsPhiInMesh = values[i].cabs
+            }
+            
+            if values[i].cabs < self.minAbsPhiInMesh
+            {
+                self.minAbsPhiInMesh = values[i].cabs
+            }
+            
+            // debugging only (will probably be optimized out in the Release build)
             if let prescribed = self.nodes[i].phiPrescribed
             {
                 if values[i] != prescribed
@@ -240,6 +329,7 @@ class FE_Mesh:Mesh
                     DLog("Got one")
                 }
             }
+            
         }
     }
     
