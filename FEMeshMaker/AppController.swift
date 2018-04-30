@@ -20,6 +20,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
     
     @IBOutlet weak var showTrianglesMenuItem: NSMenuItem!
     @IBOutlet weak var showContourLinesMenuItem: NSMenuItem!
+    @IBOutlet weak var solveMenuItem: NSMenuItem!
     
     
     var currentMesh:FE_Mesh? = nil
@@ -27,6 +28,24 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
     
     var meshRectangle = NSRect(x: 0, y: 0, width: 0, height: 0)
     
+    
+    override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool
+    {
+        if menuItem == showTrianglesMenuItem
+        {
+            return self.geometryView != nil
+        }
+        else if menuItem == showContourLinesMenuItem
+        {
+            return self.currentMeshIsSolved
+        }
+        else if menuItem == solveMenuItem
+        {
+            return self.currentMesh != nil
+        }
+        
+        return true
+    }
     
     @IBAction func handleShowContourLines(_ sender: Any)
     {
@@ -270,7 +289,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         DLog("Done. \n Creating geometry...")
         self.currentMesh = elStaticMesh
         
-        self.geometryView = GeometryViewController(scrollClipView: self.scrollClipView, placeholderView: self.dummyGeoView)
+        self.geometryView = GeometryViewController(scrollClipView: self.scrollClipView, placeholderView: self.dummyGeoView, delegate:self)
         //self.currentGeometryViewBounds = self.geometryView!.view.bounds
         
         var diskPaths:[NSBezierPath] = [tankPath.path]
@@ -281,6 +300,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         
         self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: elStaticMesh.elements)
         
+        /*
         DLog("Done. \nSearching for point 1...")
         let zone1 = elStaticMesh.FindZoneWithPoint(X: NSPoint(x: 5.5, y: 23.0))
         if let testTriangle1 = zone1.triangle
@@ -305,6 +325,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         {
             self.geometryView?.AppendOtherPaths(otherPaths: [path], otherColors: [NSColor.blue])
         }
+         */
         
         
     }
