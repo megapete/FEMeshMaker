@@ -189,7 +189,8 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         
         // It's a regular node, so we do Humphries Eq. 2.67 (RHS)
         var result = Complex(real: 0.0)
-        let constant = Complex(real: 1.0 / (3.0 * ε0))
+        let εFactor = (self.units == .mm ? 0.001 : 0.001 * 25.4)
+        let constant = Complex(real: 1.0 / (3.0 * ε0 * εFactor))
         for nextElement in node.elements
         {
             var rho = Complex(real: 0.0)

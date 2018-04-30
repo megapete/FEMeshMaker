@@ -100,17 +100,17 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
     @IBAction func handleCreateDemo1(_ sender: Any)
     {
         // Simple model
-        self.meshRectangle = NSRect(x: 0.0, y: 0.0, width: 20.0, height: 40.0)
+        self.meshRectangle = NSRect(x: 0.0, y: 0.0, width: 20.0 * 25.4, height: 40.0 * 25.4)
         
         var currentRegionTagBase = 1
         let bulkOil = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerOil)
-        bulkOil.refPoints = [NSPoint(x: 0.1, y: 0.1)]
+        bulkOil.refPoints = [NSPoint(x: 0.1 * 25.4, y: 0.1 * 25.4)]
         currentRegionTagBase += bulkOil.refPoints.count
         
         let tankBoundary = Electrode(tag: 1, prescribedVoltage: Complex(real: 0.0, imag: 0.0), description: "Tank")
         let tankPath = MeshPath(path: NSBezierPath(rect: meshRectangle), boundary: tankBoundary)
         
-        let coilRect = NSRect(x: 0.0, y: 5.0, width: 2.25, height: 30.0)
+        let coilRect = NSRect(x: 0.0, y: 5.0 * 25.4, width: 2.25 * 25.4, height: 30.0 * 25.4)
         
         let lvElectrode = Electrode(tag: 2, prescribedVoltage: Complex(real: 26400.0), description: "LV")
         let hvElectrode = Electrode(tag: 3, prescribedVoltage: Complex(real: 120000.0 / SQRT3), description: "HV")
@@ -119,15 +119,15 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         var holes:[NSPoint] = []
         
         // let testRegion1 = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerBoard)
-        meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 2.5, 0.0), boundary: lvElectrode))
+        meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 2.5 * 25.4, 0.0), boundary: lvElectrode))
         // testRegion1.refPoints.append(NSPoint(x: 3.0, y: 10.0))
-        holes.append(NSPoint(x: 3.0, y: 10.0))
+        holes.append(NSPoint(x: 3.0 * 25.4, y: 10.0 * 25.4))
         // let testRegion2 = DielectricRegion(dielectric: .TransformerBoard)
         // testRegion1.refPoints.append(NSPoint(x: 7.25, y: 10.0))
-        meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 6.75, 0.0), boundary: hvElectrode))
-        holes.append(NSPoint(x: 7.25, y: 10.0))
+        meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 6.75 * 25.4, 0.0), boundary: hvElectrode))
+        holes.append(NSPoint(x: 7.25 * 25.4, y: 10.0 * 25.4))
         
-        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, units: .inch, vertices: [], regions: [bulkOil], holes: holes)
+        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, units: .mm, vertices: [], regions: [bulkOil], holes: holes)
         
         self.currentMesh = elStaticMesh
         

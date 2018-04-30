@@ -204,7 +204,7 @@ class Element:Hashable, CustomStringConvertible
         
         guard nodeSet.count >= minNodeCount else
         {
-            ALog("Oh shit!")
+            DLog("Not enough nodes in set!")
             return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
         }
         
@@ -237,11 +237,11 @@ class Element:Hashable, CustomStringConvertible
         
         guard let A = C.SolveWith(D) else
         {
-            ALog("Could not solve matrix!")
+            DLog("Could not solve matrix!")
             return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
         }
         
-        DLog("A: \(A)")
+        // DLog("A: \(A)")
         
         return (A[0,0], -A[1,0], -A[2,0])
     }
