@@ -223,7 +223,12 @@ class GeometryViewController: NSViewController
         // self.currentScale /= zoomFactor
         
         let oldFrame = self.view.frame
-        let newRect = NSRect(origin: oldFrame.origin, size: NSSize(width: oldFrame.width * zoomFactor, height: oldFrame.height * zoomFactor))
+        let oldFrameCenter = NSPoint(x: oldFrame.origin.x + oldFrame.width / 2.0, y: oldFrame.origin.y + oldFrame.height / 2.0)
+        let newWidth = oldFrame.width * zoomFactor
+        let newHeight = oldFrame.height * zoomFactor
+        let newSize = NSSize(width: newWidth, height: newHeight)
+        let newOrigin = NSPoint(x: oldFrameCenter.x - newWidth / 2.0, y: oldFrameCenter.y - newHeight / 2.0)
+        let newRect = NSRect(origin: newOrigin, size: newSize)
         
         ZoomRect(newFrame: newRect)
         

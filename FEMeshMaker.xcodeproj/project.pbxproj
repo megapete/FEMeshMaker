@@ -32,6 +32,7 @@
 		D3D3C295207EC05500EC5C83 /* MeshPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C294207EC05500EC5C83 /* MeshPath.swift */; };
 		D3D3C297207EC11700EC5C83 /* Boundary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C296207EC11700EC5C83 /* Boundary.swift */; };
 		D3E78486209361B80012A882 /* GeometryViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E78485209361B80012A882 /* GeometryViewControllerDelegate.swift */; };
+		D3E7848A20976F140012A882 /* PCH_Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E7848920976F140012A882 /* PCH_Matrix.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +66,7 @@
 		D3D3C294207EC05500EC5C83 /* MeshPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshPath.swift; sourceTree = "<group>"; };
 		D3D3C296207EC11700EC5C83 /* Boundary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Boundary.swift; sourceTree = "<group>"; };
 		D3E78485209361B80012A882 /* GeometryViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryViewControllerDelegate.swift; sourceTree = "<group>"; };
+		D3E7848920976F140012A882 /* PCH_Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PCH_Matrix.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +117,7 @@
 				D36668A7208CC79C00D5DB92 /* TriangleEdge.swift */,
 				D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */,
 				D313746D20876B16006AC4A6 /* SparseMatrix.swift */,
+				D3E7848920976F140012A882 /* PCH_Matrix.swift */,
 				D39987AF207910020052B863 /* triangle.h */,
 				D39987AE207910020052B863 /* triangle.c */,
 				D39987922077A3120052B863 /* Assets.xcassets */,
@@ -224,6 +227,7 @@
 				D3D3C295207EC05500EC5C83 /* MeshPath.swift in Sources */,
 				D39987A82077B0A70052B863 /* GlobalDefs.swift in Sources */,
 				D39987A52077A6750052B863 /* Element.swift in Sources */,
+				D3E7848A20976F140012A882 /* PCH_Matrix.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

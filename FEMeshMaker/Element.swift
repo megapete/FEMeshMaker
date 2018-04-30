@@ -107,6 +107,11 @@ class Element:Hashable, CustomStringConvertible
         self.corners = (n0, n1, n2)
         self.region = region
         
+        if let theRegion = region
+        {
+            theRegion.associatedTriangles.append(self)
+        }
+        
         // Set self as being one of the triangles that each of the nodes is used for
         n0.elements.insert(self)
         n1.elements.insert(self)
@@ -133,7 +138,7 @@ class Element:Hashable, CustomStringConvertible
             return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
         }
         
-        // The method employed here comes from Humphries, Table 7.2. Note that he calls the method "coarse" and suggests that it would be better to use a least-squares method with more vertices. Since we adopted Meeker's method of having more triangles, I think we should be okay, but if things become problematic, I will consider using least-squares.
+        // The method employed here comes from Humphries, Table 7.2. Note that he calls the method "coarse" and suggests that it would be better to use a least-squares method with more vertices. Since we adopted Meeker's method of having more triangles, I think we should be okay, but if things become problematic, I will consider using least-squares (which I did, see below).
         let x0 = Complex(real: Double(self.corners.n0.vertex.x))
         let x1 = Complex(real: Double(self.corners.n1.vertex.x))
         let x2 = Complex(real: Double(self.corners.n2.vertex.x))
@@ -155,6 +160,90 @@ class Element:Hashable, CustomStringConvertible
         let phi = A * (xIn - x0) + B * (yIn - y0) + q0
         
         return (phi, -A, -B)
+    }
+    
+    func LSF_ValuesAtPoint(_ thePoint:NSPoint) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
+    {
+        // My attempt at using Least-Squares Fitting to find the value of the mesh at a point. I've used the method in Humphries section 7.2.
+        
+        // We start by getting a set of Nodes in the immediate vicinity of 'thePoint'. We need at least 6 Nodes for this to work. We will use the nodes on the corners of self, plus the set of neighbours to those points. In theory, this should easily get us at least 6 points, but there is a catch, as per Humphries: "A vertex is rejected if it is outside the solution region or if it is not connected to at least one triangle that has the same region number as the target element.", and "At Neumann boundaries an external point is added for each valid point inside the boundary. The new point has the same potential and the mirror position relative to the boundary."
+        
+        // TODO: Handle Neumann boundaries
+        
+        let minNodeCount = 6
+        var nodeSet:Set<Node> = [self.corners.n0, self.corners.n1, self.corners.n2]
+        
+        guard let selfRegion = self.region else
+        {
+            ALog("Illlegal region!")
+            return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
+        }
+        
+        // start with the corners of this element
+        for nextCorner in [self.corners.n0, self.corners.n1, self.corners.n2]
+        {
+            // check each neighbor to make sure that it touches at least one triangle that is in the same Region as self and if so, add it to nodeSet
+            for nextNeighbor in nextCorner.neighbours
+            {
+                var regionIsGood = false
+                for nextElement in nextNeighbor.elements
+                {
+                    if selfRegion.associatedTriangles.contains(nextElement)
+                    {
+                        regionIsGood = true
+                        break
+                    }
+                }
+                
+                if regionIsGood
+                {
+                    nodeSet.insert(nextNeighbor)
+                }
+            }
+        }
+        
+        guard nodeSet.count >= minNodeCount else
+        {
+            ALog("Oh shit!")
+            return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
+        }
+        
+        let C = PCH_Matrix(numRows: minNodeCount, numCols: minNodeCount, matrixPrecision: .complexPrecision, matrixType: .generalMatrix)
+        let D = PCH_Matrix(numVectorElements: minNodeCount, vectorPrecision: .complexPrecision)
+        
+        var f:[Double] = Array(repeating: 0.0, count: minNodeCount)
+        for nextNode in nodeSet
+        {
+            let Xi = Double(nextNode.vertex.x - thePoint.x)
+            let Yi = Double(nextNode.vertex.y - thePoint.y)
+            
+            f[0] = 1.0
+            f[1] = Xi
+            f[2] = Yi
+            f[3] = Xi * Xi
+            f[4] = Xi * Yi
+            f[5] = Yi * Yi
+            
+            for m in 0..<minNodeCount
+            {
+                D[m, 0] += nextNode.phi * f[m]
+                
+                for n in 0..<minNodeCount
+                {
+                    C[m,n] += Complex(real: f[m] * f[n])
+                }
+            }
+        }
+        
+        guard let A = C.SolveWith(D) else
+        {
+            ALog("Could not solve matrix!")
+            return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
+        }
+        
+        DLog("A: \(A)")
+        
+        return (A[0,0], -A[1,0], -A[2,0])
     }
     
     func Height() -> Double

@@ -49,7 +49,24 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         
         let Ex = pointValues.slopeX
         let Ey = pointValues.slopeY
-        let Eabs = (Ex + Ey).cabs
+        
+        // This comes from Andersen's paper "Finite Element Solution of Complex Potential Electric Fields", equations 19, 20, and 21
+        let phaseAngleDiff = abs(Ex.carg - Ey.carg)
+        
+        // We want Exp and Exn to be on the X-axis, so we create a Complex number with a real value of |Ex| and imag of 0.
+        let ExAbs = Complex(real: Ex.cabs)
+        let Exp = ExAbs * 0.5
+        let Exn = Exp
+        
+        // The Ey values are a bit more complicated
+        let EyAbs = Ey.cabs
+        let Eyp = Complex(real: EyAbs * cos(π / 2 + phaseAngleDiff), imag: EyAbs * sin(π / 2 + phaseAngleDiff)) * 0.5
+        let Eyn = Complex(real: EyAbs * cos(π / 2 - phaseAngleDiff), imag: EyAbs * sin(π / 2 - phaseAngleDiff)) * 0.5
+        
+        let Ep = Exp + Eyp
+        let En = Exn + Eyn
+        
+        let Eabs = Ep.cabs + En.cabs
         
         let units = (self.units == .inch ? "inch" : "mm")
         let absField = ("|E|:", Complex(real:Eabs), "V/\(units)")

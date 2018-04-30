@@ -17,7 +17,7 @@ class GeometryView: NSView {
     
     // The triangles of the mesh (if any)
     var triangles:[Element] = []
-    let triangleColor = NSColor.yellow
+    let triangleColor = NSColor.yellow.blended(withFraction: 0.35, of: NSColor.brown)!
     
     var contourLines:[(path:NSBezierPath, color:NSColor)] = []
     
