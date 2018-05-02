@@ -16,7 +16,10 @@ class GeometryViewController: NSViewController
     var paths:[NSBezierPath] = []
     var triangles:[Element] = []
     var trianglesAreVisible:Bool = false
-    var tiranglesAreFilled:Bool = false
+    var trianglesAreFilled:Bool = false
+    
+    var triangleMinValue:Double = Double.greatestFiniteMagnitude
+    var triangleMaxValue:Double = Double.greatestFiniteMagnitude
     
     var contourLines:[(path:NSBezierPath, color:NSColor)] = []
     var contourLinesAreVisible = false
@@ -176,44 +179,6 @@ class GeometryViewController: NSViewController
         self.view.needsDisplay = true
     }
     
-    // Zoom routines
-    
-    /* Old code
-    func ZoomAll(meshBounds:NSRect)
-    {
-        self.view.frame = self.scrollClipView!.frame
-        
-        // We always want the outer mesh boundary to be inset by 5 points.
-        let insetPoints = CGFloat(5.0)
-        
-        // let selfViewFrame = self.view.frame
-        let xScale = meshBounds.size.width / (self.view.frame.size.width - 2.0 * insetPoints)
-        let yScale = meshBounds.size.height / (self.view.frame.size.height - 2.0 * insetPoints)
-        
-        var scaledMeshRect = meshBounds
-        
-        if xScale > yScale
-        {
-            self.currentScale = xScale
-            scaledMeshRect.size.height = self.view.frame.size.height * xScale
-        }
-        else
-        {
-            self.currentScale = yScale
-            scaledMeshRect.size.width = self.view.frame.size.width * yScale
-        }
-        
-        let insetValue = insetPoints * self.currentScale
-        
-        scaledMeshRect.origin.x -= insetValue
-        scaledMeshRect.origin.y -= insetValue
-        scaledMeshRect.size.height += insetValue * 2.0
-        scaledMeshRect.size.width += insetValue * 2.0
-        
-        ZoomRect(newRect: scaledMeshRect)
-    }
-    */
-    
     // To zoom in, factor should be >1, to zoom out it should be <1. For now, we "cheap out" and leave the origin wherever it is and zoom in or out (it would be nicer to maintain the center of the view instead of the origin).
     func ZoomWithFactor(_ factor:Double)
     {
@@ -233,17 +198,6 @@ class GeometryViewController: NSViewController
         
     }
     
-    /* Old Code
-    func ZoomRect(newRect:NSRect)
-    {
-        self.view.bounds = newRect
-        
-        let geoView = self.view as! GeometryView
-        geoView.lineWidth = self.currentScale
-        
-        self.view.needsDisplay = true
-    }
-    */
     
     func ToggleContourLines() -> Bool
     {
@@ -262,6 +216,97 @@ class GeometryViewController: NSViewController
         self.contourLinesAreVisible = !self.contourLinesAreVisible
         
         return self.contourLinesAreVisible
+    }
+    
+    func TriangleFillColorFor(value:Double) ->NSColor
+    {
+        if self.triangleMinValue == Double.greatestFiniteMagnitude || self.triangleMaxValue == Double.greatestFiniteMagnitude
+        {
+            DLog("Triangle min and max not set!")
+            return NSColor.white
+        }
+        
+        let fraction = (value - self.triangleMinValue) / (self.triangleMaxValue - self.triangleMinValue)
+        
+        // 0.00 -> Blue = (0, 0, 255)
+        // 0.20 -> Aqua = (0, 255, 255)
+        // 0.30 -> Green = (0, 255, 0)
+        // 0.40 -> Yellow = (255, 255, 0)
+        // 0.67 -> Red = (255, 0, 0)
+        // 1.0 -> Pink = (255, 0, 255)
+        
+        if fraction <= 0.2
+        {
+            // Blue to Aqua
+            let green = CGFloat(255.0 * fraction / 0.2)
+            
+            return NSColor(calibratedRed: 0.0, green: green, blue: 255.0, alpha: 1.0)
+        }
+        else if fraction <= 0.3
+        {
+            // Aqua to Green
+            let blue = CGFloat(255.0 - 255.0 * (fraction - 0.2) / 0.1)
+            
+            return NSColor(calibratedRed: 0.0, green: 255.0, blue: blue, alpha: 1.0)
+        }
+        else if fraction <= 0.4
+        {
+            // Green to Yellow
+            let red = CGFloat(255.0 * (fraction - 0.3) / 0.1)
+            
+            return NSColor(calibratedRed: red, green: 255.0, blue: 0.0, alpha: 1.0)
+        }
+        else if fraction <= 0.67
+        {
+            let green = CGFloat(255.0 - 255.0 * (fraction - 0.4) / 0.27)
+            
+            return NSColor(calibratedRed: 255.0, green: green, blue: 0.0, alpha: 1.0)
+        }
+        else
+        {
+            let blue = CGFloat(255.0 * (fraction - 0.67) / 0.33)
+            
+            return NSColor(calibratedRed: 255.0, green: 0.0, blue: blue, alpha: 1.0)
+        }
+    }
+    
+    func ToggleTriangleFill() -> Bool
+    {
+        let geoView = self.view as! GeometryView
+        
+        if self.trianglesAreFilled
+        {
+            geoView.showFieldColors = false
+        }
+        else
+        {
+            if let delegate = self.delegate
+            {
+                if let minMax = delegate.MinMaxFieldIntensity()
+                {
+                    self.triangleMinValue = minMax.minField
+                    self.triangleMaxValue = minMax.maxField
+                }
+                else
+                {
+                    DLog("Min and max fields not set")
+                    return false
+                }
+            }
+            else
+            {
+                DLog("Delegate not set")
+                return false
+            }
+            
+            geoView.showFieldColors = true
+        }
+        
+        geoView.needsDisplay = true
+        
+        self.trianglesAreFilled = !self.trianglesAreFilled
+        
+        return self.trianglesAreFilled
     }
     
     // show/hide the triangles and return whether or not they are currently visible
@@ -302,12 +347,14 @@ class GeometryViewController: NSViewController
     {
         super.viewDidLoad()
         
+        let geoView = self.view as! GeometryView
+        
+        geoView.controller = self
+        
         if self.meshBounds.width == 0.0 || self.meshBounds.height == 0.0
         {
             return
         }
-        
-        let geoView = self.view as! GeometryView
         
         geoView.geometry = []
         

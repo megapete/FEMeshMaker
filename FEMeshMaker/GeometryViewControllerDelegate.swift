@@ -16,4 +16,6 @@ protocol GeometryViewControllerDelegate
     func FindTriangleWithPoint(point:NSPoint) -> Element?
     
     func DataForPoint(point:NSPoint) -> GeometryViewController.PointData
+    
+    func MinMaxFieldIntensity() -> (minField:Double, maxField:Double)?
 }

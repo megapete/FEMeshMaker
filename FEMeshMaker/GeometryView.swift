@@ -28,6 +28,8 @@ class GeometryView: NSView {
     var otherPaths:[NSBezierPath] = []
     var otherPathsColors:[NSColor] = []
     
+    var controller:GeometryViewController? = nil
+    
     override func draw(_ dirtyRect: NSRect)
     {
         super.draw(dirtyRect)
@@ -38,14 +40,30 @@ class GeometryView: NSView {
         
         NSBezierPath.defaultLineWidth = self.lineWidth
         
-        if self.showFieldColors || self.showTriangleOutlines
+        if let controller = self.controller, self.showFieldColors
+        {
+            for nextTriangle in triangles
+            {
+                let trianglePath = nextTriangle.ElementAsPath()
+                trianglePath.lineWidth = self.lineWidth
+                
+                let triangleColor = controller.TriangleFillColorFor(value: nextTriangle.value)
+                
+                triangleColor.setFill()
+                triangleColor.setStroke()
+                
+                trianglePath.stroke()
+                trianglePath.fill()
+            }
+        }
+        else if self.showTriangleOutlines
         {
             triangleOutlineColor.setStroke()
             for nextTriangle in triangles
             {
                 let trianglePath = nextTriangle.ElementAsPath()
                 trianglePath.lineWidth = self.lineWidth
-                nextTriangle.ElementAsPath().stroke()
+                trianglePath.stroke()
             }
         }
         

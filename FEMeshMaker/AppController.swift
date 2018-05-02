@@ -31,7 +31,34 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
     
     @IBAction func handleShowFieldInfo(_ sender: Any)
     {
+        guard let mesh = self.currentMesh else
+        {
+            DLog("No current mesh")
+            return
+        }
         
+        guard let minF = mesh.minFieldIntensityTriangle, let maxF = mesh.maxFieldIntensityTriangle else
+        {
+            DLog("Min and max triangles not set")
+            return 
+        }
+    }
+    
+    func MinMaxFieldIntensity() -> (minField:Double, maxField:Double)?
+    {
+        guard let mesh = self.currentMesh else
+        {
+            DLog("No current mesh")
+            return nil
+        }
+        
+        guard let minF = mesh.minFieldIntensityTriangle, let maxF = mesh.maxFieldIntensityTriangle else
+        {
+            DLog("Min and max triangles not set")
+            return nil
+        }
+        
+        return (minF.value, maxF.value)
     }
     
     override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool

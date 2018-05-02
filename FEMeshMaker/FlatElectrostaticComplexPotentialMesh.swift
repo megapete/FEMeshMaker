@@ -13,7 +13,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
 {
     var electrodes:[Int:Electrode] = [:]
     
-    var maxFieldTriangle:Element? = nil
+    
     
     init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
@@ -54,6 +54,8 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
     {
         var maxFieldIntensity = -Double.greatestFiniteMagnitude
         var maxFieldIntensityTriangle:Element? = nil
+        var minFieldIntensity = Double.greatestFiniteMagnitude
+        var minFieldIntensityTriangle:Element? = nil
     
         for nextTriangle in self.elements
         {
@@ -87,6 +89,12 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             
             let Eabs = Ep.cabs + En.cabs
             
+            if Eabs < minFieldIntensity
+            {
+                minFieldIntensity = Eabs
+                minFieldIntensityTriangle = nextTriangle
+            }
+            
             if Eabs > maxFieldIntensity
             {
                 maxFieldIntensity = Eabs
@@ -96,7 +104,8 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             nextTriangle.value = Eabs
         }
         
-        self.maxFieldTriangle = maxFieldIntensityTriangle
+        self.maxFieldIntensityTriangle = maxFieldIntensityTriangle
+        self.minFieldIntensityTriangle = minFieldIntensityTriangle
     }
     
     override func DataAtPoint(_ point:NSPoint) -> [(name:String, value:Complex, units:String)]

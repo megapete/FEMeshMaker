@@ -33,6 +33,9 @@ class FE_Mesh:Mesh
     var minAbsSlopeInMesh:Double = Double.greatestFiniteMagnitude
     var maxAbsSlopeInMesh:Double = -Double.greatestFiniteMagnitude
     
+    var maxFieldIntensityTriangle:Element? = nil
+    var minFieldIntensityTriangle:Element? = nil
+    
     var bounds:NSRect = NSRect(x: 0, y: 0, width: 0, height: 0)
     
     // We store the index of triangle of the last "hit" point that was queried and use it as the start point for the next query
