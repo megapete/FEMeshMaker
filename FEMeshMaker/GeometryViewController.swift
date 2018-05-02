@@ -16,6 +16,7 @@ class GeometryViewController: NSViewController
     var paths:[NSBezierPath] = []
     var triangles:[Element] = []
     var trianglesAreVisible:Bool = false
+    var tiranglesAreFilled:Bool = false
     
     var contourLines:[(path:NSBezierPath, color:NSColor)] = []
     var contourLinesAreVisible = false
@@ -29,8 +30,6 @@ class GeometryViewController: NSViewController
     
     // My first-ever delegate! (I think)
     var delegate:GeometryViewControllerDelegate? = nil
-    
-    
     
     override var acceptsFirstResponder: Bool
     {

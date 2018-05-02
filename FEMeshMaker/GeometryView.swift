@@ -17,7 +17,10 @@ class GeometryView: NSView {
     
     // The triangles of the mesh (if any)
     var triangles:[Element] = []
-    let triangleColor = NSColor.yellow.blended(withFraction: 0.35, of: NSColor.brown)!
+    let triangleOutlineColor = NSColor.yellow.blended(withFraction: 0.35, of: NSColor.brown)!
+    
+    var showTriangleOutlines:Bool = false
+    var showFieldColors:Bool = false
     
     var contourLines:[(path:NSBezierPath, color:NSColor)] = []
     
@@ -35,12 +38,15 @@ class GeometryView: NSView {
         
         NSBezierPath.defaultLineWidth = self.lineWidth
         
-        triangleColor.setStroke()
-        for nextTriangle in triangles
+        if self.showFieldColors || self.showTriangleOutlines
         {
-            let trianglePath = nextTriangle.ElementAsPath()
-            trianglePath.lineWidth = self.lineWidth
-            nextTriangle.ElementAsPath().stroke()
+            triangleOutlineColor.setStroke()
+            for nextTriangle in triangles
+            {
+                let trianglePath = nextTriangle.ElementAsPath()
+                trianglePath.lineWidth = self.lineWidth
+                nextTriangle.ElementAsPath().stroke()
+            }
         }
         
         for nextPath in self.geometry

@@ -9,9 +9,10 @@
 // This is probably overkill, but I've decided to create a protocol for a GeometryViewControllerDelegate, just to get my feet wet.
 
 import Foundation
+import Cocoa
 
-protocol GeometryViewControllerDelegate {
-    
+protocol GeometryViewControllerDelegate
+{
     func FindTriangleWithPoint(point:NSPoint) -> Element?
     
     func DataForPoint(point:NSPoint) -> GeometryViewController.PointData

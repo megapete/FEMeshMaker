@@ -99,7 +99,8 @@ class Element:Hashable, CustomStringConvertible
     
     var corners:(n0:Node, n1:Node, n2:Node)
     
-    var value:Complex = Complex(real: 0.0, imag: 0.0)
+    // A value that concrete subclasses of FE_Mesh can set to whatever they want (usually the triangle's internal field value)
+    var value:Double = 0.0
     
     init(n0:Node, n1:Node, n2:Node, region:Region? = nil)
     {
@@ -126,6 +127,18 @@ class Element:Hashable, CustomStringConvertible
         result.line(to: self.corners.n1.vertex)
         result.line(to: self.corners.n2.vertex)
         result.close()
+        
+        return result
+    }
+    
+    func ValuesAtCenterOfMass() -> (phi:Complex, slopeX:Complex, slopeY:Complex)
+    {
+        var result = LSF_ValuesAtPoint(self.CenterOfMass())
+        
+        if result.phi == Complex.ComplexNan
+        {
+            result = self.ValuesAtPoint(self.CenterOfMass())
+        }
         
         return result
     }

@@ -13,6 +13,8 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
 {
     var electrodes:[Int:Electrode] = [:]
     
+    var maxFieldTriangle:Element? = nil
+    
     init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint])
     {
         super.init(precision: .complex, units:units, withPaths: withPaths, vertices: vertices, regions: regions, holes: holes)
@@ -35,9 +37,62 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
     
     override func Solve()
     {
+        DLog("Solving matrix")
         let solutionVector:[Complex] = self.SolveMatrix()
+        DLog("Done")
         
+        DLog("Setting vertex phi values")
         self.SetNodePhiValuesTo(solutionVector)
+        DLog("Done")
+        
+        DLog("Setting electric fields")
+        self.SetElectricFields()
+        DLog("Done")
+    }
+    
+    func SetElectricFields()
+    {
+        var maxFieldIntensity = -Double.greatestFiniteMagnitude
+        var maxFieldIntensityTriangle:Element? = nil
+        
+        let iterations = self.elements.count
+        
+        
+        for nextTriangle in self.elements
+        {
+            let pointValues = nextTriangle.ValuesAtCenterOfMass()
+            
+            let Ex = pointValues.slopeX
+            let Ey = pointValues.slopeY
+            
+            // This comes from Andersen's paper "Finite Element Solution of Complex Potential Electric Fields", equations 19, 20, and 21
+            let phaseAngleDiff = abs(Ex.carg - Ey.carg)
+            
+            // We want Exp and Exn to be on the X-axis, so we create a Complex number with a real value of |Ex| and imag of 0.
+            let ExAbs = Complex(real: Ex.cabs)
+            let Exp = ExAbs * 0.5
+            let Exn = Exp
+            
+            // The Ey values are a bit more complicated
+            let EyAbs = Ey.cabs
+            let Eyp = Complex(real: EyAbs * cos(π / 2 + phaseAngleDiff), imag: EyAbs * sin(π / 2 + phaseAngleDiff)) * 0.5
+            let Eyn = Complex(real: EyAbs * cos(π / 2 - phaseAngleDiff), imag: EyAbs * sin(π / 2 - phaseAngleDiff)) * 0.5
+            
+            let Ep = Exp + Eyp
+            let En = Exn + Eyn
+            
+            let Eabs = Ep.cabs + En.cabs
+            
+            if Eabs > maxFieldIntensity
+            {
+                maxFieldIntensity = Eabs
+                maxFieldIntensityTriangle = nextTriangle
+            }
+            
+            nextTriangle.value = Eabs
+        }
+        
+        self.maxFieldTriangle = maxFieldIntensityTriangle
     }
     
     override func DataAtPoint(_ point:NSPoint) -> [(name:String, value:Complex, units:String)]

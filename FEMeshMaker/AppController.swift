@@ -21,6 +21,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
     @IBOutlet weak var showTrianglesMenuItem: NSMenuItem!
     @IBOutlet weak var showContourLinesMenuItem: NSMenuItem!
     @IBOutlet weak var solveMenuItem: NSMenuItem!
+    @IBOutlet weak var showFieldInfoMenuItem: NSMenuItem!
     
     
     var currentMesh:FE_Mesh? = nil
@@ -28,6 +29,10 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
     
     var meshRectangle = NSRect(x: 0, y: 0, width: 0, height: 0)
     
+    @IBAction func handleShowFieldInfo(_ sender: Any)
+    {
+        
+    }
     
     override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool
     {
@@ -35,7 +40,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         {
             return self.geometryView != nil
         }
-        else if menuItem == showContourLinesMenuItem
+        else if menuItem == showContourLinesMenuItem || menuItem == showFieldInfoMenuItem
         {
             return self.currentMeshIsSolved
         }
