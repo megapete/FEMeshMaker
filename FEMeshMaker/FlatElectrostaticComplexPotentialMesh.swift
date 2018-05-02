@@ -60,13 +60,22 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         
         for nextTriangle in self.elements
         {
-            let pointValues = nextTriangle.ValuesAtCenterOfMass()
+            let pointValues = nextTriangle.ValuesAtCenterOfMass(coarse: true)
             
             let Ex = pointValues.slopeX
             let Ey = pointValues.slopeY
             
             // This comes from Andersen's paper "Finite Element Solution of Complex Potential Electric Fields", equations 19, 20, and 21
-            let phaseAngleDiff = abs(Ex.carg - Ey.carg)
+            var phaseAngleDiff = 0.0
+            if Ex != Complex.ComplexZero
+            {
+                if Ey != Complex.ComplexZero
+                {
+                    phaseAngleDiff = abs(Ex.carg - Ey.carg)
+                }
+            }
+            
+            // let phaseAngleDiff = abs(Ex.carg - Ey.carg)
             
             // We want Exp and Exn to be on the X-axis, so we create a Complex number with a real value of |Ex| and imag of 0.
             let ExAbs = Complex(real: Ex.cabs)

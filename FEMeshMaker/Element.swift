@@ -10,6 +10,7 @@
 
 import Foundation
 import Cocoa
+import Accelerate
 
 class Element:Hashable, CustomStringConvertible
 {
@@ -131,8 +132,13 @@ class Element:Hashable, CustomStringConvertible
         return result
     }
     
-    func ValuesAtCenterOfMass() -> (phi:Complex, slopeX:Complex, slopeY:Complex)
+    func ValuesAtCenterOfMass(coarse:Bool) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
     {
+        if coarse
+        {
+            return self.ValuesAtPoint(self.CenterOfMass())
+        }
+        
         var result = LSF_ValuesAtPoint(self.CenterOfMass())
         
         if result.phi == Complex.ComplexNan
@@ -179,6 +185,10 @@ class Element:Hashable, CustomStringConvertible
     {
         // My attempt at using Least-Squares Fitting to find the value of the mesh at a point. I've used the method in Humphries section 7.2.
         
+        // Note that this routine is stunningly slow, presumably because of the use of PCH_Matrix. It may be worth the agony of using LAPACK directly (or writing a specialized 6x6 matrix solving routine) instead of using PCH_Matrix.
+        
+        // So, I did as the above comment and its still fucking slow.
+        
         // We start by getting a set of Nodes in the immediate vicinity of 'thePoint'. We need at least 6 Nodes for this to work. We will use the nodes on the corners of self, plus the set of neighbours to those points. In theory, this should easily get us at least 6 points, but there is a catch, as per Humphries: "A vertex is rejected if it is outside the solution region or if it is not connected to at least one triangle that has the same region number as the target element.", and "At Neumann boundaries an external point is added for each valid point inside the boundary. The new point has the same potential and the mirror position relative to the boundary."
         
         // TODO: Handle Neumann boundaries
@@ -221,8 +231,8 @@ class Element:Hashable, CustomStringConvertible
             return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
         }
         
-        let C = PCH_Matrix(numRows: minNodeCount, numCols: minNodeCount, matrixPrecision: .complexPrecision, matrixType: .generalMatrix)
-        let D = PCH_Matrix(numVectorElements: minNodeCount, vectorPrecision: .complexPrecision)
+        var bufferC = [__CLPK_doublecomplex](repeating: __CLPK_doublecomplex(r: 0.0, i: 0.0), count: minNodeCount * minNodeCount)
+        var bufferD = [__CLPK_doublecomplex](repeating: __CLPK_doublecomplex(r: 0.0, i: 0.0), count: minNodeCount)
         
         var f:[Double] = Array(repeating: 0.0, count: minNodeCount)
         for nextNode in nodeSet
@@ -239,24 +249,33 @@ class Element:Hashable, CustomStringConvertible
             
             for m in 0..<minNodeCount
             {
-                D[m, 0] += nextNode.phi * f[m]
+                bufferD[m] = __CLPK_doublecomplex(r: bufferD[m].r + nextNode.phi.real * f[m], i: bufferD[m].i + nextNode.phi.imag * f[m])
                 
                 for n in 0..<minNodeCount
                 {
-                    C[m,n] += Complex(real: f[m] * f[n])
+                    let mn = n * minNodeCount + m
+                    bufferC[mn] = __CLPK_doublecomplex(r: bufferC[mn].r + f[m] * f[n], i: 0.0)
                 }
             }
         }
         
-        guard let A = C.SolveWith(D) else
+        var n:__CLPK_integer = __CLPK_integer(minNodeCount)
+        var nrhs = __CLPK_integer(1)
+        var lda = n
+        var ldb = n
+        var ipiv = [__CLPK_integer](repeating: 0, count: minNodeCount)
+        var info:__CLPK_integer = 0
+        
+        zgesv_(&n, &nrhs, &bufferC, &lda, &ipiv, &bufferD, &ldb, &info)
+        
+        if (info != 0)
         {
-            DLog("Could not solve matrix!")
+            DLog("Error in zgesv: \(info)")
+            
             return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
         }
         
-        // DLog("A: \(A)")
-        
-        return (A[0,0], -A[1,0], -A[2,0])
+        return (Complex(real: bufferD[0].r, imag: bufferD[0].i), Complex(real: bufferD[1].r, imag: bufferD[1].i), Complex(real: bufferD[2].r, imag: bufferD[2].i))
     }
     
     func Height() -> Double
