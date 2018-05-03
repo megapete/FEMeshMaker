@@ -109,6 +109,18 @@ class GeometryViewController: NSViewController
                 geoView.geometry.append((path:nextPath, color:NSColor.black))
             }
             
+            geoView.triangles = []
+            for nextTriangle in self.triangles
+            {
+                if let region = nextTriangle.region
+                {
+                    if !region.isVirtualHole
+                    {
+                        geoView.triangles.append(nextTriangle)
+                    }
+                }
+            }
+            
             geoView.bounds = meshBounds
             
             ZoomAll()
@@ -228,6 +240,8 @@ class GeometryViewController: NSViewController
         
         let fraction = (value - self.triangleMinValue) / (self.triangleMaxValue - self.triangleMinValue)
         
+        // This method does not really lend itself to electrostatic fields (maybe magnetostatic either) because there is a huge ocean of aqua and tiny triangles of yellow and pink at corners. I will try to come up with a more suitable function.
+        
         // 0.00 -> Blue = (0, 0, 255)
         // 0.20 -> Aqua = (0, 255, 255)
         // 0.30 -> Green = (0, 255, 0)
@@ -277,6 +291,7 @@ class GeometryViewController: NSViewController
         if self.trianglesAreFilled
         {
             geoView.showFieldColors = false
+            // geoView.triangles = []
         }
         else
         {
@@ -286,6 +301,7 @@ class GeometryViewController: NSViewController
                 {
                     self.triangleMinValue = minMax.minField
                     self.triangleMaxValue = minMax.maxField
+                    // geoView.triangles = self.triangles
                 }
                 else
                 {
@@ -316,11 +332,13 @@ class GeometryViewController: NSViewController
         
         if self.trianglesAreVisible
         {
-            geoView.triangles = []
+            geoView.showTriangleOutlines = false
+            // geoView.triangles = []
         }
         else
         {
-            geoView.triangles = self.triangles
+            geoView.showTriangleOutlines = true
+            // geoView.triangles = self.triangles
         }
         
         geoView.needsDisplay = true
@@ -363,6 +381,18 @@ class GeometryViewController: NSViewController
         for nextPath in self.paths
         {
             geoView.geometry.append((path:nextPath, color:NSColor.black))
+        }
+        
+        geoView.triangles = []
+        for nextTriangle in self.triangles
+        {
+            if let region = nextTriangle.region
+            {
+                if !region.isVirtualHole
+                {
+                    geoView.triangles.append(nextTriangle)
+                }
+            }
         }
         
         geoView.otherPaths = self.otherPaths

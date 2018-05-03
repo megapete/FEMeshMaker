@@ -33,8 +33,8 @@ class Node:Hashable, CustomStringConvertible
     // A number that is used by Triangle to identify the node
     let tag:Int
     
-    // A number used to identify the boundary (if any) that the point is on. A boundary can be (for example), a counductor with fixed voltage, a mesh boundary, etc.
-    let marker:Int
+    // A number used to identify the boundary (if any) that the point is on (or in). A boundary can be (for example), a counductor with fixed voltage, a mesh boundary, etc.
+    var marker:Int
     
     // The point where the node is located
     let vertex:NSPoint

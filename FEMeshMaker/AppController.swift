@@ -31,16 +31,11 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
     
     @IBAction func handleShowFieldInfo(_ sender: Any)
     {
-        guard let mesh = self.currentMesh else
+        if let gView = self.geometryView
         {
-            DLog("No current mesh")
-            return
-        }
-        
-        guard let minF = mesh.minFieldIntensityTriangle, let maxF = mesh.maxFieldIntensityTriangle else
-        {
-            DLog("Min and max triangles not set")
-            return 
+            let currentState = gView.ToggleTriangleFill()
+            
+            self.showFieldInfoMenuItem.state = (currentState ? .on : .off)
         }
     }
     
@@ -164,7 +159,9 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         let coilRect = NSRect(x: 0.0, y: 5.0 * 25.4, width: 2.25 * 25.4, height: 30.0 * 25.4)
         
         let lvElectrode = Electrode(tag: 2, prescribedVoltage: Complex(real: 26400.0), description: "LV")
+        let lvConductor = ConductorRegion(type: .copper, electrode: lvElectrode, tagBase: 1000, refPoints: [NSPoint(x: 3.0 * 25.4, y: 10.0 * 25.4)], isVirtualHole: true)
         let hvElectrode = Electrode(tag: 3, prescribedVoltage: Complex(real: 120000.0 / SQRT3), description: "HV")
+        let hvConductor = ConductorRegion(type: .copper, electrode: hvElectrode, tagBase: 2000, refPoints: [NSPoint(x: 7.25 * 25.4, y: 10.0 * 25.4)], isVirtualHole: true)
         
         var meshPaths:[MeshPath] = [tankPath]
         var holes:[NSPoint] = []
@@ -178,7 +175,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 6.75 * 25.4, 0.0), boundary: hvElectrode))
         holes.append(NSPoint(x: 7.25 * 25.4, y: 10.0 * 25.4))
         
-        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, units: .mm, vertices: [], regions: [bulkOil], holes: holes)
+        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, units: .mm, vertices: [], regions: [bulkOil, lvConductor, hvConductor])
         
         self.currentMesh = elStaticMesh
         

@@ -15,7 +15,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
     
     
     
-    init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint])
+    init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [])
     {
         super.init(precision: .complex, units:units, withPaths: withPaths, vertices: vertices, regions: regions, holes: holes)
         
@@ -27,6 +27,22 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
                 if let electrode = boundary as? Electrode
                 {
                     electrodes[electrode.tag] = electrode
+                }
+            }
+        }
+        
+        // For any nodes that are part of a triangle that is "inside" a conductor, set its marker according to the enclosing electrode
+        for nextNode in self.nodes
+        {
+            for nextTriangle in nextNode.elements
+            {
+                if let region = nextTriangle.region as? ConductorRegion
+                {
+                    if let electrode = region.electrode
+                    {
+                        nextNode.marker = electrode.tag
+                        break
+                    }
                 }
             }
         }
@@ -154,7 +170,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
     
     override func CalculateCouplingConstants(node: Node)
     {
-        // If the node is an electrode...
+        // If the node is on an electrode surface...
         if node.marker != 0
         {
             if self.electrodes[node.marker] != nil

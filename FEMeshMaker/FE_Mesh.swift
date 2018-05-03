@@ -41,7 +41,7 @@ class FE_Mesh:Mesh
     // We store the index of triangle of the last "hit" point that was queried and use it as the start point for the next query
     var lastHitTriangle:Element? = nil
     
-    init(precision:PCH_SparseMatrix.DataType, units:Units, withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint])
+    init(precision:PCH_SparseMatrix.DataType, units:Units, withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [])
     {
         self.precision = precision
         self.units = units
@@ -67,7 +67,7 @@ class FE_Mesh:Mesh
         
         self.bounds = NSRect(origin: minPoint, size: NSSize(width: maxPoint.x - minPoint.x, height: maxPoint.y - minPoint.y))
         
-        // Hole zones are saved to do hit-testing later on.
+        // Hole zones are OBSOLETE. We leave the code here until we're sure that they are really, truly, OBSOLETE
         for nextHole in holes
         {
             var holeContainers:[MeshPath] = []
@@ -373,7 +373,7 @@ class FE_Mesh:Mesh
     }
     
     // This function uses the "better" algorithm on page 10 of this document: http://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-728.pdf
-    // The point could be in a triangle or in a "hole" (usually a section with a prescribed-value boundary zone), which means we can return either one.
+    // This function assumes that there are NO HOLES in the geometry (ie: the entire area is meshed - there may be "virtual holes" but they will be treated elsewhere.
     func FindZoneWithPoint(X:NSPoint) -> Zone
     {
         let zeroResult = Zone(triangle: nil, zone: nil, pathFollowed:nil)
@@ -384,6 +384,7 @@ class FE_Mesh:Mesh
             return zeroResult
         }
         
+        /* OLD CODE
         // Now do the simple test to see if X is in one of the mesh "holes"
         for nextHole in self.holeZones
         {
@@ -392,6 +393,7 @@ class FE_Mesh:Mesh
                 return Zone(triangle: nil, zone: nextHole.boundary, pathFollowed:nil)
             }
         }
+ */
         
         // calling routines can trace the path followed
         let pathToPoint = NSBezierPath()
@@ -448,10 +450,12 @@ class FE_Mesh:Mesh
         pathToPoint.move(to: triangleEdge.triangle!.CenterOfMass())
         
         // var badResult = false
-        var OnextIsOnBoundary = false
-        var DprevIsOnBoundary = false
+        // var OnextIsOnBoundary = false
+        // var DprevIsOnBoundary = false
+        
         while true
         {
+            /* OLD CODE (was used for checking a mesh with holes in it - teh code was always buggy, so I redesigned the entire FE_Mesh class so that holes are not required)
             // Check if we're on the edge of a boundary (ie: a hole)
             if OnextIsOnBoundary || DprevIsOnBoundary
             {
@@ -534,73 +538,14 @@ class FE_Mesh:Mesh
                     
                 }
                 
-                
-                
-                /* OLD CODE
-                while destNode.marker == orgNode.marker
-                {
-                    var directionDifference:CGFloat = CGFloat.greatestFiniteMagnitude
-                    
-                    var bestNode = destNode
-                    for nextNode in destNode.neighbours
-                    {
-                        let newDirection = TriangleEdge.Direction(edge: (A:destNode, B:nextNode))
-                        let newDiff = TriangleEdge.DirectionDifference(dir1: direction, dir2: newDirection)
-                        
-                        if newDiff < directionDifference
-                        {
-                            bestNode = nextNode
-                            directionDifference = newDiff
-                            
-                            if directionDifference == 0
-                            {
-                                // it ain't gonna get better than this
-                                break
-                            }
-                        }
-                    }
-                    
-                    orgNode = destNode
-                    destNode = bestNode
-                    
-                    pathToPoint.line(to: destNode.vertex)
-                }
-                
-                // At this point, we want to create a TriangleEdge with orgNode as Org and destNode as Dest. There will be up to two possible triangles that satisfy this, with (hopefully) at least one that also satisfies !IsRightOf(). We need to choose the triangle using the paper's algorithm (so basically, everything gets coded twice...)
-                let triangleSet = orgNode.elements.intersection(destNode.elements)
-                var foundSuitableTriangle = false
-                for nextTriangle in triangleSet
-                {
-                    let checkTriangle =  nextTriangle.NormalizedOn(n0: orgNode)
-                    
-                    // DLog("Org: \(orgNode), Dest:\(destNode)")
-                    // DLog("n0:\(checkTriangle.corners.n0); n1:\(checkTriangle.corners.n1); n2:\(checkTriangle.corners.n2)")
-                    
-                    if checkTriangle.corners.n0 == orgNode && checkTriangle.corners.n1 == destNode
-                    {
-                        let checkTriangleEdge = TriangleEdge(e: (Org:orgNode, Dest:destNode), Other: checkTriangle.corners.n2)
-                        
-                        if !TriangleEdge.IsRightOf(edge: checkTriangleEdge.e, X: X)
-                        {
-                            triangleEdge = checkTriangleEdge
-                            foundSuitableTriangle = true
-                            break
-                        }
-                    }
-                }
  
                 
-                if !foundSuitableTriangle
-                {
-                    // The "bestNode" discovered above was in the best "direction" but a suitable triangle cannot be made using it.
-                    DLog("This is a problem!")
-                    return Zone(triangle: nil, zone: nil, pathFollowed: pathToPoint)
-                }
-                */
+                
             }
+            */
             
-            OnextIsOnBoundary = false
-            DprevIsOnBoundary = false
+            // OnextIsOnBoundary = false
+            // DprevIsOnBoundary = false
             
             pathToPoint.line(to: triangleEdge.triangle!.CenterOfMass())
             
@@ -626,7 +571,8 @@ class FE_Mesh:Mesh
                     }
                     else
                     {
-                        OnextIsOnBoundary = true
+                        DLog("Could not create triangle (holes are NOT allowed")
+                        // OnextIsOnBoundary = true
                     }
                 }
                 else
@@ -637,7 +583,8 @@ class FE_Mesh:Mesh
                     }
                     else
                     {
-                        DprevIsOnBoundary = true
+                        DLog("Could not create triangle (holes are NOT allowed")
+                        // DprevIsOnBoundary = true
                     }
                 }
             }
@@ -650,7 +597,8 @@ class FE_Mesh:Mesh
                 }
                 else
                 {
-                    OnextIsOnBoundary = true
+                    DLog("Could not create triangle (holes are NOT allowed")
+                    // OnextIsOnBoundary = true
                 }
             }
             else if DprevTest
@@ -662,7 +610,8 @@ class FE_Mesh:Mesh
                 }
                 else
                 {
-                    DprevIsOnBoundary = true
+                    DLog("Could not create triangle (holes are NOT allowed")
+                    // DprevIsOnBoundary = true
                 }
             }
             else
