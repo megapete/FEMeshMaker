@@ -242,15 +242,24 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             }
             else // do the next adjacent triangle
             {
+                let prevTriangle = nextTriangle
+                
                 nextTriangle = sortedTriangles[i + 1].NormalizedOn(n0: node)
                 
-                guard let region = nextTriangle.region as? DielectricRegion else
+                if prevTriangle.corners.n2.tag == nextTriangle.corners.n1.tag
                 {
-                    ALog("Could not get region for triangle")
-                    return
+                    guard let region = nextTriangle.region as? DielectricRegion else
+                    {
+                        ALog("Could not get region for triangle")
+                        return
+                    }
+                    
+                    coeff += region.eRel /* Complex(real: Double(nextTriangle.CenterOfMass().x)) */ * Complex(real: nextTriangle.CotanThetaB()) * Complex(real: 0.5)
                 }
-                
-                coeff += region.eRel /* Complex(real: Double(nextTriangle.CenterOfMass().x)) */ * Complex(real: nextTriangle.CotanThetaB()) * Complex(real: 0.5)
+                else
+                {
+                    DLog("Break (or boundary) at node: \(node)")
+                }
             }
             
             sumWi += coeff
