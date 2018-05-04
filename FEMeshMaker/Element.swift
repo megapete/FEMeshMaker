@@ -103,21 +103,24 @@ class Element:Hashable, CustomStringConvertible
     // A value that concrete subclasses of FE_Mesh can set to whatever they want (usually the triangle's internal field value)
     var value:Double = 0.0
     
-    init(n0:Node, n1:Node, n2:Node, region:Region? = nil)
+    init(n0:Node, n1:Node, n2:Node, region:Region? = nil, retain:Bool = true)
     {
         // self.tag = tag
         self.corners = (n0, n1, n2)
         self.region = region
         
-        if let theRegion = region
+        if retain
         {
-            theRegion.associatedTriangles.append(self)
+            if let theRegion = region
+            {
+                theRegion.associatedTriangles.append(self)
+            }
+            
+            // Set self as being one of the triangles that each of the nodes is used for
+            n0.elements.insert(self)
+            n1.elements.insert(self)
+            n2.elements.insert(self)
         }
-        
-        // Set self as being one of the triangles that each of the nodes is used for
-        n0.elements.insert(self)
-        n1.elements.insert(self)
-        n2.elements.insert(self)
     }
     
     func ElementAsPath() -> NSBezierPath
@@ -194,7 +197,7 @@ class Element:Hashable, CustomStringConvertible
         // TODO: Handle Neumann boundaries
         
         let minNodeCount = 6
-        var nodeSet:Set<Node> = [self.corners.n0, self.corners.n1, self.corners.n2]
+        // var nodeSet:Set<Node> = [self.corners.n0, self.corners.n1, self.corners.n2]
         
         guard let selfRegion = self.region else
         {
@@ -202,6 +205,57 @@ class Element:Hashable, CustomStringConvertible
             return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
         }
         
+        // Find the closest corner to the point that interests us
+        var closestDistance = self.corners.n0.Distance(toPoint: thePoint)
+        var closestNode = self.corners.n0
+        
+        if self.corners.n1.Distance(toPoint: thePoint) < closestDistance
+        {
+            closestDistance = self.corners.n1.Distance(toPoint: thePoint)
+            closestNode = self.corners.n1
+        }
+        
+        if self.corners.n2.Distance(toPoint: thePoint) < closestDistance
+        {
+            closestDistance = self.corners.n2.Distance(toPoint: thePoint)
+            closestNode = self.corners.n2
+        }
+        
+        var nodeSet:Set<Node> = [closestNode]
+        var parentNodes = [closestNode]
+        
+        // we'll start with 18 nodes as a minimum target (even though in theory we could go down to 6). This comes from Humphries text in section 7.3 - although he doesn't strictly say to use 18, he sort of implies it.
+        while nodeSet.count < 18
+        {
+            var newParents:[Node] = []
+            for nextParent in parentNodes
+            {
+                for nextNeighbour in nextParent.neighbours
+                {
+                    var regionIsGood = false
+                    for nextElement in nextNeighbour.elements
+                    {
+                        if selfRegion.associatedTriangles.contains(nextElement)
+                        {
+                            regionIsGood = true
+                            break
+                        }
+                    }
+                    
+                    if regionIsGood
+                    {
+                        nodeSet.insert(nextNeighbour)
+                        newParents.append(nextNeighbour)
+                    }
+                }
+            }
+            
+            parentNodes = newParents
+        }
+        
+        DLog("Number of nodes for calculation: \(nodeSet.count)")
+        
+        /* OLD CODE
         // start with the corners of this element
         for nextCorner in [self.corners.n0, self.corners.n1, self.corners.n2]
         {
@@ -224,6 +278,7 @@ class Element:Hashable, CustomStringConvertible
                 }
             }
         }
+        */
         
         guard nodeSet.count >= minNodeCount else
         {
@@ -275,7 +330,7 @@ class Element:Hashable, CustomStringConvertible
             return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)
         }
         
-        return (Complex(real: bufferD[0].r, imag: bufferD[0].i), Complex(real: bufferD[1].r, imag: bufferD[1].i), Complex(real: bufferD[2].r, imag: bufferD[2].i))
+        return (Complex(real: bufferD[0].r, imag: bufferD[0].i), Complex(real: -bufferD[1].r, imag: -bufferD[1].i), Complex(real: -bufferD[2].r, imag: -bufferD[2].i))
     }
     
     func Height() -> Double
@@ -388,7 +443,7 @@ class Element:Hashable, CustomStringConvertible
     // Return a new node, normalized on self
     func NormalizedOn(n0:Node) -> Element
     {
-        let result = Element(n0:self.corners.n0, n1:self.corners.n1, n2:self.corners.n2, region:self.region)
+        let result = Element(n0:self.corners.n0, n1:self.corners.n1, n2:self.corners.n2, region:self.region, retain:false)
         
         result.NormalizeOn(n0: n0)
         

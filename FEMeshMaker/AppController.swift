@@ -227,6 +227,48 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         
         self.currentMeshIsSolved = true
         
+        // Debug sanity checks
+        #if DEBUG
+        
+        let currMesh = self.currentMesh!
+        
+        var checkElems:Set<Element> = []
+        var checkNodes:Set<Node> = []
+        for nextNode in currMesh.nodes
+        {
+            for nextNeighbour in nextNode.neighbours
+            {
+                checkNodes.insert(nextNeighbour)
+            }
+            for nextElem in nextNode.elements
+            {
+                checkElems.insert(nextElem)
+            }
+        }
+        
+        if checkNodes.count != currMesh.nodes.count
+        {
+            ALog("Too many nodes!")
+        }
+        
+        if checkElems.count != currMesh.elements.count
+        {
+            ALog("Too many triangles!")
+        }
+        
+        var regionTriangleCount = 0
+        for nextRegion in currMesh.regions
+        {
+            regionTriangleCount += nextRegion.associatedTriangles.count
+        }
+        
+        if regionTriangleCount != currMesh.elements.count
+        {
+            ALog("Regions have incorrect number of triangles!")
+        }
+        
+        #endif
+        
         DLog("Matrices solved...")
         
         let lines = self.currentMesh!.CreateContourLines()
