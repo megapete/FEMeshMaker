@@ -211,13 +211,19 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             
             let colIndex = nextTriangle.corners.n2.tag
             
+            let region = nextTriangle.region! as! DielectricRegion
+            
+            /* OLD CODE (may have been slow)
             guard let region = nextTriangle.region as? DielectricRegion else
             {
                 ALog("Could not get region for triangle")
                 return
             }
+            */
             
-            var coeff = region.eRel /* Complex(real: Double(nextTriangle.CenterOfMass().x)) */ * Complex(real: nextTriangle.CotanThetaA()) * Complex(real: 0.5)
+            let cotanA = nextTriangle.CotanThetaA()
+            let Er = region.eRel
+            var coeff = Complex(real: Er.real * cotanA, imag: Er.imag * cotanA)
             
             // We've come all the way around, back to the first triangle
             if i == sortedTriangles.count - 1
@@ -226,13 +232,21 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
                 {
                     nextTriangle = firstTriangle
                     
-                    guard let region = nextTriangle.region as? DielectricRegion else
-                    {
+                    let region = nextTriangle.region! as! DielectricRegion
+                    
+                    /* OLD CODE (may have been slow)
+                     guard let region = nextTriangle.region as? DielectricRegion else
+                     {
                         ALog("Could not get region for triangle")
                         return
-                    }
+                     }
+                     */
                     
-                    coeff += region.eRel /* Complex(real: Double(nextTriangle.CenterOfMass().x)) */ * Complex(real: nextTriangle.CotanThetaB()) * Complex(real: 0.5)
+                    let cotanB = nextTriangle.CotanThetaB()
+                    let Er = region.eRel
+                    
+                    // coeff += region.eRel * Complex(real: nextTriangle.CotanThetaB())
+                    coeff = Complex(real: coeff.real + Er.real * cotanB, imag: coeff.imag + Er.imag * cotanB)
                 }
                 else
                 {
@@ -248,13 +262,21 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
                 
                 if prevTriangle.corners.n2.tag == nextTriangle.corners.n1.tag
                 {
-                    guard let region = nextTriangle.region as? DielectricRegion else
-                    {
+                    let region = nextTriangle.region! as! DielectricRegion
+                    
+                    /* OLD CODE (may have been slow)
+                     guard let region = nextTriangle.region as? DielectricRegion else
+                     {
                         ALog("Could not get region for triangle")
                         return
-                    }
+                     }
+                     */
                     
-                    coeff += region.eRel /* Complex(real: Double(nextTriangle.CenterOfMass().x)) */ * Complex(real: nextTriangle.CotanThetaB()) * Complex(real: 0.5)
+                    let cotanB = nextTriangle.CotanThetaB()
+                    let Er = region.eRel
+                    
+                    // coeff += region.eRel * Complex(real: nextTriangle.CotanThetaB())
+                    coeff = Complex(real: coeff.real + Er.real * cotanB, imag: coeff.imag + Er.imag * cotanB)
                 }
                 else
                 {
@@ -262,9 +284,9 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
                 }
             }
             
-            sumWi += coeff
+            sumWi += coeff * 0.5
             
-            self.matrixA![node.tag, colIndex] = Complex(real: -1.0) * coeff
+            self.matrixA![node.tag, colIndex] = Complex(real: -coeff.real * 0.5, imag: -coeff.imag * 0.5)
         }
         
         self.matrixA![node.tag, node.tag] = sumWi
