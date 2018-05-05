@@ -103,6 +103,7 @@ class Element:Hashable, CustomStringConvertible
     // A value that concrete subclasses of FE_Mesh can set to whatever they want (usually the triangle's internal field value)
     var value:Double = 0.0
     
+    // Most of the parameters are self explanatory except 'retain', which should be called if we don't want to add this triangle to region nor to the nodes (ie: usually used for a 'temporary' copy)
     init(n0:Node, n1:Node, n2:Node, region:Region? = nil, retain:Bool = true)
     {
         // self.tag = tag
@@ -314,7 +315,7 @@ class Element:Hashable, CustomStringConvertible
             }
         }
         
-        var n:__CLPK_integer = __CLPK_integer(minNodeCount)
+        var n = __CLPK_integer(minNodeCount)
         var nrhs = __CLPK_integer(1)
         var lda = n
         var ldb = n
