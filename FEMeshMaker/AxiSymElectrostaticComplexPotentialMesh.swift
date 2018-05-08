@@ -92,7 +92,7 @@ class AxiSymElectrostaticComplexPotentialMesh: FlatElectrostaticComplexPotential
     override func CalculateRHSforNode(node: Node)
     {
         // If the node is an electrode...
-        if node.marker != 0
+        if node.marker != 0 && node.marker != Boundary.neumannTagNumber
         {
             if let electrode = self.electrodes[node.marker]
             {

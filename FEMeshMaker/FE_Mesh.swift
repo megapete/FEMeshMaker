@@ -122,7 +122,7 @@ class FE_Mesh:Mesh
         var paths:[NSBezierPath] = Array(repeating: NSBezierPath(), count: numLines)
         var nextPhiToCreate = self.minAbsPhiInMesh
         
-        // I will try to parallelize this, which is why I have separted it from the loop below that actually creates the contour line array
+        // I will try to parallelize this, which is why I have separated it from the loop below that actually creates the contour line array
         for i in 0..<numLines
         {
             SetContourPath(path: paths[i], forValue: nextPhiToCreate)

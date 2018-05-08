@@ -12,6 +12,8 @@ import Foundation
 
 class Boundary
 {
+    static let neumannTagNumber = 32000
+    
     let tag:Int
     
     let description:String
@@ -30,6 +32,6 @@ class Boundary
     
     static func NeumannBoundary() -> Boundary
     {
-        return Boundary(tag: 16, fixedValue: Complex.ComplexNan, description: "Neumann Boundary", isNeumann: true)
+        return Boundary(tag: Boundary.neumannTagNumber, fixedValue: Complex.ComplexNan, description: "Neumann Boundary", isNeumann: true)
     }
 }

@@ -39,22 +39,9 @@ class Edge:Hashable
     let endPoint2:Node
     let marker:Int
     
-    init(endPoint1:Node, endPoint2:Node)
+    init(endPoint1:Node, endPoint2:Node, marker:Int)
     {
-        // We'll arbitrarily set the marker to either of the endpoint markers that are non-zero (giving preference to endpoint1). Of course, in actuality, the two endpoints SHOULD have the same marker.
-        if endPoint1.marker != 0
-        {
-            self.marker = endPoint1.marker
-        }
-        else if endPoint2.marker != 0
-        {
-            self.marker = endPoint2.marker
-        }
-        else
-        {
-            self.marker = 0
-        }
-        
+        self.marker = marker
         self.endPoint1 = endPoint1
         self.endPoint2 = endPoint2
         

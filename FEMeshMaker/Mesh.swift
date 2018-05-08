@@ -139,7 +139,7 @@ class Mesh
                         self.nodes.append(newNode)
                     }
                     
-                    self.segments.append(Edge(endPoint1: currentNode, endPoint2: newNode))
+                    self.segments.append(Edge(endPoint1: currentNode, endPoint2: newNode, marker:nextMarker))
                     
                     currentNode = newNode
                 }
@@ -149,7 +149,7 @@ class Mesh
                     
                     if currentNode != pathStartNode
                     {
-                        self.segments.append(Edge(endPoint1: currentNode, endPoint2: pathStartNode))
+                        self.segments.append(Edge(endPoint1: currentNode, endPoint2: pathStartNode, marker:nextMarker))
                     }
                     
                     break // this is needed because NSBezierPath ends with a "moveto" the start point if it was created with an NSRect
@@ -188,7 +188,7 @@ class Mesh
                             self.nodes.append(newNode)
                         }
                         
-                        self.segments.append(Edge(endPoint1: currentNode, endPoint2: newNode))
+                        self.segments.append(Edge(endPoint1: currentNode, endPoint2: newNode, marker:nextMarker))
                         
                         currentNode = newNode
                         
@@ -417,7 +417,7 @@ class Mesh
         self.segments = []
         for i in 0..<Int(output.numberofsegments)
         {
-            let newSegment = Edge(endPoint1: self.nodes[Int(output.segmentlist[2 * i])], endPoint2: self.nodes[Int(output.segmentlist[2 * i + 1])])
+            let newSegment = Edge(endPoint1: self.nodes[Int(output.segmentlist[2 * i])], endPoint2: self.nodes[Int(output.segmentlist[2 * i + 1])], marker:Int(output.segmentmarkerlist[i]))
             
             // We don't need to set the segment marker because the Edge.init() function will set it to the marker of the nodes passed to it. We also do not need to set the neighbour properties of the two end Nodes because that is done in the Edge.init() function.
             
@@ -430,7 +430,7 @@ class Mesh
         self.edges = []
         for i in 0..<Int(output.numberofedges)
         {
-            let newEdge = Edge(endPoint1: nodes[Int(output.edgelist[2 * i])], endPoint2: nodes[Int(output.edgelist[2 * i + 1])])
+            let newEdge = Edge(endPoint1: nodes[Int(output.edgelist[2 * i])], endPoint2: nodes[Int(output.edgelist[2 * i + 1])], marker:Int(output.edgemarkerlist[i]))
             
             // We do not need to set the neighbour properties of the two end Nodes because that is done in the Edge.init() function.
             

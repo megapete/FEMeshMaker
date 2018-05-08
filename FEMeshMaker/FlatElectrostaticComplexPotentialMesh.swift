@@ -169,7 +169,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
     override func CalculateCouplingConstants(node: Node)
     {
         // If the node is on an electrode surface...
-        if node.marker != 0
+        if node.marker != 0 && node.marker != Boundary.neumannTagNumber
         {
             if self.electrodes[node.marker] != nil
             {
@@ -199,8 +199,6 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             triIndex += 1
         }
         */
-        
-        
         
         let firstTriangle = sortedTriangles[0].NormalizedOn(n0: node)
         for i in 0..<sortedTriangles.count
@@ -248,7 +246,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
                 }
                 else
                 {
-                    DLog("Break (or boundary) at node: \(node)")
+                    // DLog("Break (or boundary) at node: \(node)")
                     
                 }
             }
@@ -278,7 +276,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
                 }
                 else
                 {
-                    DLog("Break (or boundary) at node: \(node)")
+                    // DLog("Break (or boundary) at node: \(node)")
                 }
             }
             
@@ -294,7 +292,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
     override func CalculateRHSforNode(node: Node)
     {
         // If the node is an electrode...
-        if node.marker != 0
+        if node.marker != 0 && node.marker != Boundary.neumannTagNumber
         {
             if let electrode = self.electrodes[node.marker]
             {
