@@ -95,18 +95,50 @@ class Mesh
                 if nextElement == .moveToBezierPathElement
                 {
                     pathStartNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: pointArray[0])
-                    self.nodeIndex += 1
+                    
+                    if self.nodes.contains(pathStartNode)
+                    {
+                        DLog("pathStartNode exists!")
+                        
+                        if let existingIndex = self.nodes.index(of: pathStartNode)
+                        {
+                            pathStartNode = self.nodes[existingIndex]
+                        }
+                        else
+                        {
+                            ALog("Ooh, that's a problem!")
+                        }
+                    }
+                    else
+                    {
+                        self.nodeIndex += 1
+                        self.nodes.append(pathStartNode)
+                    }
                     
                     currentNode = pathStartNode
-                    
-                    self.nodes.append(pathStartNode)
                 }
                 else if nextElement == .lineToBezierPathElement
                 {
-                    let newNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: pointArray[0])
-                    self.nodeIndex += 1
+                    var newNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: pointArray[0])
+                    if self.nodes.contains(newNode)
+                    {
+                        DLog("newNode exists!")
+                        
+                        if let existingIndex = self.nodes.index(of: newNode)
+                        {
+                            newNode = self.nodes[existingIndex]
+                        }
+                        else
+                        {
+                            ALog("Ooh, that's a problem!")
+                        }
+                    }
+                    else
+                    {
+                        self.nodeIndex += 1
+                        self.nodes.append(newNode)
+                    }
                     
-                    self.nodes.append(newNode)
                     self.segments.append(Edge(endPoint1: currentNode, endPoint2: newNode))
                     
                     currentNode = newNode
@@ -135,10 +167,27 @@ class Mesh
                     while t < 0.999 // careful for rounding...
                     {
                         // The PointOnCurve function is in GlobalDefs, on the off-chance we'll need it again someday
-                        let newNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: PointOnCurve(points: points, t: t))
-                        self.nodeIndex += 1
+                        var newNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: PointOnCurve(points: points, t: t))
                         
-                        self.nodes.append(newNode)
+                        if self.nodes.contains(newNode)
+                        {
+                            DLog("newNode exists!")
+                            
+                            if let existingIndex = self.nodes.index(of: newNode)
+                            {
+                                newNode = self.nodes[existingIndex]
+                            }
+                            else
+                            {
+                                ALog("Ooh, that's a problem!")
+                            }
+                        }
+                        else
+                        {
+                            self.nodeIndex += 1
+                            self.nodes.append(newNode)
+                        }
+                        
                         self.segments.append(Edge(endPoint1: currentNode, endPoint2: newNode))
                         
                         currentNode = newNode
