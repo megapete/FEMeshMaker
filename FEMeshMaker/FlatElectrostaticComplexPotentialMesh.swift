@@ -13,8 +13,6 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
 {
     var electrodes:[Int:Electrode] = [:]
     
-    
-    
     init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [])
     {
         super.init(precision: .complex, units:units, withPaths: withPaths, vertices: vertices, regions: regions, holes: holes)

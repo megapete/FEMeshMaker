@@ -30,6 +30,7 @@
 		D39987C2207B952C0052B863 /* GeometryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987C1207B952C0052B863 /* GeometryView.swift */; };
 		D39987C6207EAA540052B863 /* Electrode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987C5207EAA540052B863 /* Electrode.swift */; };
 		D3B8CCBC209B3D5E00102039 /* ConductorRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B8CCBB209B3D5E00102039 /* ConductorRegion.swift */; };
+		D3B8CCC020A2266900102039 /* FlatMagnetostaticComplexPotentialMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B8CCBF20A2266900102039 /* FlatMagnetostaticComplexPotentialMesh.swift */; };
 		D3D3C291207AE2F800EC5C83 /* DielectricRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */; };
 		D3D3C295207EC05500EC5C83 /* MeshPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C294207EC05500EC5C83 /* MeshPath.swift */; };
 		D3D3C297207EC11700EC5C83 /* Boundary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3C296207EC11700EC5C83 /* Boundary.swift */; };
@@ -66,6 +67,7 @@
 		D39987C1207B952C0052B863 /* GeometryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeometryView.swift; sourceTree = "<group>"; };
 		D39987C5207EAA540052B863 /* Electrode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Electrode.swift; sourceTree = "<group>"; };
 		D3B8CCBB209B3D5E00102039 /* ConductorRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConductorRegion.swift; sourceTree = "<group>"; };
+		D3B8CCBF20A2266900102039 /* FlatMagnetostaticComplexPotentialMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlatMagnetostaticComplexPotentialMesh.swift; sourceTree = "<group>"; };
 		D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DielectricRegion.swift; sourceTree = "<group>"; };
 		D3D3C294207EC05500EC5C83 /* MeshPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshPath.swift; sourceTree = "<group>"; };
 		D3D3C296207EC11700EC5C83 /* Boundary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Boundary.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 				D36668A7208CC79C00D5DB92 /* TriangleEdge.swift */,
 				D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */,
 				D31FCF582097B48200166A42 /* AxiSymElectrostaticComplexPotentialMesh.swift */,
+				D3B8CCBF20A2266900102039 /* FlatMagnetostaticComplexPotentialMesh.swift */,
 				D313746D20876B16006AC4A6 /* SparseMatrix.swift */,
 				D3E7848920976F140012A882 /* PCH_Matrix.swift */,
 				D39987AF207910020052B863 /* triangle.h */,
@@ -212,6 +215,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D31FCF5720964BB900166A42 /* ContourLine.swift in Sources */,
+				D3B8CCC020A2266900102039 /* FlatMagnetostaticComplexPotentialMesh.swift in Sources */,
 				D39987B8207A8BEE0052B863 /* FE_Mesh.swift in Sources */,
 				D39987C6207EAA540052B863 /* Electrode.swift in Sources */,
 				D39987B2207914D30052B863 /* Region.swift in Sources */,

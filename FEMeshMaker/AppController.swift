@@ -225,6 +225,67 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         */
         
     }
+    @IBAction func handleCreateDemo3(_ sender: Any)
+    {
+        self.meshRectangle = NSRect(x: 0.0, y: 0.0, width: 20.0 * 25.4, height: 40.0 * 25.4)
+        
+        var currentRegionTagBase = 1
+        let bulkOil = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerOil)
+        bulkOil.refPoints = [NSPoint(x: 0.1 * 25.4, y: 0.1 * 25.4)]
+        currentRegionTagBase += bulkOil.refPoints.count
+        
+        let tankBoundary = Electrode(tag: 1, prescribedVoltage: Complex(real: 0.0, imag: 0.0), description: "Tank")
+        let groundPath = NSBezierPath()
+        groundPath.move(to: NSPoint(x: 20.0 * 25.4, y: 40.0 * 25.4))
+        groundPath.line(to: NSPoint(x: 0.0, y: 40.0 * 25.4))
+        groundPath.line(to: self.meshRectangle.origin)
+        groundPath.line(to: NSPoint(x: 20 * 25.4, y: 0.0))
+        let tankPath = MeshPath(path: groundPath, boundary: tankBoundary)
+        let neumannPath = NSBezierPath()
+        neumannPath.move(to: NSPoint(x: 20.0 * 25.4, y: 40.0 * 25.4))
+        neumannPath.line(to: NSPoint(x: 20 * 25.4, y: 0.0))
+        let rightsidePath = MeshPath(path: neumannPath, boundary: Boundary.NeumannBoundary())
+        
+        let coilRect = NSRect(x: 0.0, y: 5.0 * 25.4, width: 2.25 * 25.4, height: 30.0 * 25.4)
+        
+        let lvElectrode = Electrode(tag: 2, prescribedVoltage: Complex(real: 26400.0), description: "LV")
+        let lvConductor = ConductorRegion(type: .copper, electrode: lvElectrode, tagBase: 1000, refPoints: [NSPoint(x: 3.0 * 25.4, y: 10.0 * 25.4)], isVirtualHole: true)
+        let hvElectrode = Electrode(tag: 3, prescribedVoltage: Complex(real: 120000.0 / SQRT3), description: "HV")
+        let hvConductor = ConductorRegion(type: .copper, electrode: hvElectrode, tagBase: 2000, refPoints: [NSPoint(x: 7.25 * 25.4, y: 10.0 * 25.4)], isVirtualHole: true)
+        
+        var meshPaths:[MeshPath] = [tankPath, rightsidePath]
+        var holes:[NSPoint] = []
+        
+        // let testRegion1 = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerBoard)
+        meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 2.5 * 25.4, 0.0), boundary: lvElectrode))
+        // testRegion1.refPoints.append(NSPoint(x: 3.0, y: 10.0))
+        holes.append(NSPoint(x: 3.0 * 25.4, y: 10.0 * 25.4))
+        // let testRegion2 = DielectricRegion(dielectric: .TransformerBoard)
+        // testRegion1.refPoints.append(NSPoint(x: 7.25, y: 10.0))
+        meshPaths.append(MeshPath(rect: NSOffsetRect(coilRect, 6.75 * 25.4, 0.0), boundary: hvElectrode))
+        holes.append(NSPoint(x: 7.25 * 25.4, y: 10.0 * 25.4))
+        
+        let elStaticMesh = FlatElectrostaticComplexPotentialMesh(withPaths: meshPaths, units: .mm, vertices: [], regions: [bulkOil, lvConductor, hvConductor])
+        
+        self.currentMesh = elStaticMesh
+        
+        // var scrollDocView = self.testScrollView.documentView
+        self.geometryView = GeometryViewController(scrollClipView: self.scrollClipView, placeholderView: self.dummyGeoView, delegate:self)
+        
+        
+        // let actualGeoView = self.geometryView!.view
+        // scrollDocView = self.testScrollView.documentView
+        
+        // let currentGeometryViewBounds = self.geometryView!.view.bounds
+        
+        var diskPaths:[NSBezierPath] = [tankPath.path]
+        for nextPath in meshPaths
+        {
+            diskPaths.append(nextPath.path)
+        }
+        
+        self.geometryView?.SetGeometry(meshBounds: meshRectangle, paths: diskPaths, triangles: elStaticMesh.elements)
+    }
     
     @IBAction func handleSolveDemo1(_ sender: Any)
     {

@@ -225,9 +225,10 @@ class Element:Hashable, CustomStringConvertible
         var nodeSet:Set<Node> = [closestNode]
         var parentNodes = [closestNode]
         
-        // We will use the minimum allowed number of nodes, 6, to do the least-squares fit. I tried going as high as 18, but this lead to the farther-away points having too much influence on the outcome (see http://mathworld.wolfram.com/LeastSquaresFitting.html for a detailed description of the least-squares method and its pitfalls)
+        // We will use the minimum allowed number of nodes, 6, to do the least-squares fit. I tried going as high as 18, but this lead to the farther-away points having too much influence on the outcome (see http://mathworld.wolfram.com/LeastSquaresFitting.html for a detailed description of the least-squares method and its pitfalls). We will actually try and find more than 6, but then prune the list back to the closest 6 points
         let numNodesToUse = 6
-        while nodeSet.count < numNodesToUse
+        let numNodesToFind = numNodesToUse + 4
+        while nodeSet.count < numNodesToFind
         {
             var newParents:[Node] = []
             for nextParent in parentNodes
@@ -268,10 +269,6 @@ class Element:Hashable, CustomStringConvertible
                 return dist1 < dist2
             }
             
-            for nextNode in nodeArray
-            {
-                DLog("Distance to point: \(nextNode.Distance(toPoint: thePoint))", file: "", function: "")
-            }
             let numToRemove = nodeSet.count - numNodesToUse
             nodeArray.removeLast(numToRemove)
             nodeSet = Set(nodeArray)

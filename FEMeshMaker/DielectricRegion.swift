@@ -23,15 +23,13 @@ class DielectricRegion: Region {
     // charge density
     let rho:Complex
     
-    // relative dielectric constant (permittivity) (>= 1)
-    let eRel:Complex
-    
     init(tagBase:Int, description:String = "Vacuum", refPoints:[NSPoint] = [], eRel:Complex = Complex(real:1.0, imag:0.0), rho:Complex = Complex(real:0.0, imag:0.0))
     {
         self.rho = rho
-        self.eRel = eRel
         
         super.init(tagBase: tagBase, description: description, refPoints: refPoints)
+        
+        self.eRel = eRel
     }
     
     // Convenience initializer for common dielectric materials. Note that it is up the calling routine to manually set the reference point(s) for the region after its creation.

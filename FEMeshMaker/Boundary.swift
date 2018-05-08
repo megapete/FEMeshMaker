@@ -18,10 +18,18 @@ class Boundary
     
     var fixedValue:Complex
     
-    init(tag:Int, fixedValue:Complex, description:String)
+    let isNeumann:Bool
+    
+    init(tag:Int, fixedValue:Complex, description:String, isNeumann:Bool = false)
     {
         self.tag = tag
         self.description = description
         self.fixedValue = fixedValue
+        self.isNeumann = isNeumann
+    }
+    
+    static func NeumannBoundary() -> Boundary
+    {
+        return Boundary(tag: -1, fixedValue: Complex.ComplexNan, description: "Neumann Boundary", isNeumann: true)
     }
 }

@@ -26,6 +26,10 @@ class Region
     var refPoints:[NSPoint] = [] // all the points in the model that refer to this Region (there should be at least one)
     var associatedTriangles:[Element] = []
     
+    // Relative permittivity and permealbility of materials. These should be properly set by concrete subclasses
+    var eRel:Complex = Complex(real: 1.0)
+    var µRel:Complex = Complex(real: 1.0)
+    
     // We don't use holes in FE_Mesh to make it easier to do triangle-finding. However, we will want the option to not show those triangles within a given region when displaying the mesh, so we define the concept of a "virtual hole"
     var isVirtualHole:Bool
     
