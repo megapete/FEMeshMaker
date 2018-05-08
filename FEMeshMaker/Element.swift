@@ -478,23 +478,6 @@ class Element:Hashable, CustomStringConvertible
         return false
     }
     
-    // For the edge n0-n1 of this triangle, there will be either zero (if the edge is on a boundary) or one triangle that shares that edge. Return that triangle, if any.
-    func TriangleThatShares(edge:(A:Node, B:Node)) -> Element?
-    {
-        let resultSet = self.corners.n0.elements.intersection(self.corners.n1.elements)
-        
-        if resultSet.count == 0
-        {
-            return nil
-        }
-        else if resultSet.count > 1
-        {
-            ALog("WTF???")
-            return nil
-        }
-        
-        return resultSet.first!
-    }
 }
 
 

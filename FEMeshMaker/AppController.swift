@@ -112,6 +112,11 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
             
             if let triangle = zone.triangle
             {
+                if self.currentMeshIsSolved
+                {
+                    DLog("V0:\(triangle.corners.n0.phi); V1:\(triangle.corners.n1.phi); V2:\(triangle.corners.n2.phi)", file: "", function: "")
+                }
+                
                 return triangle
             }
         }
