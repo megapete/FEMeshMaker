@@ -225,8 +225,9 @@ class Element:Hashable, CustomStringConvertible
         var nodeSet:Set<Node> = [closestNode]
         var parentNodes = [closestNode]
         
-        // we'll start with 18 nodes as a minimum target (even though in theory we could go down to 6). This comes from Humphries text in section 7.3 - although he doesn't strictly say to use 18, he sort of implies it.
-        while nodeSet.count < 18
+        // We will use the minimum allowed number of nodes, 6, to do the least-squares fit. I tried going as high as 18, but this lead to the farther-away points having too much influence on the outcome (see http://mathworld.wolfram.com/LeastSquaresFitting.html for a detailed description of the least-squares method and its pitfalls)
+        let numNodesToUse = 6
+        while nodeSet.count < numNodesToUse
         {
             var newParents:[Node] = []
             for nextParent in parentNodes
@@ -254,32 +255,27 @@ class Element:Hashable, CustomStringConvertible
             parentNodes = newParents
         }
         
-        DLog("Number of nodes for calculation: \(nodeSet.count)")
+        DLog("Number of nodes found: \(nodeSet.count)")
         
-        /* OLD CODE
-        // start with the corners of this element
-        for nextCorner in [self.corners.n0, self.corners.n1, self.corners.n2]
+        // Prune the nodes so that we only use the ones closest to our point
+        if nodeSet.count > numNodesToUse
         {
-            // check each neighbor to make sure that it touches at least one triangle that is in the same Region as self and if so, add it to nodeSet
-            for nextNeighbor in nextCorner.neighbours
-            {
-                var regionIsGood = false
-                for nextElement in nextNeighbor.elements
-                {
-                    if selfRegion.associatedTriangles.contains(nextElement)
-                    {
-                        regionIsGood = true
-                        break
-                    }
-                }
+            var nodeArray = Array(nodeSet).sorted { (node1, node2) -> Bool in
                 
-                if regionIsGood
-                {
-                    nodeSet.insert(nextNeighbor)
-                }
+                let dist1 = node1.Distance(toPoint: thePoint)
+                let dist2 = node2.Distance(toPoint: thePoint)
+                
+                return dist1 < dist2
             }
+            
+            for nextNode in nodeArray
+            {
+                DLog("Distance to point: \(nextNode.Distance(toPoint: thePoint))", file: "", function: "")
+            }
+            let numToRemove = nodeSet.count - numNodesToUse
+            nodeArray.removeLast(numToRemove)
+            nodeSet = Set(nodeArray)
         }
-        */
         
         guard nodeSet.count >= minNodeCount else
         {
@@ -291,6 +287,7 @@ class Element:Hashable, CustomStringConvertible
         var bufferD = [__CLPK_doublecomplex](repeating: __CLPK_doublecomplex(r: 0.0, i: 0.0), count: minNodeCount)
         
         var f:[Double] = Array(repeating: 0.0, count: minNodeCount)
+        
         for nextNode in nodeSet
         {
             let Xi = Double(nextNode.vertex.x - thePoint.x)
