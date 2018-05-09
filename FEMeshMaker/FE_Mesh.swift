@@ -643,8 +643,12 @@ class FE_Mesh:Mesh
             return (boundary.fixedValue, Complex(real: 0.0), Complex(real: 0.0))
         }
         
+        
         if let triangle = enclosingZone.triangle
         {
+            return triangle.ValuesAtPoint(point)
+            
+            /*
             let lsf_result = triangle.LSF_ValuesAtPoint(point)
             
             if lsf_result.phi == Complex.ComplexNan
@@ -653,6 +657,7 @@ class FE_Mesh:Mesh
             }
             
             return lsf_result
+            */
         }
         
         return (Complex.ComplexNan, Complex.ComplexNan, Complex.ComplexNan)

@@ -303,7 +303,7 @@ class Element:Hashable, CustomStringConvertible
                 
                 for n in 0..<minNodeCount
                 {
-                    let mn = n * minNodeCount + m
+                    let mn = m * minNodeCount + n
                     bufferC[mn] = __CLPK_doublecomplex(r: bufferC[mn].r + f[m] * f[n], i: 0.0)
                 }
             }

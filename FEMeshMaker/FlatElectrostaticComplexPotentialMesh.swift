@@ -186,7 +186,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         // It's a regular node, so we do Humphries Eq. 2.67 (LHS)
         var sumWi = Complex(real: 0.0)
         
-        let sortedTriangles = node.SortedArrayOfTriangles()
+        // let nodeTriangles = Array(node.elements) //node.SortedArrayOfTriangles()
         
         /* Debugging stuff
         DLog("Node n0 vertex: \(node.vertex)")
@@ -201,9 +201,9 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         */
         
         // let firstTriangle = sortedTriangles[0].NormalizedOn(n0: node)
-        for i in 0..<sortedTriangles.count
+        for triangle in node.elements
         {
-            let nextTriangle = sortedTriangles[i].NormalizedOn(n0: node)
+            let nextTriangle = triangle.NormalizedOn(n0: node)
             
             let colIndexN2 = nextTriangle.corners.n2.tag // for the first triangle, this is labeled 𝜙1 in Humphries
             let colIndexN1 = nextTriangle.corners.n1.tag // for the first triangle, this is labeled 𝜙6 in Humphries
@@ -223,9 +223,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
             self.matrixA![node.tag, colIndexN2] = Complex(real: prevN2.real - coeffN2.real, imag: prevN2.imag - coeffN2.imag)
             
             let prevN1:Complex = self.matrixA![node.tag, colIndexN1]
-            self.matrixA![node.tag, colIndexN1] = Complex(real: prevN1.real - coeffN1.real, imag: prevN1.imag - coeffN1.imag)
-            
-            // self.matrixA![node.tag, colIndexN2] = Complex(real: -coeffN2.real * 0.5, imag: -coeff.imag * 0.5)
+            self.matrixA![node.tag, colIndexN1] = Complex(real: prevN1.real - coeffN1.real, imag: prevN1.imag - coeffN1.imag)            
         }
         
         self.matrixA![node.tag, node.tag] = sumWi

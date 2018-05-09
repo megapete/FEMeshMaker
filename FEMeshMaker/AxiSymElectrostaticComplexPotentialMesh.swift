@@ -27,63 +27,32 @@ class AxiSymElectrostaticComplexPotentialMesh: FlatElectrostaticComplexPotential
             }
         }
         
-        // It's a regular node, so we do Humphries Eq. 2.67 (LHS)
+        // It's a regular node, so we do Humphries Eq. 2.77 & 2.78
         var sumWi = Complex(real: 0.0)
         
-        let sortedTriangles = node.SortedArrayOfTriangles()
-        
-        let firstTriangle = sortedTriangles[0].NormalizedOn(n0: node)
-        for i in 0..<sortedTriangles.count
+        for triangle in node.elements
         {
-            var nextTriangle = sortedTriangles[i].NormalizedOn(n0: node)
+            let nextTriangle = triangle.NormalizedOn(n0: node)
             
-            let colIndex = nextTriangle.corners.n2.tag
+            let colIndexN2 = nextTriangle.corners.n2.tag // for the first triangle, this is labeled 𝜙1 in Humphries
+            let colIndexN1 = nextTriangle.corners.n1.tag // for the first triangle, this is labeled 𝜙6 in Humphries
             
-            guard let region = nextTriangle.region as? DielectricRegion else
-            {
-                ALog("Could not get region for triangle")
-                return
-            }
+            let region = nextTriangle.region! as! DielectricRegion
             
-            var coeff = region.eRel * Complex(real: Double(nextTriangle.CenterOfMass().x)) * Complex(real: nextTriangle.CotanThetaA()) * Complex(real: 0.5)
+            let cotanA_r = nextTriangle.CotanThetaA() * Double(nextTriangle.CenterOfMass().x)
+            let Er = region.eRel
+            let coeffN2 = Complex(real: Er.real * cotanA_r / 2.0, imag: Er.imag * cotanA_r / 2.0)
             
-            // We've come all the way around, back to the first triangle
-            if i == sortedTriangles.count - 1
-            {
-                if nextTriangle.corners.n2.tag == firstTriangle.corners.n1.tag
-                {
-                    nextTriangle = firstTriangle
-                    
-                    guard let region = nextTriangle.region as? DielectricRegion else
-                    {
-                        ALog("Could not get region for triangle")
-                        return
-                    }
-                    
-                    coeff += region.eRel * Complex(real: Double(nextTriangle.CenterOfMass().x)) * Complex(real: nextTriangle.CotanThetaB()) * Complex(real: 0.5)
-                }
-                else
-                {
-                    DLog("Break (or boundary) at node: \(node)")
-                    
-                }
-            }
-            else // do the next adjacent triangle
-            {
-                nextTriangle = sortedTriangles[i + 1].NormalizedOn(n0: node)
-                
-                guard let region = nextTriangle.region as? DielectricRegion else
-                {
-                    ALog("Could not get region for triangle")
-                    return
-                }
-                
-                coeff += region.eRel * Complex(real: Double(nextTriangle.CenterOfMass().x)) * Complex(real: nextTriangle.CotanThetaB()) * Complex(real: 0.5)
-            }
+            let cotanB_r = nextTriangle.CotanThetaB() * Double(nextTriangle.CenterOfMass().x)
+            let coeffN1 = Complex(real: Er.real * cotanB_r / 2.0, imag: Er.imag * cotanB_r / 2.0)
             
-            sumWi += coeff
+            sumWi += coeffN1 + coeffN2
             
-            self.matrixA![node.tag, colIndex] = Complex(real: -1.0) * coeff
+            let prevN2:Complex = self.matrixA![node.tag, colIndexN2]
+            self.matrixA![node.tag, colIndexN2] = Complex(real: prevN2.real - coeffN2.real, imag: prevN2.imag - coeffN2.imag)
+            
+            let prevN1:Complex = self.matrixA![node.tag, colIndexN1]
+            self.matrixA![node.tag, colIndexN1] = Complex(real: prevN1.real - coeffN1.real, imag: prevN1.imag - coeffN1.imag)
         }
         
         self.matrixA![node.tag, node.tag] = sumWi
