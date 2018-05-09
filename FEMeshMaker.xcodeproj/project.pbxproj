@@ -12,6 +12,8 @@
 		D31FCF5720964BB900166A42 /* ContourLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31FCF5620964BB900166A42 /* ContourLine.swift */; };
 		D31FCF592097B48200166A42 /* AxiSymElectrostaticComplexPotentialMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31FCF582097B48200166A42 /* AxiSymElectrostaticComplexPotentialMesh.swift */; };
 		D36668A8208CC79C00D5DB92 /* TriangleEdge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36668A7208CC79C00D5DB92 /* TriangleEdge.swift */; };
+		D3707C3E20A3B01900FA7C31 /* MagneticBoundary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3707C3D20A3B01900FA7C31 /* MagneticBoundary.swift */; };
+		D3707C4020A3B10E00FA7C31 /* CoreSteel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3707C3F20A3B10E00FA7C31 /* CoreSteel.swift */; };
 		D39987912077A3110052B863 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39987902077A3110052B863 /* AppDelegate.swift */; };
 		D39987932077A3120052B863 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D39987922077A3120052B863 /* Assets.xcassets */; };
 		D39987962077A3120052B863 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = D39987942077A3120052B863 /* MainMenu.xib */; };
@@ -44,6 +46,8 @@
 		D31FCF5620964BB900166A42 /* ContourLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContourLine.swift; sourceTree = "<group>"; };
 		D31FCF582097B48200166A42 /* AxiSymElectrostaticComplexPotentialMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxiSymElectrostaticComplexPotentialMesh.swift; sourceTree = "<group>"; };
 		D36668A7208CC79C00D5DB92 /* TriangleEdge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriangleEdge.swift; sourceTree = "<group>"; };
+		D3707C3D20A3B01900FA7C31 /* MagneticBoundary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MagneticBoundary.swift; sourceTree = "<group>"; };
+		D3707C3F20A3B10E00FA7C31 /* CoreSteel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreSteel.swift; sourceTree = "<group>"; };
 		D399878D2077A3110052B863 /* FEMeshMaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FEMeshMaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D39987902077A3110052B863 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D39987922077A3120052B863 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -112,11 +116,13 @@
 				D39987A02077A35C0052B863 /* Node.swift */,
 				D3D3C296207EC11700EC5C83 /* Boundary.swift */,
 				D39987C5207EAA540052B863 /* Electrode.swift */,
+				D3707C3D20A3B01900FA7C31 /* MagneticBoundary.swift */,
 				D39987A22077A5DB0052B863 /* Edge.swift */,
 				D39987A42077A6750052B863 /* Element.swift */,
 				D39987B1207914D30052B863 /* Region.swift */,
 				D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */,
 				D3B8CCBB209B3D5E00102039 /* ConductorRegion.swift */,
+				D3707C3F20A3B10E00FA7C31 /* CoreSteel.swift */,
 				D39987B32079236D0052B863 /* Mesh.swift */,
 				D3D3C294207EC05500EC5C83 /* MeshPath.swift */,
 				D39987B7207A8BEE0052B863 /* FE_Mesh.swift */,
@@ -218,6 +224,7 @@
 				D3B8CCC020A2266900102039 /* FlatMagnetostaticComplexPotentialMesh.swift in Sources */,
 				D39987B8207A8BEE0052B863 /* FE_Mesh.swift in Sources */,
 				D39987C6207EAA540052B863 /* Electrode.swift in Sources */,
+				D3707C4020A3B10E00FA7C31 /* CoreSteel.swift in Sources */,
 				D39987B2207914D30052B863 /* Region.swift in Sources */,
 				D39987BD207B94120052B863 /* GeometryViewController.swift in Sources */,
 				D313746C20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift in Sources */,
@@ -231,6 +238,7 @@
 				D39987B42079236D0052B863 /* Mesh.swift in Sources */,
 				D36668A8208CC79C00D5DB92 /* TriangleEdge.swift in Sources */,
 				D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */,
+				D3707C3E20A3B01900FA7C31 /* MagneticBoundary.swift in Sources */,
 				D39987A32077A5DB0052B863 /* Edge.swift in Sources */,
 				D313746E20876B16006AC4A6 /* SparseMatrix.swift in Sources */,
 				D3E78486209361B80012A882 /* GeometryViewControllerDelegate.swift in Sources */,

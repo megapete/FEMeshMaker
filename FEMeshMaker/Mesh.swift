@@ -419,8 +419,6 @@ class Mesh
         {
             let newSegment = Edge(endPoint1: self.nodes[Int(output.segmentlist[2 * i])], endPoint2: self.nodes[Int(output.segmentlist[2 * i + 1])], marker:Int(output.segmentmarkerlist[i]))
             
-            // We don't need to set the segment marker because the Edge.init() function will set it to the marker of the nodes passed to it. We also do not need to set the neighbour properties of the two end Nodes because that is done in the Edge.init() function.
-            
             self.segments.append(newSegment)
         }
         

@@ -11,6 +11,14 @@ import Foundation
 
 class FlatMagnetostaticComplexPotentialMesh: FE_Mesh
 {
+    init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [])
+    {
+        super.init(precision: .complex, units: units, withPaths: withPaths, vertices: vertices, regions: regions)
+        
+        self.Setup_A_Matrix()
+        self.SetupComplexBmatrix()
+    }
+    
     override func Solve()
     {
         
