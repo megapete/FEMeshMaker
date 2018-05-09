@@ -200,89 +200,32 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         }
         */
         
-        let firstTriangle = sortedTriangles[0].NormalizedOn(n0: node)
+        // let firstTriangle = sortedTriangles[0].NormalizedOn(n0: node)
         for i in 0..<sortedTriangles.count
         {
-            var nextTriangle = sortedTriangles[i].NormalizedOn(n0: node)
+            let nextTriangle = sortedTriangles[i].NormalizedOn(n0: node)
             
-            let colIndex = nextTriangle.corners.n2.tag
+            let colIndexN2 = nextTriangle.corners.n2.tag // for the first triangle, this is labeled 𝜙1 in Humphries
+            let colIndexN1 = nextTriangle.corners.n1.tag // for the first triangle, this is labeled 𝜙6 in Humphries
             
             let region = nextTriangle.region! as! DielectricRegion
             
-            /* OLD CODE (may have been slow)
-            guard let region = nextTriangle.region as? DielectricRegion else
-            {
-                ALog("Could not get region for triangle")
-                return
-            }
-            */
-            
             let cotanA = nextTriangle.CotanThetaA()
             let Er = region.eRel
-            var coeff = Complex(real: Er.real * cotanA, imag: Er.imag * cotanA)
+            let coeffN2 = Complex(real: Er.real * cotanA / 2.0, imag: Er.imag * cotanA / 2.0)
             
-            // We've come all the way around, back to the first triangle
-            if i == sortedTriangles.count - 1
-            {
-                if nextTriangle.corners.n2.tag == firstTriangle.corners.n1.tag
-                {
-                    nextTriangle = firstTriangle
-                    
-                    let region = nextTriangle.region! as! DielectricRegion
-                    
-                    /* OLD CODE (may have been slow)
-                     guard let region = nextTriangle.region as? DielectricRegion else
-                     {
-                        ALog("Could not get region for triangle")
-                        return
-                     }
-                     */
-                    
-                    let cotanB = nextTriangle.CotanThetaB()
-                    let Er = region.eRel
-                    
-                    // coeff += region.eRel * Complex(real: nextTriangle.CotanThetaB())
-                    coeff = Complex(real: coeff.real + Er.real * cotanB, imag: coeff.imag + Er.imag * cotanB)
-                }
-                else
-                {
-                    // DLog("Break (or boundary) at node: \(node)")
-                    
-                }
-            }
-            else // do the next adjacent triangle
-            {
-                let prevTriangle = nextTriangle
-                
-                nextTriangle = sortedTriangles[i + 1].NormalizedOn(n0: node)
-                
-                if prevTriangle.corners.n2.tag == nextTriangle.corners.n1.tag
-                {
-                    let region = nextTriangle.region! as! DielectricRegion
-                    
-                    /* OLD CODE (may have been slow)
-                     guard let region = nextTriangle.region as? DielectricRegion else
-                     {
-                        ALog("Could not get region for triangle")
-                        return
-                     }
-                     */
-                    
-                    let cotanB = nextTriangle.CotanThetaB()
-                    let Er = region.eRel
-                    
-                    // coeff += region.eRel * Complex(real: nextTriangle.CotanThetaB())
-                    coeff = Complex(real: coeff.real + Er.real * cotanB, imag: coeff.imag + Er.imag * cotanB)
-                }
-                else
-                {
-                    // DLog("Break (or boundary) at node: \(node)")
-                }
-            }
+            let cotanB = nextTriangle.CotanThetaB()
+            let coeffN1 = Complex(real: Er.real * cotanB / 2.0, imag: Er.imag * cotanB / 2.0)
             
-            sumWi += coeff * 0.5
+            sumWi += coeffN1 + coeffN2
             
-            self.matrixA![node.tag, colIndex] = Complex(real: -coeff.real * 0.5, imag: -coeff.imag * 0.5)
+            let prevN2:Complex = self.matrixA![node.tag, colIndexN2]
+            self.matrixA![node.tag, colIndexN2] = Complex(real: prevN2.real - coeffN2.real, imag: prevN2.imag - coeffN2.imag)
+            
+            let prevN1:Complex = self.matrixA![node.tag, colIndexN1]
+            self.matrixA![node.tag, colIndexN1] = Complex(real: prevN1.real - coeffN1.real, imag: prevN1.imag - coeffN1.imag)
+            
+            // self.matrixA![node.tag, colIndexN2] = Complex(real: -coeffN2.real * 0.5, imag: -coeff.imag * 0.5)
         }
         
         self.matrixA![node.tag, node.tag] = sumWi
