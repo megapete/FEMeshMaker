@@ -10,6 +10,11 @@ import Foundation
 
 class AxiSymElectrostaticComplexPotentialMesh: FlatElectrostaticComplexPotentialMesh
 {
+    init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [])
+    {
+        super.init(withPaths: withPaths, units: units, vertices: vertices, regions: regions, holes: holes, isFlat: false)
+    }
+    
     override func CalculateCouplingConstants(node: Node)
     {
         // If the node is an electrode...

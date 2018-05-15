@@ -48,4 +48,9 @@ class Edge:Hashable
         endPoint1.neighbours.insert(endPoint2)
         endPoint2.neighbours.insert(endPoint1)
     }
+    
+    func Length() -> CGFloat
+    {
+        return endPoint1.Distance(toNode: endPoint2)
+    }
 }

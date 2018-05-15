@@ -59,5 +59,22 @@ class Region
         return result
     }
     
+    func Volume(isFlat:Bool) -> Double
+    {
+        // for flat meshes, the volume is actually a "volume per length in z"
+        if isFlat
+        {
+            return self.TotalTriangleArea()
+        }
+        
+        var result = 0.0
+        
+        for nextTriangle in self.associatedTriangles
+        {
+            result += Double(nextTriangle.CenterOfMass().x) * nextTriangle.Area()
+        }
+        
+        return 2.0 * π * result
+    }
     
 }

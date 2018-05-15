@@ -13,9 +13,9 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
 {
     var electrodes:[Int:Electrode] = [:]
     
-    init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [])
+    init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [], isFlat:Bool = true)
     {
-        super.init(precision: .complex, units:units, withPaths: withPaths, vertices: vertices, regions: regions, holes: holes)
+        super.init(precision: .complex, units:units, withPaths: withPaths, vertices: vertices, regions: regions, holes: holes, isFlat: isFlat)
         
         // save the electrodes into a dictionary to make it easy to look them up
         for nextPath in withPaths
@@ -41,6 +41,18 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
                         nextNode.marker = electrode.tag
                         break
                     }
+                }
+            }
+        }
+        
+        // For any edges that are on a boundary, add those edges to the electrodes
+        for nextEdge in self.edges
+        {
+            if nextEdge.endPoint1.marker == nextEdge.endPoint2.marker
+            {
+                if let electrode = self.electrodes[nextEdge.endPoint1.marker]
+                {
+                    electrode.associatedEdges.append(nextEdge)
                 }
             }
         }

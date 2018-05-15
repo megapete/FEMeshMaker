@@ -25,6 +25,8 @@ class FE_Mesh:Mesh
     var doubleMatrixB:[Double] = []
     var holeZones:[MeshPath] = []
     
+    let isFlat:Bool
+    
     let units:Units
     
     var minAbsPhiInMesh:Double = Double.greatestFiniteMagnitude
@@ -41,10 +43,11 @@ class FE_Mesh:Mesh
     // We store the index of triangle of the last "hit" point that was queried and use it as the start point for the next query
     var lastHitTriangle:Element? = nil
     
-    init(precision:PCH_SparseMatrix.DataType, units:Units, withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [])
+    init(precision:PCH_SparseMatrix.DataType, units:Units, withPaths:[MeshPath], vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [], isFlat:Bool = true)
     {
         self.precision = precision
         self.units = units
+        self.isFlat = isFlat
         
         super.init(withPaths: withPaths, vertices: vertices, regions: regions, holes: holes)
         
@@ -66,6 +69,8 @@ class FE_Mesh:Mesh
         }
         
         self.bounds = NSRect(origin: minPoint, size: NSSize(width: maxPoint.x - minPoint.x, height: maxPoint.y - minPoint.y))
+        
+        
         
         // Hole zones are OBSOLETE. We leave the code here until we're sure that they are really, truly, OBSOLETE
         for nextHole in holes

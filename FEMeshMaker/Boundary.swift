@@ -22,6 +22,8 @@ class Boundary
     
     let isNeumann:Bool
     
+    var associatedEdges:[Edge] = []
+    
     init(tag:Int, fixedValue:Complex, description:String, isNeumann:Bool = false)
     {
         self.tag = tag
@@ -33,5 +35,28 @@ class Boundary
     static func NeumannBoundary() -> Boundary
     {
         return Boundary(tag: Boundary.neumannTagNumber, fixedValue: Complex.ComplexNan, description: "Neumann Boundary", isNeumann: true)
+    }
+    
+    func SurfaceArea(isFlat:Bool) -> Double
+    {
+        var result = 0.0
+        if isFlat
+        {
+            for nextEdge in self.associatedEdges
+            {
+                result += Double(nextEdge.Length())
+            }
+        }
+        else
+        {
+            for nextEdge in self.associatedEdges
+            {
+                let averageR = Double((nextEdge.endPoint1.vertex.x + nextEdge.endPoint2.vertex.x) / 2.0)
+                
+                result += 2.0 * π * averageR * Double(nextEdge.Length())
+            }
+        }
+        
+        return result
     }
 }
