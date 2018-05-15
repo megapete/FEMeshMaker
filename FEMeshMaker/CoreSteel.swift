@@ -15,6 +15,6 @@ class CoreSteel: Region
     {
         super.init(tagBase: tagBase, description: "Core Steel", refPoints: refPoints, isVirtualHole: false)
         
-        self.µRel = Complex(real: 4000.0)
+        self.µRel = Complex(real: 10000.0)
     }
 }

@@ -119,6 +119,10 @@ class GeometryViewController: NSViewController
                     {
                         geoView.triangles.append(nextTriangle)
                     }
+                    else
+                    {
+                        DLog("got a hole")
+                    }
                 }
             }
             
@@ -392,6 +396,10 @@ class GeometryViewController: NSViewController
                 if !region.isVirtualHole
                 {
                     geoView.triangles.append(nextTriangle)
+                }
+                else
+                {
+                    DLog("Got a hole")
                 }
             }
         }
