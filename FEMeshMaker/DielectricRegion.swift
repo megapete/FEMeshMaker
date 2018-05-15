@@ -66,4 +66,59 @@ class DielectricRegion: Region {
         
         self.init(tagBase: tagBase, description: desc, eRel: Complex(real: eRel, imag: 0.0), rho:rho)
     }
+    
+    func ElectricFieldEnergy(isFlat:Bool, units:FE_Mesh.Units) -> Double
+    {
+        let ε0_fixed = ε0 * (units == .mm ? 0.001 : (units == .inch ? 0.0254 : 1.0))
+        var result = 0.0
+        DLog("For \(self.associatedTriangles.count) triangles")
+        var currentTriangle = 0
+        
+        for nextTriangle in self.associatedTriangles
+        {
+            currentTriangle += 1
+            
+            let values = nextTriangle.ValuesAtCenterOfMass(coarse: true)
+            
+            let Ex = values.slopeX
+            let Ey = values.slopeY
+            
+            // This comes from Andersen's paper "Finite Element Solution of Complex Potential Electric Fields", equations 19, 20, and 21
+            
+            var phaseAngleDiff = 0.0
+            if Ex != Complex.ComplexZero
+            {
+                if Ey != Complex.ComplexZero
+                {
+                    phaseAngleDiff = abs(Ex.carg - Ey.carg)
+                }
+            }
+            
+            // We want Exp and Exn to be on the X-axis, so we create a Complex number with a real value of |Ex| and imag of 0.
+            let ExAbs = Complex(real: Ex.cabs)
+            let Exp = ExAbs * 0.5
+            let Exn = Exp
+            
+            // The Ey values are a bit more complicated
+            let EyAbs = Ey.cabs
+            let Eyp = Complex(real: EyAbs * cos(π / 2 + phaseAngleDiff), imag: EyAbs * sin(π / 2 + phaseAngleDiff)) * 0.5
+            let Eyn = Complex(real: EyAbs * cos(π / 2 - phaseAngleDiff), imag: EyAbs * sin(π / 2 - phaseAngleDiff)) * 0.5
+            
+            let Ep = Exp + Eyp
+            let En = Exn + Eyn
+            
+            let Eabs = Ep.cabs + En.cabs
+            
+            if isFlat
+            {
+                result += self.eRel.real * ε0_fixed * Eabs * Eabs * nextTriangle.Area() / 2.0
+            }
+            else
+            {
+                result += π * Double(nextTriangle.CenterOfMass().x) * self.eRel.real * ε0_fixed * Eabs * Eabs * nextTriangle.Area()
+            }
+        }
+        
+        return result
+    }
 }

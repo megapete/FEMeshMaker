@@ -380,6 +380,20 @@
                                     <action selector="handleCreateDemo3:" target="Msw-Rr-Zan" id="8yL-jr-gHy"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Create Demo 4" id="e2a-Jn-txY">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="handleCreateDemo4:" target="Msw-Rr-Zan" id="hBa-pF-hDm"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="6jL-pY-0zw"/>
+                            <menuItem title="Create MagDemo 5" id="WMq-Ek-Gz1">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="handleCreateDemo5:" target="Msw-Rr-Zan" id="Wxv-HC-ncc"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="E9x-sd-sc0"/>
                             <menuItem title="Show Triangles" id="nKz-pZ-27R">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>

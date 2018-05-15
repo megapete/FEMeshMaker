@@ -170,7 +170,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         
         let Eabs = Ep.cabs + En.cabs
         
-        let units = (self.units == .inch ? "inch" : "mm")
+        let units = (self.units == .inch ? "inch" : (self.units == .mm ? "mm" : "meter"))
         let absField = ("|E|:", Complex(real:Eabs), "V/\(units)")
         let fieldX = ("Ex:", Ex, "V/\(units)")
         let fieldY = ("Ey:", Ey, "V/\(units)")
@@ -261,7 +261,7 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         
         // It's a regular node, so we do Humphries Eq. 2.67 (RHS)
         var result = Complex(real: 0.0)
-        let εFactor = (self.units == .mm ? 0.001 : 0.001 * 25.4)
+        let εFactor = (self.units == .mm ? 0.001 : (self.units == .inch ? 0.001 * 25.4 : 1.0))
         let constant = Complex(real: 1.0 / (3.0 * ε0 * εFactor))
         for nextElement in node.elements
         {

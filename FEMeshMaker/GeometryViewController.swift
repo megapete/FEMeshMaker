@@ -82,7 +82,7 @@ class GeometryViewController: NSViewController
         {
             let data = delegate.DataForPoint(point: point)
             
-            let inchLocation = NSPoint(x:data.location.x / 25.4, y:data.location.y / 25.4)
+            let inchLocation = NSPoint(x:data.location.x * 1000.0 / 25.4, y:data.location.y * 1000.0 / 25.4)
             DLog("Point: (\(data.location)); \(inchLocation)", file: "", function: "")
             
             for nextData in data.data

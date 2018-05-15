@@ -17,6 +17,7 @@ class FE_Mesh:Mesh
     enum Units {
         case inch
         case mm
+        case meters
     }
     
     let precision:PCH_SparseMatrix.DataType

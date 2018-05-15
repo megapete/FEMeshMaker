@@ -121,7 +121,7 @@ class FlatMagnetostaticComplexPotentialMesh: FE_Mesh
         }
         
         var result = Complex(real: 0.0)
-        let µFactor = (self.units == .mm ? 0.001 : 0.001 * 25.4)
+        let µFactor = (self.units == .mm ? 0.001 : (self.units == .inch ? 0.001 * 25.4 : 1.0))
         let constant = Complex(real:  µ0 * µFactor / 3.0)
         
         for nextElement in node.elements

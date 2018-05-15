@@ -256,7 +256,7 @@ class Element:Hashable, CustomStringConvertible
             parentNodes = newParents
         }
         
-        DLog("Number of nodes found: \(nodeSet.count)")
+        // DLog("Number of nodes found: \(nodeSet.count)")
         
         // Prune the nodes so that we only use the ones closest to our point
         if nodeSet.count > numNodesToUse
