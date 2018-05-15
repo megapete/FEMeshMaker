@@ -34,14 +34,23 @@ class FlatMagnetostaticComplexPotentialMesh: FE_Mesh
     
     override func Solve()
     {
+        DLog("Solving matrix")
+        let solutionVector:[Complex] = self.SolveMatrix()
+        DLog("Done")
         
+        DLog("Setting vertex phi values")
+        self.SetNodePhiValuesTo(solutionVector)
+        DLog("Done")
     }
     
     override func DataAtPoint(_ point:NSPoint) -> [(name:String, value:Complex, units:String)]
     {
+        let pointValues = self.ValuesAtPoint(point)
         
+        let potential = ("A:", pointValues.phi, "")
+        // let absVolts = ("|V|:", Complex(real:pointValues.phi.cabs), "Volts")
         
-        return []
+        return [potential]
     }
     
     override func CalculateCouplingConstants(node:Node)
@@ -113,6 +122,24 @@ class FlatMagnetostaticComplexPotentialMesh: FE_Mesh
         
         var result = Complex(real: 0.0)
         let µFactor = (self.units == .mm ? 0.001 : 0.001 * 25.4)
-        let constant = Complex(real: 1.0 / (3.0 * µ0 * µFactor))
+        let constant = Complex(real:  µ0 * µFactor / 3.0)
+        
+        for nextElement in node.elements
+        {
+            var jz0 = Complex(real: 0.0)
+            if let nextRegion = nextElement.region as? ConductorRegion
+            {
+                jz0 = nextRegion.currentDensity
+            }
+            
+            let area = Complex(real: nextElement.Area())
+            
+            // we did the division of the constant when we defined it, so multiply it now (faster, I think)
+            let iTerm = jz0 * area * constant
+            
+            result += iTerm
+        }
+        
+        self.complexMatrixB[node.tag] = result
     }
 }
