@@ -278,6 +278,8 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         
         self.currentMesh = flatMag
         
+        DLog("Core steel triangles: \(coreSteel.associatedTriangles.count)")
+        
         self.geometryView = GeometryViewController(scrollClipView: self.scrollClipView, placeholderView: self.dummyGeoView, delegate:self)
         
         var drawPaths:[NSBezierPath] = []

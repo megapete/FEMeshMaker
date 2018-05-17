@@ -92,6 +92,7 @@ class Mesh
             {
                 let nextElement = nextPath.element(at: i, associatedPoints: pointArray)
                 
+                DLog("Point: \(pointArray[0])")
                 if nextElement == .moveToBezierPathElement
                 {
                     pathStartNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: pointArray[0])

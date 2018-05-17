@@ -75,7 +75,7 @@ class MeshPath
         {
             path.relativeLine(to: NSPoint(x: 0.0, y: -dl))
         }
-        path.close()
+        path.line(to: rect.origin)
             
         /* OLD CODE
         path.move(to: rect.origin) // bottom left

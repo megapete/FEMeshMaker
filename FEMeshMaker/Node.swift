@@ -25,7 +25,15 @@ class Node:Hashable, CustomStringConvertible
     
     static func == (lhs:Node, rhs:Node) -> Bool
     {
-        return lhs.vertex.x == rhs.vertex.x && lhs.vertex.y == rhs.vertex.y
+        // Testing has shown that some CGFloat values get rounded at the weirdest times, so we can'y use straightforward equalities to see if the vertices are the same.
+        let equalityTopLimit:CGFloat = 1.000001
+        let equalityBottomLimit:CGFloat = 2.0 - equalityTopLimit
+        
+        let resultX = lhs.vertex.x <= rhs.vertex.x * equalityTopLimit && lhs.vertex.x >= rhs.vertex.x * equalityBottomLimit
+        
+        let resultY = lhs.vertex.y <= rhs.vertex.y * equalityTopLimit && lhs.vertex.y >= rhs.vertex.y * equalityBottomLimit
+        
+        return resultX && resultY
     }
     
     // Properties
