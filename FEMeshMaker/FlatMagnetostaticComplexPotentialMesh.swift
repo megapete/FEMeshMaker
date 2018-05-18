@@ -87,10 +87,10 @@ class FlatMagnetostaticComplexPotentialMesh: FE_Mesh
             
             let cotanA = nextTriangle.CotanThetaA()
             
-            let coeffN2 = Complex(real: cotanA / (µr.real * 2.0), imag:  cotanA / (µr.imag * 2.0))
+            let coeffN2 = Complex(real: cotanA / (µr.real * 2.0), imag: 0.0)
             
             let cotanB = nextTriangle.CotanThetaB()
-            let coeffN1 = Complex(real: cotanB / (µr.real * 2.0), imag:  cotanB / (µr.imag * 2.0))
+            let coeffN1 = Complex(real: cotanB / (µr.real * 2.0), imag: 0.0)
             
             sumWi += coeffN1 + coeffN2
             
