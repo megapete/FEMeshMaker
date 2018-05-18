@@ -136,7 +136,7 @@ class Element:Hashable, CustomStringConvertible
         return result
     }
     
-    func ValuesAtCenterOfMass(coarse:Bool) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
+    func ValuesAtCenterOfMass(coarse:Bool) -> (phi:Complex, U:Complex, V:Complex)
     {
         if coarse
         {
@@ -153,7 +153,7 @@ class Element:Hashable, CustomStringConvertible
         return result
     }
     
-    func ValuesAtPoint(_ point:NSPoint) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
+    func ValuesAtPointX(_ point:NSPoint) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
     {
         if !self.ElementAsPath().contains(point)
         {
@@ -185,7 +185,33 @@ class Element:Hashable, CustomStringConvertible
         return (phi, -A, -B)
     }
     
-    func LSF_ValuesAtPoint(_ thePoint:NSPoint) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
+    // This is the same function as above, except more general (the above function is actually geared toward electrostatics as far as the returned values go)
+    func ValuesAtPoint(_ point:NSPoint) -> (phi:Complex, U:Complex, V:Complex)
+    {
+        let x0 = Complex(real: Double(self.corners.n0.vertex.x))
+        let x1 = Complex(real: Double(self.corners.n1.vertex.x))
+        let x2 = Complex(real: Double(self.corners.n2.vertex.x))
+        
+        let y0 = Complex(real: Double(self.corners.n0.vertex.y))
+        let y1 = Complex(real: Double(self.corners.n1.vertex.y))
+        let y2 = Complex(real: Double(self.corners.n2.vertex.y))
+        
+        let q0 = self.corners.n0.phi
+        let q1 = self.corners.n1.phi
+        let q2 = self.corners.n2.phi
+        
+        let U = ((q1 - q0) * (y2 - y0) - (q2 - q0) * (y1 - y0)) / ((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0))
+        let V = ((q1 - q0) * (x2 - x0) - (q2 - q0) * (x1 - x0)) / ((y1 - y0) * (x2 - x0) - (y2 - y0) * (x1 - x0))
+        
+        let xIn = Complex(real: point.x)
+        let yIn = Complex(real: point.y)
+        
+        let phi = U * (xIn - x0) + V * (yIn - y0) + q0
+        
+        return (phi, U, V)
+    }
+    
+    func LSF_ValuesAtPoint(_ thePoint:NSPoint) -> (phi:Complex, U:Complex, V:Complex)
     {
         // My attempt at using Least-Squares Fitting to find the value of the mesh at a point. I've used the method in Humphries section 7.2.
         

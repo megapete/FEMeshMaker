@@ -640,7 +640,7 @@ class FE_Mesh:Mesh
         var pathFollowed:NSBezierPath? = nil
     }
     
-    func ValuesAtPoint(_ point:NSPoint) -> (phi:Complex, slopeX:Complex, slopeY:Complex)
+    func ValuesAtPoint(_ point:NSPoint) -> (phi:Complex, U:Complex, V:Complex)
     {
         let enclosingZone = FindZoneWithPoint(X: point)
         

@@ -43,14 +43,47 @@ class FlatMagnetostaticComplexPotentialMesh: FE_Mesh
         DLog("Done")
     }
     
+    
+    
     override func DataAtPoint(_ point:NSPoint) -> [(name:String, value:Complex, units:String)]
     {
         let pointValues = self.ValuesAtPoint(point)
         
         let potential = ("A:", pointValues.phi, "")
-        // let absVolts = ("|V|:", Complex(real:pointValues.phi.cabs), "Volts")
         
-        return [potential]
+        // Humphries 9.49
+        let Bx = pointValues.V
+        let By = -pointValues.U
+        
+        var phaseAngleDiff = 0.0
+        if Bx != Complex.ComplexZero
+        {
+            if By != Complex.ComplexZero
+            {
+                phaseAngleDiff = abs(Bx.carg - By.carg)
+            }
+        }
+        
+        // We want Exp and Exn to be on the X-axis, so we create a Complex number with a real value of |Ex| and imag of 0.
+        let BxAbs = Complex(real: Bx.cabs)
+        let Bxp = BxAbs * 0.5
+        let Bxn = Bxp
+        
+        // The Ey values are a bit more complicated
+        let ByAbs = By.cabs
+        let Byp = Complex(real: ByAbs * cos(π / 2 + phaseAngleDiff), imag: ByAbs * sin(π / 2 + phaseAngleDiff)) * 0.5
+        let Byn = Complex(real: ByAbs * cos(π / 2 - phaseAngleDiff), imag: ByAbs * sin(π / 2 - phaseAngleDiff)) * 0.5
+        
+        let Bp = Bxp + Byp
+        let Bn = Bxn + Byn
+        
+        let Babs = Bp.cabs + Bn.cabs
+        
+        let fieldAbs = ("Bmax:", Complex(real: Babs), "T")
+        let fieldX = ("Bx:", Bx, "T")
+        let fieldY = ("By:", By, "T")
+        
+        return [potential, fieldAbs, fieldX, fieldY]
     }
     
     override func CalculateCouplingConstants(node:Node)

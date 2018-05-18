@@ -87,8 +87,9 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         {
             let pointValues = nextTriangle.ValuesAtCenterOfMass(coarse: true)
             
-            let Ex = pointValues.slopeX
-            let Ey = pointValues.slopeY
+            // per Humphries 2.53, both Ex and Ey are the negatives of U and V
+            let Ex = -pointValues.U
+            let Ey = -pointValues.V
             
             // This comes from Andersen's paper "Finite Element Solution of Complex Potential Electric Fields", equations 19, 20, and 21
             var phaseAngleDiff = 0.0
@@ -141,8 +142,9 @@ class FlatElectrostaticComplexPotentialMesh:FE_Mesh
         let volts = ("V:", pointValues.phi, "Volts")
         let absVolts = ("|V|:", Complex(real:pointValues.phi.cabs), "Volts")
         
-        let Ex = pointValues.slopeX
-        let Ey = pointValues.slopeY
+        // per Humphries 2.53, both Ex and Ey are the negatives of U and V
+        let Ex = -pointValues.U
+        let Ey = -pointValues.V
         
         // This comes from Andersen's paper "Finite Element Solution of Complex Potential Electric Fields", equations 19, 20, and 21
         

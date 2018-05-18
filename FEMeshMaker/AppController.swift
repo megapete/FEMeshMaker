@@ -476,7 +476,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
             {
                 if let dielectric = nextRegion as? DielectricRegion
                 {
-                    let units = (axiElecMesh.units == .inch ? "inch" : (axiElecMesh.units == .mm ? "mm" : "meter"))
+                    // let units = (axiElecMesh.units == .inch ? "inch" : (axiElecMesh.units == .mm ? "mm" : "meter"))
                     let energy = dielectric.ElectricFieldEnergy(isFlat: true, units: axiElecMesh.units)
                     DLog("\(dielectric.description) Energy: \(energy) Joules")
                 }
