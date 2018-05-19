@@ -498,11 +498,11 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         else if let flatMagMesh = self.currentMesh! as? FlatMagnetostaticComplexPotentialMesh
         {
             var totalEnergy = 0.0
-            DLog("Calculating electrical energy")
+            DLog("Calculating magnetic energy")
             let units = (flatMagMesh.units == .inch ? "inch" : (flatMagMesh.units == .mm ? "mm" : "meter"))
             for nextRegion in flatMagMesh.regions
             {
-                let energy = nextRegion.ElectricFieldEnergy(isFlat: true, units: flatMagMesh.units)
+                let energy = nextRegion.MagneticFieldEnergy(isFlat: true, units: flatMagMesh.units)
                 totalEnergy += energy
                 DLog("\(nextRegion.description) Energy: \(energy) Joules (depth 1 \(units))")
             }

@@ -110,7 +110,7 @@ class Region
                 }
             }
             
-            // We want Exp and Exn to be on the X-axis, so we create a Complex number with a real value of |Ex| and imag of 0.
+            // We want Bxp and Bxn to be on the X-axis, so we create a Complex number with a real value of |Bx| and imag of 0.
             let BxAbs = Complex(real: Bx.cabs)
             let Bxp = BxAbs * 0.5
             let Bxn = Bxp
