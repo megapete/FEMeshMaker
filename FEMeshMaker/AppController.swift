@@ -231,9 +231,9 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         var currentRegionTagBase = 1
         var currentBoundaryBase = 1
         
-        let coreR:CGFloat = 215.0
-        let windHt:CGFloat = 1110.0
-        let tankR:CGFloat = 530.0
+        let coreR:CGFloat = 215.0 / 1000.0
+        let windHt:CGFloat = 1110.0  / 1000.0
+        let tankR:CGFloat = 530.0  / 1000.0
         
         // let coreRectangle = NSRect(x: 0.0, y: 0.0, width: coreR, height: windHt)
         let corePath = NSBezierPath()
@@ -245,36 +245,36 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         currentBoundaryBase += 1
         let coreMeshPath = MeshPath(path: corePath, boundary: coreCenter)
         
-        let coreSteel = CoreSteel(tagBase: currentRegionTagBase, refPoints: [NSPoint(x: 0.1, y: 0.1)])
+        let coreSteel = CoreSteel(tagBase: currentRegionTagBase, refPoints: [NSPoint(x: 0.0001, y: 0.0001)])
         currentRegionTagBase += 1
         
         let bulkOil = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerOil)
-        bulkOil.refPoints = [NSPoint(x: coreR + 0.1, y: 0.1)]
+        bulkOil.refPoints = [NSPoint(x: coreR + 0.0001, y: 0.0001)]
         currentRegionTagBase += 1
         
         let tankBoundary = Boundary.NeumannBoundary()
         let tankRect = NSRect(x: coreR, y: 0.0, width: tankR - coreR, height: windHt)
         let tankMeshPath = MeshPath(rect: tankRect, boundary: tankBoundary)
         
-        let lvCoilRect = NSRect(x: 244.5, y: 89.3, width: 34.8, height: 914.5)
-        let lvCoilArea = 34.8 * 914.5
+        let lvCoilRect = NSRect(x: 244.5  / 1000.0, y: 89.3  / 1000.0, width: 34.8  / 1000.0, height: 914.5  / 1000.0)
+        let lvCoilArea = 34.8 * 914.5  / 1000000.0
         let lvCurrentRMS = -266.667
         let lvCurrentPeak = lvCurrentRMS * sqrt(2.0)
         let lvTurns = 208.0
-        let lvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:lvCurrentPeak * lvTurns / lvCoilArea), description: "LV", tagBase: 1000, refPoints: [NSPoint(x: lvCoilRect.origin.x + lvCoilRect.width / 2.0, y: lvCoilRect.origin.y + lvCoilRect.height)], isVirtualHole: false)
+        let lvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:lvCurrentPeak * lvTurns / lvCoilArea), description: "LV", tagBase: 1000, refPoints: [NSPoint(x: lvCoilRect.origin.x + lvCoilRect.width / 2.0, y: lvCoilRect.origin.y + lvCoilRect.height / 2.0)], isVirtualHole: false)
         let lvCoilMeshPath = MeshPath(rect: lvCoilRect, boundary: nil)
         
-        let hvCoilRect = NSRect(x: 322.7, y: 89.3, width: 34.1, height: 914.5)
-        let hvCoilArea = 34.1 * 914.5
+        let hvCoilRect = NSRect(x: 322.7 / 1000.0, y: 89.3 / 1000.0, width: 34.1 / 1000.0, height: 914.5 / 1000.0)
+        let hvCoilArea = 34.1 * 914.5 / 1000000.0
         let hvCurrentRMS = 83.674
         let hvCurrentPeak = hvCurrentRMS * sqrt(2.0)
         let hvTurns = 663.0
-        let hvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:hvCurrentPeak * hvTurns / hvCoilArea), description: "HV", tagBase: 2000, refPoints: [NSPoint(x: hvCoilRect.origin.x + hvCoilRect.width / 2.0, y: hvCoilRect.origin.y + hvCoilRect.height)], isVirtualHole: false)
+        let hvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:hvCurrentPeak * hvTurns / hvCoilArea), description: "HV", tagBase: 2000, refPoints: [NSPoint(x: hvCoilRect.origin.x + hvCoilRect.width / 2.0, y: hvCoilRect.origin.y + hvCoilRect.height / 2.0)], isVirtualHole: false)
         let hvCoilMeshPath = MeshPath(rect: hvCoilRect, boundary: nil)
         
         let meshPaths = [coreMeshPath, tankMeshPath, lvCoilMeshPath, hvCoilMeshPath]
         
-        let flatMag = FlatMagnetostaticComplexPotentialMesh(withPaths: meshPaths, units: .mm, vertices: [], regions: [coreSteel, bulkOil, lvCoilCond, hvCoilCond])
+        let flatMag = FlatMagnetostaticComplexPotentialMesh(withPaths: meshPaths, units: .meters, vertices: [], regions: [coreSteel, bulkOil, lvCoilCond, hvCoilCond])
         
         self.currentMesh = flatMag
         
@@ -494,6 +494,20 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
                     DLog("\(dielectric.description) Energy: \(energy) Joules (depth 1 \(units))")
                 }
             }
+        }
+        else if let flatMagMesh = self.currentMesh! as? FlatMagnetostaticComplexPotentialMesh
+        {
+            var totalEnergy = 0.0
+            DLog("Calculating electrical energy")
+            let units = (flatMagMesh.units == .inch ? "inch" : (flatMagMesh.units == .mm ? "mm" : "meter"))
+            for nextRegion in flatMagMesh.regions
+            {
+                let energy = nextRegion.ElectricFieldEnergy(isFlat: true, units: flatMagMesh.units)
+                totalEnergy += energy
+                DLog("\(nextRegion.description) Energy: \(energy) Joules (depth 1 \(units))")
+            }
+            
+            DLog("Total energy: \(totalEnergy) Joules (depth 1 \(units))")
         }
         
     }

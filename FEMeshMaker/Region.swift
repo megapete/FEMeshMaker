@@ -80,7 +80,55 @@ class Region
     func MagneticFieldEnergy(isFlat:Bool, units:FE_Mesh.Units = .meters) -> Double
     {
         // NOTE: For now, make your life easier, define all problems in meters
-        let result = 0.0
+        var result = 0.0
+        
+        let µ0_fixed = µ0 * (units == .mm ? 0.001 : (units == .inch ? 0.0254 : 1.0))
+        
+        for nextTriangle in self.associatedTriangles
+        {
+            let pointValues = nextTriangle.ValuesAtCenterOfMass(coarse: true)
+            
+            var Bx = pointValues.V
+            var By = -pointValues.U
+            
+            // This comes from Humphries 9.55
+            if !isFlat
+            {
+                let r = Complex(real:nextTriangle.CenterOfMass().x)
+                let oneOverR = Complex(real: 1.0) / r
+                
+                Bx *= -oneOverR
+                By *= -oneOverR
+            }
+        
+            var phaseAngleDiff = 0.0
+            if Bx != Complex.ComplexZero
+            {
+                if By != Complex.ComplexZero
+                {
+                    phaseAngleDiff = abs(Bx.carg - By.carg)
+                }
+            }
+            
+            // We want Exp and Exn to be on the X-axis, so we create a Complex number with a real value of |Ex| and imag of 0.
+            let BxAbs = Complex(real: Bx.cabs)
+            let Bxp = BxAbs * 0.5
+            let Bxn = Bxp
+            
+            // The Ey values are a bit more complicated
+            let ByAbs = By.cabs
+            let Byp = Complex(real: ByAbs * cos(π / 2 + phaseAngleDiff), imag: ByAbs * sin(π / 2 + phaseAngleDiff)) * 0.5
+            let Byn = Complex(real: ByAbs * cos(π / 2 - phaseAngleDiff), imag: ByAbs * sin(π / 2 - phaseAngleDiff)) * 0.5
+            
+            let Bp = Bxp + Byp
+            let Bn = Bxn + Byn
+            
+            let Babs = Bp.cabs + Bn.cabs
+            
+            let µm = Babs * Babs / (2.0 * µ0_fixed * self.µRel.real)
+            
+            result += µm * nextTriangle.Area()
+        }
         
         return result
     }
@@ -90,12 +138,9 @@ class Region
         let ε0_fixed = ε0 * (units == .mm ? 0.001 : (units == .inch ? 0.0254 : 1.0))
         var result = 0.0
         DLog("For \(self.associatedTriangles.count) triangles")
-        var currentTriangle = 0
         
         for nextTriangle in self.associatedTriangles
         {
-            currentTriangle += 1
-            
             let values = nextTriangle.ValuesAtCenterOfMass(coarse: true)
             
             // per Humphries 2.53, both Ex and Ey are the negatives of U and V
