@@ -79,7 +79,6 @@ class Region
     
     func MagneticFieldEnergy(isFlat:Bool, units:FE_Mesh.Units = .meters) -> Double
     {
-        // NOTE: For now, make your life easier, define all problems in meters
         var result = 0.0
         
         let µ0_fixed = µ0 * (units == .mm ? 0.001 : (units == .inch ? 0.0254 : 1.0))
