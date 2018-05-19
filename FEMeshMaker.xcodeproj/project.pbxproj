@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D304211420B07F8A004A4661 /* AxiSymMagnetostaticComplexPotentialMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D304211320B07F8A004A4661 /* AxiSymMagnetostaticComplexPotentialMesh.swift */; };
 		D313746C20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */; };
 		D313746E20876B16006AC4A6 /* SparseMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D313746D20876B16006AC4A6 /* SparseMatrix.swift */; };
 		D31FCF5720964BB900166A42 /* ContourLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31FCF5620964BB900166A42 /* ContourLine.swift */; };
@@ -41,6 +42,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D304211320B07F8A004A4661 /* AxiSymMagnetostaticComplexPotentialMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxiSymMagnetostaticComplexPotentialMesh.swift; sourceTree = "<group>"; };
 		D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlatElectrostaticComplexPotentialMesh.swift; sourceTree = "<group>"; };
 		D313746D20876B16006AC4A6 /* SparseMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SparseMatrix.swift; sourceTree = "<group>"; };
 		D31FCF5620964BB900166A42 /* ContourLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContourLine.swift; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 				D313746B20853193006AC4A6 /* FlatElectrostaticComplexPotentialMesh.swift */,
 				D31FCF582097B48200166A42 /* AxiSymElectrostaticComplexPotentialMesh.swift */,
 				D3B8CCBF20A2266900102039 /* FlatMagnetostaticComplexPotentialMesh.swift */,
+				D304211320B07F8A004A4661 /* AxiSymMagnetostaticComplexPotentialMesh.swift */,
 				D313746D20876B16006AC4A6 /* SparseMatrix.swift */,
 				D3E7848920976F140012A882 /* PCH_Matrix.swift */,
 				D39987AF207910020052B863 /* triangle.h */,
@@ -239,6 +242,7 @@
 				D36668A8208CC79C00D5DB92 /* TriangleEdge.swift in Sources */,
 				D39987A92077B0A70052B863 /* PCH_Defs.swift in Sources */,
 				D3707C3E20A3B01900FA7C31 /* MagneticBoundary.swift in Sources */,
+				D304211420B07F8A004A4661 /* AxiSymMagnetostaticComplexPotentialMesh.swift in Sources */,
 				D39987A32077A5DB0052B863 /* Edge.swift in Sources */,
 				D313746E20876B16006AC4A6 /* SparseMatrix.swift in Sources */,
 				D3E78486209361B80012A882 /* GeometryViewControllerDelegate.swift in Sources */,

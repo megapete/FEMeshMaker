@@ -94,10 +94,19 @@ class Region
             if !isFlat
             {
                 let r = Complex(real:nextTriangle.CenterOfMass().x)
-                let oneOverR = Complex(real: 1.0) / r
                 
-                Bx *= -oneOverR
-                By *= -oneOverR
+                if r == Complex.ComplexZero
+                {
+                    // By definition, the magnetic field is zero at r=0
+                    continue
+                }
+                else
+                {
+                    let oneOverR = Complex(real: 1.0) / r
+                
+                    Bx *= -oneOverR
+                    By *= -oneOverR
+                }
             }
         
             var phaseAngleDiff = 0.0
@@ -126,7 +135,14 @@ class Region
             
             let µm = Babs * Babs / (2.0 * µ0_fixed * self.µRel.real)
             
-            result += µm * nextTriangle.Area()
+            if isFlat
+            {
+                result += µm * nextTriangle.Area()
+            }
+            else
+            {
+                result += 2.0 * π * Double(nextTriangle.CenterOfMass().x) * µm * nextTriangle.Area()
+            }
         }
         
         return result

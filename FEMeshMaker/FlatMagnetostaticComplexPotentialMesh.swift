@@ -13,9 +13,9 @@ class FlatMagnetostaticComplexPotentialMesh: FE_Mesh
 {
     var magneticBoundaries:[Int:MagneticBoundary] = [:]
     
-    init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [])
+    init(withPaths:[MeshPath], units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [], isFlat:Bool = true)
     {
-        super.init(precision: .complex, units: units, withPaths: withPaths, vertices: vertices, regions: regions)
+        super.init(precision: .complex, units: units, withPaths: withPaths, vertices: vertices, regions: regions, isFlat:isFlat)
         
         for nextPath in withPaths
         {
