@@ -30,6 +30,23 @@ class Region
     var eRel:Complex = Complex(real: 1.0)
     var µRel:Complex = Complex(real: 1.0)
     
+    // Create dummy resistivity and conductivity - concrete subclasses where one or both of these may be non-zero must override or set these properties accordingly
+    var resistivity:Double
+    {
+        get
+        {
+            return 0.0
+        }
+    }
+    
+    var conductivity:Double
+    {
+        get
+        {
+            return 0.0
+        }
+    }
+    
     // We don't use holes in FE_Mesh to make it easier to do triangle-finding. However, we will want the option to not show those triangles within a given region when displaying the mesh, so we define the concept of a "virtual hole"
     var isVirtualHole:Bool
     

@@ -22,7 +22,7 @@ class ConductorRegion: Region
     let type:CommonConductors
     
     // resistivity in ohm-meters
-    var resistivity:Double
+    override var resistivity:Double
     {
         get
         {
@@ -46,7 +46,7 @@ class ConductorRegion: Region
         }
     }
     
-    var conductivity:Double
+    override var conductivity:Double
     {
         get
         {
