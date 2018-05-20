@@ -62,6 +62,8 @@ class AxiSymMagneticWithEddyCurrents:AxiSymMagnetostaticComplexPotentialMesh
                 }
             }
             
+            eddyTerm = 0.0
+            
             let cotanA = nextTriangle.CotanThetaA()
             
             let coeffN2 = Complex(real: cotanA / (µr.real * µFixed * 2.0 * R), imag: 0.0)

@@ -13,6 +13,7 @@
 		D313746E20876B16006AC4A6 /* SparseMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = D313746D20876B16006AC4A6 /* SparseMatrix.swift */; };
 		D31FCF5720964BB900166A42 /* ContourLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31FCF5620964BB900166A42 /* ContourLine.swift */; };
 		D31FCF592097B48200166A42 /* AxiSymElectrostaticComplexPotentialMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31FCF582097B48200166A42 /* AxiSymElectrostaticComplexPotentialMesh.swift */; };
+		D343332A20B1C1F9005F74A1 /* CoilRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D343332920B1C1F9005F74A1 /* CoilRegion.swift */; };
 		D36668A8208CC79C00D5DB92 /* TriangleEdge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36668A7208CC79C00D5DB92 /* TriangleEdge.swift */; };
 		D3707C3E20A3B01900FA7C31 /* MagneticBoundary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3707C3D20A3B01900FA7C31 /* MagneticBoundary.swift */; };
 		D3707C4020A3B10E00FA7C31 /* CoreSteel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3707C3F20A3B10E00FA7C31 /* CoreSteel.swift */; };
@@ -49,6 +50,7 @@
 		D313746D20876B16006AC4A6 /* SparseMatrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SparseMatrix.swift; sourceTree = "<group>"; };
 		D31FCF5620964BB900166A42 /* ContourLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContourLine.swift; sourceTree = "<group>"; };
 		D31FCF582097B48200166A42 /* AxiSymElectrostaticComplexPotentialMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxiSymElectrostaticComplexPotentialMesh.swift; sourceTree = "<group>"; };
+		D343332920B1C1F9005F74A1 /* CoilRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoilRegion.swift; sourceTree = "<group>"; };
 		D36668A7208CC79C00D5DB92 /* TriangleEdge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriangleEdge.swift; sourceTree = "<group>"; };
 		D3707C3D20A3B01900FA7C31 /* MagneticBoundary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MagneticBoundary.swift; sourceTree = "<group>"; };
 		D3707C3F20A3B10E00FA7C31 /* CoreSteel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreSteel.swift; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 				D39987B1207914D30052B863 /* Region.swift */,
 				D3D3C290207AE2F800EC5C83 /* DielectricRegion.swift */,
 				D3B8CCBB209B3D5E00102039 /* ConductorRegion.swift */,
+				D343332920B1C1F9005F74A1 /* CoilRegion.swift */,
 				D3707C3F20A3B10E00FA7C31 /* CoreSteel.swift */,
 				D39987B32079236D0052B863 /* Mesh.swift */,
 				D3D3C294207EC05500EC5C83 /* MeshPath.swift */,
@@ -252,6 +255,7 @@
 				D3E78486209361B80012A882 /* GeometryViewControllerDelegate.swift in Sources */,
 				D399879F2077A32E0052B863 /* AppController.swift in Sources */,
 				D3D3C295207EC05500EC5C83 /* MeshPath.swift in Sources */,
+				D343332A20B1C1F9005F74A1 /* CoilRegion.swift in Sources */,
 				D39987A82077B0A70052B863 /* GlobalDefs.swift in Sources */,
 				D3B8CCBC209B3D5E00102039 /* ConductorRegion.swift in Sources */,
 				D39987A52077A6750052B863 /* Element.swift in Sources */,
