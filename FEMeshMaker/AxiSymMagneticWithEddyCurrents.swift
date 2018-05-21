@@ -62,7 +62,7 @@ class AxiSymMagneticWithEddyCurrents:AxiSymMagnetostaticComplexPotentialMesh
                 }
             }
             
-            eddyTerm = 0.0
+            // eddyTerm = 0.0
             
             let cotanA = nextTriangle.CotanThetaA()
             

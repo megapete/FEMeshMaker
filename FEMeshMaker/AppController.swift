@@ -263,7 +263,8 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         let lvCurrentRMS = -266.667
         let lvCurrentPeak = lvCurrentRMS * sqrt(2.0)
         let lvTurns = 208.0
-        let lvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:lvCurrentPeak * lvTurns / lvCoilArea), description: "LV", tagBase: 1000, refPoints: [NSPoint(x: lvCoilRect.origin.x + lvCoilRect.width / 2.0, y: lvCoilRect.origin.y + lvCoilRect.height / 2.0)], isVirtualHole: false)
+        // let lvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:lvCurrentPeak * lvTurns / lvCoilArea), description: "LV", tagBase: 1000, refPoints: [NSPoint(x: lvCoilRect.origin.x + lvCoilRect.width / 2.0, y: lvCoilRect.origin.y + lvCoilRect.height / 2.0)], isVirtualHole: false)
+        let lvCoil = CoilRegion(type: .copper, currentDensity: Complex(real:lvCurrentPeak * lvTurns / lvCoilArea), description: "LV", tagBase: 1000, refPoints: [NSPoint(x: lvCoilRect.origin.x + lvCoilRect.width / 2.0, y: lvCoilRect.origin.y + lvCoilRect.height / 2.0)], N: lvTurns, Nradial: 3.467, strandDim: (8.55 / 1000.0, 12.55 / 1000.0), bounds: lvCoilRect, isVirtualHole: false)
         let lvCoilMeshPath = MeshPath(rect: lvCoilRect, boundary: nil)
         
         let hvCoilRect = NSRect(x: 322.7 / 1000.0, y: 89.3 / 1000.0, width: 34.1 / 1000.0, height: 914.5 / 1000.0)
@@ -271,12 +272,13 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         let hvCurrentRMS = 83.674
         let hvCurrentPeak = hvCurrentRMS * sqrt(2.0)
         let hvTurns = 663.0
-        let hvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:hvCurrentPeak * hvTurns / hvCoilArea), description: "HV", tagBase: 2000, refPoints: [NSPoint(x: hvCoilRect.origin.x + hvCoilRect.width / 2.0, y: hvCoilRect.origin.y + hvCoilRect.height / 2.0)], isVirtualHole: false)
+        // let hvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:hvCurrentPeak * hvTurns / hvCoilArea), description: "HV", tagBase: 2000, refPoints: [NSPoint(x: hvCoilRect.origin.x + hvCoilRect.width / 2.0, y: hvCoilRect.origin.y + hvCoilRect.height / 2.0)], isVirtualHole: false)
+        let hvCoil = CoilRegion(type: .copper, currentDensity: Complex(real:hvCurrentPeak * hvTurns / hvCoilArea), description: "HV", tagBase: 2000, refPoints: [NSPoint(x: hvCoilRect.origin.x + hvCoilRect.width / 2.0, y: hvCoilRect.origin.y + hvCoilRect.height / 2.0)], N: hvTurns, Nradial: 11.84, strandDim: (2.412 / 1000.0, 11.809 / 1000.0), bounds: hvCoilRect, isVirtualHole: false)
         let hvCoilMeshPath = MeshPath(rect: hvCoilRect, boundary: nil)
         
         let meshPaths = [coreMeshPath, tankMeshPath, lvCoilMeshPath, hvCoilMeshPath]
         
-        let flatMag = AxiSymMagneticWithEddyCurrents(withPaths: meshPaths, atFrequency: 60.0, units: .meters, vertices: [], regions: [coreSteel, bulkOil, lvCoilCond, hvCoilCond])
+        let flatMag = AxiSymMagneticWithEddyCurrents(withPaths: meshPaths, atFrequency: 60.0, units: .meters, vertices: [], regions: [coreSteel, bulkOil, lvCoil, hvCoil])
         
         self.currentMesh = flatMag
         
