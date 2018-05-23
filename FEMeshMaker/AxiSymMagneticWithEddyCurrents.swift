@@ -6,11 +6,11 @@
 //  Copyright © 2018 Peter Huber. All rights reserved.
 //
 
-// This is my attempt to reconcile Andersen's method of calculating eddy losses with Section 11.5 of Humphries book. In Humphries, he takes the sum over i of Jzoi * ai / 3 (which is the total current in ai, say Iai). This is equivalent to the term (𝛾/6)DU in equation 39 of his Eddy Loss paper (conductance time area time an electric field is equal to current, and D is twice the triangle area).
+// This is my attempt to reconcile Andersen's method of calculating eddy losses with Section 11.5 of Humphries book. In Humphries, he takes the sum over i of Jzoi * ai / 3 (which is the total current in ai, say Iai). This is equivalent to the term (𝛾/6)DU in equation 39 of his Eddy Loss paper (conductance times area times an electric field is equal to current, and D is twice the triangle area).
 
 // Step 1: Set up the A-matrix for the problem. This remains unchanged throughout the calculations
 // Step 2: For each coil region in the problem, do:
-//          2a) Apply the field U = 1V per radian to the coil region (same as saying Jzoi = Y)
+//          2a) Apply the field U = 1V per radian to the coil region (same as saying Jzoi = 𝛾)
 //          2b) Set everything else to 0
 //          2c) Set up the B-matrix and solve the matrix system
 //          2d) Use the result to calculate the currents (see note * below) in the other coil regions and fill in the ith column of the admittance matrix
@@ -18,7 +18,7 @@
 // Step 4: Using the drive currents, calculate actual U-values and convert them to Jzoi values - set up B-matrix with these values
 // Step 5: Solve the final matrix system
 
-// NOTE * : I don't know how to do this yet. Here are my attempts ayt figuring this out
+// NOTE * : I don't know how to do this yet. Here are my attempts at figuring this out
 // Attempt #1: Use Andersen formula (8) from his Eddy Loss paper. Here, for the U=0 regions, total I = ∑(Ii), where Ii = -j𝜔𝛾(Ai) * ai
 
 import Foundation
@@ -28,7 +28,7 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
     let frequency:Double
     var magneticBoundaries:[Int:MagneticBoundary] = [:]
     var coilRegions:[CoilRegion] = []
-    let admittanceMatrix:PCH_Matrix
+    var coilTotalCurrents:PCH_Matrix
     
     init(withPaths:[MeshPath], atFrequency:Double, units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [])
     {
@@ -41,9 +41,16 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
             }
         }
         
-        self.admittanceMatrix = PCH_Matrix(numRows: self.coilRegions.count, numCols: self.coilRegions.count, matrixPrecision: .complexPrecision, matrixType: .generalMatrix)
+        self.coilTotalCurrents = PCH_Matrix(numVectorElements: self.coilRegions.count, vectorPrecision: .complexPrecision)
+        
+        ZAssert(self.coilRegions.count > 0, message: "At least one coil must be defined for this class")
         
         super.init(precision: .complex, units: units, withPaths: withPaths, vertices: vertices, regions: regions, holes:holes, isFlat:false)
+        
+        for i in 0..<self.coilRegions.count
+        {
+            self.coilTotalCurrents[i, 0] = self.coilRegions[i].currentDensity * self.coilRegions[i].TotalTriangleArea()
+        }
         
         for nextPath in withPaths
         {
@@ -61,8 +68,69 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
     
     override func Solve()
     {
-        var coils = self.coilRegions
+        let admittanceMatrix = PCH_Matrix(numRows: self.coilRegions.count, numCols: self.coilRegions.count, matrixPrecision: .complexPrecision, matrixType: .generalMatrix)
         
+        for i in 0..<self.coilRegions.count
+        {
+            CreateRHSforU_CoilRegion(coil: self.coilRegions[i])
+            
+            let solutionVector:[Complex] = self.SolveMatrix()
+            self.SetNodePhiValuesTo(solutionVector)
+            
+            // DLog("U = 1 total current: \(coils[i].conductivity * coils[i].TotalTriangleArea())")
+            
+            // let calculatedCurrent = TotalCurrent(coil: coils[i])
+            // DLog("Total current of U=1 coil after matrix solution: \(calculatedCurrent), |I| = \(calculatedCurrent.cabs)")
+            
+            for j in 0..<self.coilRegions.count
+            {
+                let calculatedCurrent = TotalCurrent(coil: self.coilRegions[j])
+                admittanceMatrix[j, i] = calculatedCurrent
+            }
+        }
+        
+        guard let impedanceMatrix = admittanceMatrix.Inverse() else
+        {
+            ALog("Could not invert the admittance matrix!")
+            return
+        }
+        
+        guard let Uvector = impedanceMatrix.MultiplyBy(self.coilTotalCurrents) else
+        {
+            ALog("Could not multiply impedance matrix by currents!")
+            return
+        }
+        
+        // Now, using the fact that J = 𝛾E, and U is an electric field (like E):
+        for i in 0..<self.coilRegions.count
+        {
+            DLog("Current density of \(self.coilRegions[i].description) before adjustment: \(self.coilRegions[i].currentDensity)")
+            self.coilRegions[i].currentDensity = Uvector[i, 0] * self.coilRegions[i].conductivity
+            DLog("Current density after adjustment: \(self.coilRegions[i].currentDensity)")
+        }
+        
+        self.SetupComplexBmatrix()
+        
+        let solutionVector:[Complex] = self.SolveMatrix()
+        self.SetNodePhiValuesTo(solutionVector)
+    }
+    
+    func TotalCurrent(coil:CoilRegion) -> Complex
+    {
+        // total I = ∑(Ii), where Ii = -j𝜔𝛾(Ai) * ai
+        
+        var result:Complex = Complex.ComplexZero
+        for nextTriangle in coil.associatedTriangles
+        {
+            let elementValues = self.ValuesAtPoint(nextTriangle.CenterOfMass())
+            let Ai = elementValues.phi
+            let 𝜔 = 2.0 * π * self.frequency
+            let 𝛾 = coil.conductivity
+            
+            result -= Complex(real: 0.0, imag: Ai * 𝜔 * 𝛾 * nextTriangle.Area())
+        }
+        
+        return result
     }
     
     override func DataAtPoint(_ point:NSPoint) -> [(name:String, value:Complex, units:String)]
@@ -168,6 +236,55 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
         }
         
         self.matrixA![node.tag, node.tag] = sumWi
+    }
+    
+    func CreateRHSforU_CoilRegion(coil:CoilRegion)
+    {
+        var RHS_Matrix = Array(repeating: Complex.ComplexNan, count: self.nodes.count)
+        
+        for node in self.nodes
+        {
+            if node.marker != 0 && node.marker != Boundary.neumannTagNumber
+            {
+                if let magBound = self.magneticBoundaries[node.marker]
+                {
+                    RHS_Matrix[node.tag] = magBound.prescribedPotential
+                }
+                else
+                {
+                    ALog("Could not find boundary in dictionary!")
+                    return
+                }
+            }
+            else
+            {
+                var result = Complex(real: 0.0)
+                let constant = Complex(real:  1.0 / 3.0)
+                
+                for nextElement in node.elements
+                {
+                    var jz0 = Complex(real: 0.0)
+                    if let nextRegion = nextElement.region as? CoilRegion
+                    {
+                        if nextRegion.tagBase == coil.tagBase
+                        {
+                            jz0 = Complex(real:nextRegion.conductivity)
+                        }
+                    }
+                    
+                    let area = Complex(real: nextElement.Area())
+                    
+                    // we did the division of the constant when we defined it, so multiply it now (faster, I think)
+                    let iTerm = jz0 * area * constant
+                    
+                    result += iTerm
+                }
+                
+                RHS_Matrix[node.tag] = result
+            }
+        }
+        
+        self.complexMatrixB = RHS_Matrix
     }
     
     override func CalculateRHSforNode(node: Node)

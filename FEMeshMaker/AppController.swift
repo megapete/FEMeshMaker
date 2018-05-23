@@ -795,7 +795,20 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
             
             DLog("Total energy: \(totalEnergy) Joules (depth 1 \(units))")
         }
-        
+        else if let magMesh = self.currentMesh! as? AxiSymMagneticWithEddyCurrents
+        {
+            var totalEnergy = 0.0
+            DLog("Calculating magnetic energy")
+            let units = (magMesh.units == .inch ? "inch" : (magMesh.units == .mm ? "mm" : "meter"))
+            for nextRegion in magMesh.regions
+            {
+                let energy = nextRegion.MagneticFieldEnergy(isFlat: false, units: magMesh.units)
+                totalEnergy += energy
+                DLog("\(nextRegion.description) Energy: \(energy) Joules")
+            }
+            
+            DLog("Total energy: \(totalEnergy) Joules")
+        }
         
     }
     
