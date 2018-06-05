@@ -25,8 +25,12 @@ class Electrode:Boundary
         }
     }
     
-    init(tag:Int, prescribedVoltage:Complex, description:String)
+    let V_isRMS:Bool
+    
+    init(tag:Int, prescribedVoltage:Complex, isRMS:Bool = true, description:String)
     {
+        self.V_isRMS = isRMS
+        
         super.init(tag: tag, fixedValue:prescribedVoltage, description: description)
     }
 }

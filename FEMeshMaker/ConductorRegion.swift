@@ -59,20 +59,24 @@ class ConductorRegion: Region
     
     var currentDensity:Complex
     
-    init(type:CommonConductors, electrode:Electrode, currentDensity:Complex, tagBase:Int, refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)], isVirtualHole:Bool = false)
+    let J_isRMS:Bool
+    
+    init(type:CommonConductors, electrode:Electrode, currentDensity:Complex, jIsRMS:Bool = false, tagBase:Int, refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)], isVirtualHole:Bool = false)
     {
         self.type = type
         self.electrode = electrode
         self.currentDensity = currentDensity
+        self.J_isRMS = jIsRMS
         
         super.init(tagBase: tagBase, description: electrode.description, refPoints: refPoints, isVirtualHole: isVirtualHole)
     }
     
-    init(type:CommonConductors, currentDensity:Complex, description:String, tagBase:Int, refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)], isVirtualHole:Bool = false)
+    init(type:CommonConductors, currentDensity:Complex, jIsRMS:Bool = false, description:String, tagBase:Int, refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)], isVirtualHole:Bool = false)
     {
         self.type = type
         self.electrode = nil
         self.currentDensity = currentDensity
+        self.J_isRMS = jIsRMS
         
         super.init(tagBase: tagBase, description: description, refPoints: refPoints, isVirtualHole: isVirtualHole)
     }
@@ -82,6 +86,8 @@ class ConductorRegion: Region
         self.type = type
         self.electrode = electrode
         self.currentDensity = Complex.ComplexZero
+        // Assume that is the electrode voltage is RMS, then the current density (if any) will also be
+        self.J_isRMS = electrode.V_isRMS
         
         super.init(tagBase: tagBase, description: electrode.description, refPoints: refPoints, isVirtualHole: isVirtualHole)
     }

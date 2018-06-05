@@ -20,7 +20,7 @@
 
 // NOTE * : I don't know how to do this yet. Here are my attempts at figuring this out
 // Attempt #1: Use Andersen formula (8) from his Eddy Loss paper. Here, for the U=0 regions, total I = ∑(Ii), where Ii = -j𝜔𝛾(Ai) * ai
-
+// Attempt #2: I was calculating the total current for the U=1 the same way as the U=0 zones, which is obviously incorrect.
 import Foundation
 
 class AxiSymMagneticWithEddyCurrents:FE_Mesh
@@ -30,13 +30,30 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
     var coilRegions:[CoilRegion] = []
     var coilTotalCurrents:PCH_Matrix
     
+    var currentsAreRMS:Bool = false
+    
     init(withPaths:[MeshPath], atFrequency:Double, units:FE_Mesh.Units, vertices:[NSPoint], regions:[Region], holes:[NSPoint] = [])
     {
         self.frequency = atFrequency
+        var rmsIsSet:Bool = false
+        
         for nextRegion in regions
         {
             if let newCoil = nextRegion as? CoilRegion
             {
+                if !rmsIsSet
+                {
+                    self.currentsAreRMS = newCoil.J_isRMS
+                    rmsIsSet = true
+                }
+                else
+                {
+                    if newCoil.J_isRMS != self.currentsAreRMS
+                    {
+                        DLog("The coil \(newCoil.description) does not have the same RMS value (\(self.currentsAreRMS)) as a previous coil - ignoring!")
+                    }
+                }
+                
                 coilRegions.append(newCoil)
             }
         }
@@ -68,6 +85,7 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
     
     override func Solve()
     {
+        
         let admittanceMatrix = PCH_Matrix(numRows: self.coilRegions.count, numCols: self.coilRegions.count, matrixPrecision: .complexPrecision, matrixType: .generalMatrix)
         
         for i in 0..<self.coilRegions.count
@@ -84,7 +102,17 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
             
             for j in 0..<self.coilRegions.count
             {
-                let calculatedCurrent = TotalCurrent(coil: self.coilRegions[j])
+                var calculatedCurrent = Complex.ComplexZero
+                
+                if j == i
+                {
+                    calculatedCurrent = Complex(real:self.coilRegions[j].conductivity * self.coilRegions[j].TotalTriangleArea())
+                }
+                else
+                {
+                    calculatedCurrent = TotalCurrent(coil: self.coilRegions[j], U:(0.0))
+                }
+                
                 admittanceMatrix[j, i] = calculatedCurrent
             }
         }
@@ -105,9 +133,10 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
         for i in 0..<self.coilRegions.count
         {
             DLog("Current density of \(self.coilRegions[i].description) before adjustment: \(self.coilRegions[i].currentDensity)")
-            self.coilRegions[i].currentDensity = Uvector[i, 0] * self.coilRegions[i].conductivity
+            self.coilRegions[i].currentDensity = Uvector[i, 0] * Complex(real: self.coilRegions[i].conductivity /*, imag: self.coilRegions[i].conductivity */)
             DLog("Current density after adjustment: \(self.coilRegions[i].currentDensity)")
         }
+ 
         
         self.SetupComplexBmatrix()
         
@@ -115,9 +144,9 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
         self.SetNodePhiValuesTo(solutionVector)
     }
     
-    func TotalCurrent(coil:CoilRegion) -> Complex
+    func TotalCurrent(coil:CoilRegion, U:Double) -> Complex
     {
-        // total I = ∑(Ii), where Ii = -j𝜔𝛾(Ai) * ai
+        // total I = ∑(Ii), where Ii = 𝛾(U -j𝜔(Ai)) * ai
         
         var result:Complex = Complex.ComplexZero
         for nextTriangle in coil.associatedTriangles
@@ -127,7 +156,7 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
             let 𝜔 = 2.0 * π * self.frequency
             let 𝛾 = coil.conductivity
             
-            result -= Complex(real: 0.0, imag: Ai * 𝜔 * 𝛾 * nextTriangle.Area())
+            result += Complex(real: U, imag: -Ai * 𝜔) * 𝛾 * nextTriangle.Area()
         }
         
         return result
@@ -140,8 +169,8 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
         let potential = ("A:", pointValues.phi, "")
         
         // Humphries 9.49
-        let Bx = pointValues.V
-        let By = -pointValues.U
+        let Bx = pointValues.V * sqrt(2)
+        let By = -pointValues.U * sqrt(2)
         
         var phaseAngleDiff = 0.0
         if Bx != Complex.ComplexZero
@@ -152,7 +181,7 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
             }
         }
         
-        // We want Exp and Exn to be on the X-axis, so we create a Complex number with a real value of |Ex| and imag of 0.
+        // We want Bxp and Bxn to be on the X-axis, so we create a Complex number with a real value of |Bx| and imag of 0.
         let BxAbs = Complex(real: Bx.cabs)
         let Bxp = BxAbs * 0.5
         let Bxn = Bxp
@@ -213,7 +242,10 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
                 
                 if region.conductivity != 0.0
                 {
-                    eddyTerm = 2.0 * π * self.frequency * region.conductivity * nextTriangle.Area() / 3.0
+                    let area = nextTriangle.Area()
+                    let conductivity = region.conductivity
+                    // DLog("Area: \(area); conductivity: \(conductivity)")
+                    eddyTerm = 2.0 * π * self.frequency * conductivity * area / 3.0
                 }
             }
             
@@ -226,7 +258,7 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
             let cotanB = nextTriangle.CotanThetaB()
             let coeffN1 = Complex(real: cotanB / (µr.real * µFixed * 2.0 * R), imag: 0.0)
             
-            sumWi += coeffN1 + coeffN2 - Complex(real: 0.0, imag: eddyTerm)
+            sumWi += ((coeffN1 + coeffN2) - Complex(real: 0.0, imag: eddyTerm))
             
             let prevN2:Complex = self.matrixA![node.tag, colIndexN2]
             self.matrixA![node.tag, colIndexN2] = Complex(real: prevN2.real - coeffN2.real, imag: prevN2.imag - coeffN2.imag)
@@ -241,6 +273,7 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
     func CreateRHSforU_CoilRegion(coil:CoilRegion)
     {
         var RHS_Matrix = Array(repeating: Complex.ComplexNan, count: self.nodes.count)
+        let totalCoilArea = coil.TotalTriangleArea()
         
         for node in self.nodes
         {
@@ -259,25 +292,22 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
             else
             {
                 var result = Complex(real: 0.0)
-                let constant = Complex(real:  1.0 / 3.0)
                 
                 for nextElement in node.elements
                 {
-                    var jz0 = Complex(real: 0.0)
                     if let nextRegion = nextElement.region as? CoilRegion
                     {
                         if nextRegion.tagBase == coil.tagBase
                         {
-                            jz0 = Complex(real:nextRegion.conductivity)
+                            let area = nextElement.Area()
+                            
+                            let jz0 = nextRegion.conductivity * area / totalCoilArea
+                            
+                            let iTerm = jz0 * area / 3.0
+                            
+                            result += Complex(real:iTerm)
                         }
                     }
-                    
-                    let area = Complex(real: nextElement.Area())
-                    
-                    // we did the division of the constant when we defined it, so multiply it now (faster, I think)
-                    let iTerm = jz0 * area * constant
-                    
-                    result += iTerm
                 }
                 
                 RHS_Matrix[node.tag] = result

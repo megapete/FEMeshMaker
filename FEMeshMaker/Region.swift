@@ -26,9 +26,11 @@ class Region
     var refPoints:[NSPoint] = [] // all the points in the model that refer to this Region (there should be at least one)
     var associatedTriangles:[Element] = []
     
+    var isLowRes:Bool = false
+    
     // Relative permittivity and permealbility of materials. These should be properly set by concrete subclasses
     var eRel:Complex = Complex(real: 1.0)
-    var µRel:Complex = Complex(real: 1.0)
+    var µRel:Complex = Complex(real: 1.0, imag: 1.0)
     
     // Create dummy resistivity and conductivity - concrete subclasses where one or both of these may be non-zero must override or set these properties accordingly
     var resistivity:Double
@@ -94,7 +96,7 @@ class Region
         return 2.0 * π * result
     }
     
-    func MagneticFieldEnergy(isFlat:Bool, units:FE_Mesh.Units = .meters) -> Double
+    func MagneticFieldEnergy(isFlat:Bool, units:FE_Mesh.Units = .meters, isRMS:Bool = true) -> Double
     {
         var result = 0.0
         
@@ -104,8 +106,8 @@ class Region
         {
             let pointValues = nextTriangle.ValuesAtCenterOfMass(coarse: true)
             
-            var Bx = pointValues.V
-            var By = -pointValues.U
+            var Bx = pointValues.V * (isRMS ? sqrt(2.0) : 1.0)
+            var By = -pointValues.U * (isRMS ? sqrt(2.0) : 1.0)
             
             // This comes from Humphries 9.55
             if !isFlat

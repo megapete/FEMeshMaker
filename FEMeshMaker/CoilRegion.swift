@@ -33,7 +33,7 @@ class CoilRegion:ConductorRegion
         }
     }
     
-    init(type:CommonConductors, electrode:Electrode? = nil, currentDensity:Complex, description:String, tagBase:Int, refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)], N:Double, Nradial:Double, strandDim:(radial:CGFloat, axial:CGFloat), bounds:NSRect, isVirtualHole:Bool = false)
+    init(type:CommonConductors, electrode:Electrode? = nil, currentDensity:Complex, jIsRMS:Bool = false, description:String, tagBase:Int, refPoints:[NSPoint] = [NSPoint(x: 0.0, y: 0.0)], N:Double, Nradial:Double, strandDim:(radial:CGFloat, axial:CGFloat), bounds:NSRect, isVirtualHole:Bool = false)
     {
         self.bounds = bounds
         self.N = N
@@ -42,11 +42,11 @@ class CoilRegion:ConductorRegion
         
         if let electrodeBoundary = electrode
         {
-            super.init(type: type, electrode: electrodeBoundary, currentDensity:currentDensity, tagBase: tagBase, refPoints: refPoints, isVirtualHole: isVirtualHole)
+            super.init(type: type, electrode: electrodeBoundary, currentDensity:currentDensity, jIsRMS:jIsRMS, tagBase: tagBase, refPoints: refPoints, isVirtualHole: isVirtualHole)
         }
         else
         {
-            super.init(type: type, currentDensity: currentDensity, description: description, tagBase: tagBase, refPoints: refPoints, isVirtualHole: isVirtualHole)
+            super.init(type: type, currentDensity: currentDensity, jIsRMS:jIsRMS, description: description, tagBase: tagBase, refPoints: refPoints, isVirtualHole: isVirtualHole)
         }
     }
 }

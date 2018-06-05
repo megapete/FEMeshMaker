@@ -247,7 +247,7 @@ class Mesh
         let pointlist = UnsafeMutablePointer<Double>.allocate(capacity: 2 * self.nodes.count)
         let pointmarkerlist = UnsafeMutablePointer<Int32>.allocate(capacity: self.nodes.count)
         
-        // We adopt the method that Meeker uses in FEMM to come up with a DefaultMeshSize. See his source code in file bd_writepoly.cpp and search for 'DefaultMeshSize'. Note that he refers to a variable called 'BoundingBoxFraction' that is set to 100.0 elsewhere.
+        // We adopt the method that Meeker uses in FEMM to come up with a DefaultMeshSize. See his source code in file bd_writepoly.cpp and search for 'DefaultMeshSize'. Note that he refers to a variable called 'BoundingBoxFraction' that is set to 100.0 elsewhere. We will use this number for all regions that are not set as "LowResolution".
         var xx = Complex(real: Double(self.nodes[0].vertex.x), imag: Double(self.nodes[0].vertex.y))
         var yy = xx
         let boundingBoxFraction = 100.0
@@ -277,7 +277,9 @@ class Mesh
         }
         
         let defaultMeshSize = pow((yy - xx).cabs / boundingBoxFraction, 2.0)
-        // let defaultMeshSizeFlag = "a\(defaultMeshSize)"
+        
+        // Set the low resolution max area to a huge number (the size of the meshbounds, actually) so that Triangle just creates enough Delaunay triangles to satisfy the minimum angle criteria
+        let loResMeshSize = (yy.real - xx.real) * (yy.imag - xx.imag)
         
         inStruct.pointee.pointlist = pointlist
         inStruct.pointee.pointmarkerlist = pointmarkerlist
@@ -346,8 +348,16 @@ class Mesh
                     regionlist[4 * i] = Double(nextRefPoint.x)
                     regionlist[4 * i + 1] = Double(nextRefPoint.y)
                     regionlist[4 * i + 2] = Double(nextRegion.tagBase + tagIndex)
+                    
+                    var meshSize = defaultMeshSize
+                    if nextRegion.isLowRes
+                    {
+                        meshSize = loResMeshSize
+                    }
+                    regionlist[4 * i + 3] = meshSize
+                    
                     tagIndex += 1
-                    regionlist[4 * i + 3] = 0.0 // unused
+                    
                     i += 1
                 }
             }
@@ -361,7 +371,7 @@ class Mesh
         // on entry we don't send in edge-related data
         
         // Set up the flags that we will pass to the triangulate() call. We always use -z, -D, -j, -e, and -n. The two flags -p and -A are conditionally set above. The 'q' flag is followed by the requested minimum angle
-        var areaFlag = "a\(defaultMeshSize)"
+        var areaFlag = "a"
         if !PCH_USE_MAX_TRIANGLE_AREA
         {
             areaFlag = ""
