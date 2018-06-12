@@ -318,6 +318,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         let coreMeshPath = MeshPath(path: corePath, boundary: coreCenter)
         
         let coreSteel = CoreSteel(tagBase: currentRegionTagBase, refPoints: [NSPoint(x: 0.1, y: 0.1)])
+        coreSteel.isLowRes = true
         currentRegionTagBase += 1
         
         let bulkOil = DielectricRegion(tagBase: currentRegionTagBase, dielectric: .TransformerOil)
@@ -333,7 +334,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         let lvCurrentRMS = -266.667
         let lvCurrentPeak = lvCurrentRMS * sqrt(2.0)
         let lvTurns = 208.0
-        let lvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:lvCurrentPeak * lvTurns / lvCoilArea), description: "LV", tagBase: 1000, refPoints: [NSPoint(x: lvCoilRect.origin.x + lvCoilRect.width / 2.0, y: lvCoilRect.origin.y + lvCoilRect.height / 2.0)], isVirtualHole: false)
+        let lvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:lvCurrentRMS * lvTurns / lvCoilArea), jIsRMS:true, description: "LV", tagBase: 1000, refPoints: [NSPoint(x: lvCoilRect.origin.x + lvCoilRect.width / 2.0, y: lvCoilRect.origin.y + lvCoilRect.height / 2.0)], isVirtualHole: false)
         let lvCoilMeshPath = MeshPath(rect: lvCoilRect, boundary: nil)
         
         let hvCoilRect = NSRect(x: 322.7, y: 89.3, width: 34.1, height: 914.5)
@@ -341,7 +342,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         let hvCurrentRMS = 83.674
         let hvCurrentPeak = hvCurrentRMS * sqrt(2.0)
         let hvTurns = 663.0
-        let hvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:hvCurrentPeak * hvTurns / hvCoilArea), description: "HV", tagBase: 2000, refPoints: [NSPoint(x: hvCoilRect.origin.x + hvCoilRect.width / 2.0, y: hvCoilRect.origin.y + hvCoilRect.height / 2.0)], isVirtualHole: false)
+        let hvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:hvCurrentRMS * hvTurns / hvCoilArea), jIsRMS:true, description: "HV", tagBase: 2000, refPoints: [NSPoint(x: hvCoilRect.origin.x + hvCoilRect.width / 2.0, y: hvCoilRect.origin.y + hvCoilRect.height / 2.0)], isVirtualHole: false)
         let hvCoilMeshPath = MeshPath(rect: hvCoilRect, boundary: nil)
         
         let meshPaths = [coreMeshPath, tankMeshPath, lvCoilMeshPath, hvCoilMeshPath]
@@ -803,12 +804,8 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
             // let units = (magMesh.units == .inch ? "inch" : (magMesh.units == .mm ? "mm" : "meter"))
             for nextRegion in magMesh.regions
             {
-                var isRMS = false
-                if let condRegion = nextRegion as? ConductorRegion
-                {
-                    isRMS = condRegion.J_isRMS
-                }
-                let energy = nextRegion.MagneticFieldEnergy(isFlat: false, units: magMesh.units, isRMS:isRMS)
+                
+                let energy = nextRegion.MagneticFieldEnergy(isFlat: false, units: magMesh.units, isRMS:true)
                 totalEnergy += energy
                 DLog("\(nextRegion.description) Energy: \(energy) Joules")
             }

@@ -21,6 +21,8 @@
 // NOTE * : I don't know how to do this yet. Here are my attempts at figuring this out
 // Attempt #1: Use Andersen formula (8) from his Eddy Loss paper. Here, for the U=0 regions, total I = ∑(Ii), where Ii = -j𝜔𝛾(Ai) * ai
 // Attempt #2: I was calculating the total current for the U=1 the same way as the U=0 zones, which is obviously incorrect.
+// Attempt #3: Success! (I think!). I added a "* R" term when calculating the eddy term in coupling constants and got close. I then started thinking about how U is actually a voltage field "per radian" and I decided to divide the eddy term calculation by 2π and suddenly I was getting the same answer (in terms of energy, anyway) as Andersen. Now I need to check whether the complex B-fields give me the same eddy loss values...
+
 import Foundation
 
 class AxiSymMagneticWithEddyCurrents:FE_Mesh
@@ -245,7 +247,7 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
                     let area = nextTriangle.Area()
                     let conductivity = region.conductivity
                     // DLog("Area: \(area); conductivity: \(conductivity)")
-                    eddyTerm = 2.0 * π * self.frequency * conductivity * area / 3.0
+                    eddyTerm = /* 2.0 * π * */ self.frequency * conductivity * area * R / 3.0
                 }
             }
             

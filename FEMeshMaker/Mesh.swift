@@ -349,6 +349,7 @@ class Mesh
                     regionlist[4 * i + 1] = Double(nextRefPoint.y)
                     regionlist[4 * i + 2] = Double(nextRegion.tagBase + tagIndex)
                     
+                    // Set the mesh size according to whether or not the region's isLowRes property is true
                     var meshSize = defaultMeshSize
                     if nextRegion.isLowRes
                     {
