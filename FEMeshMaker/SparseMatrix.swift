@@ -81,10 +81,11 @@ class PCH_SparseMatrix:CustomStringConvertible
         let col:Int
         
         // Standard hash function
+        /*
         var hashValue: Int
         {
             return self.row.hashValue ^ self.col.hashValue &* 16777619
-        }
+        } */
         
         static func == (lhs:SparseKey, rhs:SparseKey) -> Bool
         {

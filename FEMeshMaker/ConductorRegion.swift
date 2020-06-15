@@ -21,14 +21,15 @@ class ConductorRegion: Region
     
     let type:CommonConductors
     
-    // resistivity in ohm-meters
+    // resistivity in ohm-meters, at 20°C
     override var resistivity:Double
     {
         get
         {
             if self.type == .copper
             {
-                return 1.68E-8
+                // this number comes from our Design sheet calculation
+                return 1.72466E-8
             }
             else if self.type == .aluminum
             {
@@ -37,6 +38,30 @@ class ConductorRegion: Region
             else if self.type == .silver
             {
                 return 1.59E-8
+            }
+            else
+            {
+                DLog("Unknown type")
+                return -1.0
+            }
+        }
+    }
+    
+    override var tempCoefficient: Double
+    {
+        get
+        {
+            if self.type == .copper
+            {
+                return 0.00404
+            }
+            else if self.type == .aluminum
+            {
+                return 0.0039
+            }
+            else if self.type == .silver
+            {
+                return 0.0038
             }
             else
             {
@@ -90,5 +115,15 @@ class ConductorRegion: Region
         self.J_isRMS = electrode.V_isRMS
         
         super.init(tagBase: tagBase, description: electrode.description, refPoints: refPoints, isVirtualHole: isVirtualHole)
+    }
+    
+    func ResistivityFactorAt(tempInC:Double) -> Double
+    {
+        return 1.0 + self.tempCoefficient * (tempInC - 20.0)
+    }
+    
+    func ConductivityFactorAt(tempInC:Double) -> Double
+    {
+        return 1.0 / self.ResistivityFactorAt(tempInC:tempInC)
     }
 }

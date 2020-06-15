@@ -56,7 +56,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         return (minF.value, maxF.value)
     }
     
-    override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool
     {
         if menuItem == showTrianglesMenuItem
         {
@@ -265,7 +265,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         // let lvCurrentPeak = lvCurrentRMS * sqrt(2.0)
         let lvTurns = 208.0
         // let lvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:lvCurrentPeak * lvTurns / lvCoilArea), description: "LV", tagBase: 1000, refPoints: [NSPoint(x: lvCoilRect.origin.x + lvCoilRect.width / 2.0, y: lvCoilRect.origin.y + lvCoilRect.height / 2.0)], isVirtualHole: false)
-        let lvCoil = CoilRegion(type: .copper, currentDensity: Complex(real:lvCurrentRMS * lvTurns / lvCoilArea), jIsRMS:true, description: "LV", tagBase: 1000, refPoints: [NSPoint(x: lvCoilRect.origin.x + lvCoilRect.width / 2.0, y: lvCoilRect.origin.y + lvCoilRect.height / 2.0)], N: lvTurns, Nradial: 3.467, strandDim: (8.55 / 1000.0, 12.55 / 1000.0), bounds: lvCoilRect, isVirtualHole: false)
+        let lvCoil = CoilRegion(type: .copper, currentDensity: Complex(real:lvCurrentRMS * lvTurns / lvCoilArea), jIsRMS:true, description: "LV", tagBase: 1000, refPoints: [NSPoint(x: lvCoilRect.origin.x + lvCoilRect.width / 2.0, y: lvCoilRect.origin.y + lvCoilRect.height / 2.0)], N: lvTurns, Nradial: 3.467, strandsPerTurn: 3, strandDim: (2.85 / 1000.0, 12.55 / 1000.0), strandJ: lvCurrentRMS / ((2.85 / 1000.0) * (12.55 / 1000.0) * 3), bounds: lvCoilRect, isVirtualHole: false)
         let lvCoilMeshPath = MeshPath(rect: lvCoilRect, boundary: nil)
         
         let hvCoilRect = NSRect(x: 322.7 / 1000.0, y: 89.3 / 1000.0, width: 34.1 / 1000.0, height: 914.5 / 1000.0)
@@ -274,7 +274,7 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
         // let hvCurrentPeak = hvCurrentRMS * sqrt(2.0)
         let hvTurns = 663.0
         // let hvCoilCond = ConductorRegion(type: .copper, currentDensity: Complex(real:hvCurrentPeak * hvTurns / hvCoilArea), description: "HV", tagBase: 2000, refPoints: [NSPoint(x: hvCoilRect.origin.x + hvCoilRect.width / 2.0, y: hvCoilRect.origin.y + hvCoilRect.height / 2.0)], isVirtualHole: false)
-        let hvCoil = CoilRegion(type: .copper, currentDensity: Complex(real:hvCurrentRMS * hvTurns / hvCoilArea), jIsRMS:true, description: "HV", tagBase: 2000, refPoints: [NSPoint(x: hvCoilRect.origin.x + hvCoilRect.width / 2.0, y: hvCoilRect.origin.y + hvCoilRect.height / 2.0)], N: hvTurns, Nradial: 11.84, strandDim: (2.412 / 1000.0, 11.809 / 1000.0), bounds: hvCoilRect, isVirtualHole: false)
+        let hvCoil = CoilRegion(type: .copper, currentDensity: Complex(real:hvCurrentRMS * hvTurns / hvCoilArea), jIsRMS:true, description: "HV", tagBase: 2000, refPoints: [NSPoint(x: hvCoilRect.origin.x + hvCoilRect.width / 2.0, y: hvCoilRect.origin.y + hvCoilRect.height / 2.0)], N: hvTurns, Nradial: 11.84, strandsPerTurn: 1, strandDim: (2.412 / 1000.0, 11.809 / 1000.0), strandJ: hvCurrentRMS / ((2.412 / 1000.0) * (11.809 / 1000.0) * 1), bounds: hvCoilRect, isVirtualHole: false)
         let hvCoilMeshPath = MeshPath(rect: hvCoilRect, boundary: nil)
         
         let meshPaths = [coreMeshPath, tankMeshPath, lvCoilMeshPath, hvCoilMeshPath]
@@ -811,6 +811,14 @@ class AppController: NSObject, NSWindowDelegate, GeometryViewControllerDelegate
             }
             
             DLog("Total energy: \(totalEnergy) Joules")
+            
+            let dcLoss = magMesh.DCLossAt(tempInC: 75.0)
+            
+            DLog("Total DC loss @ 75°C: \(dcLoss)")
+            
+            let eddyLoss = magMesh.EddyLossAt(tempInC: 75.0)
+            DLog("Total Eddy loss @ 75°C: \(eddyLoss)")
+            
         }
     }
     

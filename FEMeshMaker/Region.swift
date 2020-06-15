@@ -41,6 +41,15 @@ class Region
         }
     }
     
+    // resistivity temperature coefficient
+    var tempCoefficient:Double
+    {
+        get
+        {
+            return 0.0
+        }
+    }
+    
     var conductivity:Double
     {
         get

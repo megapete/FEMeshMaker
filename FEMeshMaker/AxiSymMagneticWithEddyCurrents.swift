@@ -139,11 +139,22 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
             DLog("Current density after adjustment: \(self.coilRegions[i].currentDensity)")
         }
  
-        
         self.SetupComplexBmatrix()
         
         let solutionVector:[Complex] = self.SolveMatrix()
         self.SetNodePhiValuesTo(solutionVector)
+        
+        DLog("Setting flux densities...")
+        // Save the flux densities at the centers of each triangle
+        for nextTriangle in self.elements
+        {
+            let B = self.FluxDensityAtPoint(nextTriangle.CenterOfMass())
+            
+            // overwrite anything that is alread stored in the valueArray
+            nextTriangle.valueArray = []
+            nextTriangle.valueArray.append(B.r) // Br at index 0
+            nextTriangle.valueArray.append(B.z) // Bz at index 1
+        }
     }
     
     func TotalCurrent(coil:CoilRegion, U:Double) -> Complex
@@ -164,46 +175,107 @@ class AxiSymMagneticWithEddyCurrents:FE_Mesh
         return result
     }
     
+    func DCLossAt(tempInC:Double) -> Double
+    {
+        var result = 0.0
+        
+        for nextCoil in self.coilRegions
+        {
+            let nextCoilLoss = nextCoil.TotalDCLossAt(tempInC: tempInC)
+            DLog("\(nextCoil.description) coil loss: \(nextCoilLoss)")
+            result += nextCoilLoss
+        }
+        
+        return result
+    }
+    
+    func EddyLossAt(tempInC:Double) -> Double
+    {
+        var result = 0.0
+        
+        for nextCoil in self.coilRegions
+        {
+            let nextCoilLoss = nextCoil.TotalEddyLossAt(tempInC: tempInC)
+            DLog("\(nextCoil.description) eddy loss: \(nextCoilLoss)")
+            result += nextCoilLoss
+        }
+        
+        return result
+    }
+    
+    func FluxDensityAtPoint(_ point:NSPoint) -> (r:Complex, z:Complex)
+    {
+        let pointValues = self.ValuesAtPoint(point)
+        
+        var Br = Complex.ComplexZero
+        var Bz = Complex.ComplexZero
+        
+        if point.x != 0.0
+        {
+            let invR = 1.0 / Double(point.x)
+            
+            // Humphries 9.55
+            Br = -pointValues.V * invR
+            Bz = pointValues.U * invR
+        }
+        
+        return (Br, Bz)
+    }
+    
     override func DataAtPoint(_ point:NSPoint) -> [(name:String, value:Complex, units:String)]
     {
         let pointValues = self.ValuesAtPoint(point)
         
-        let potential = ("A:", pointValues.phi, "")
+        var A = Complex.ComplexZero
         
-        // Humphries 9.49
-        let Bx = pointValues.V * sqrt(2)
-        let By = -pointValues.U * sqrt(2)
+        var Br = Complex.ComplexZero
+        var Bz = Complex.ComplexZero
+        
+        if point.x != 0.0
+        {
+            // Humphries 9.40
+            let invR = 1.0 / Double(point.x)
+            A = pointValues.phi * invR
+            
+            // Humphries 9.55
+            Br = -pointValues.V * ((self.currentsAreRMS ? sqrt(2.0) : 1.0) / Double(point.x))
+            Bz = pointValues.U * ((self.currentsAreRMS ? sqrt(2.0) : 1.0) / Double(point.x))
+        }
+        
+        let potential = ("A:", A, "")
         
         var phaseAngleDiff = 0.0
-        if Bx != Complex.ComplexZero
+        if Br != Complex.ComplexZero
         {
-            if By != Complex.ComplexZero
+            if Bz != Complex.ComplexZero
             {
-                phaseAngleDiff = abs(Bx.carg - By.carg)
+                phaseAngleDiff = abs(Br.carg - Bz.carg)
             }
         }
         
-        // We want Bxp and Bxn to be on the X-axis, so we create a Complex number with a real value of |Bx| and imag of 0.
-        let BxAbs = Complex(real: Bx.cabs)
-        let Bxp = BxAbs * 0.5
-        let Bxn = Bxp
+        // We want Brp and Brn to be on the X-axis, so we create a Complex number with a real value of |Br| and imag of 0.
+        let BrAbs = Complex(real: Br.cabs)
+        let Brp = BrAbs * 0.5
+        let Brn = Brp
         
         // The Ey values are a bit more complicated
-        let ByAbs = By.cabs
-        let Byp = Complex(real: ByAbs * cos(π / 2 + phaseAngleDiff), imag: ByAbs * sin(π / 2 + phaseAngleDiff)) * 0.5
-        let Byn = Complex(real: ByAbs * cos(π / 2 - phaseAngleDiff), imag: ByAbs * sin(π / 2 - phaseAngleDiff)) * 0.5
+        let BzAbs = Bz.cabs
+        let Bzp = Complex(real: BzAbs * cos(π / 2 + phaseAngleDiff), imag: BzAbs * sin(π / 2 + phaseAngleDiff)) * 0.5
+        let Bzn = Complex(real: BzAbs * cos(π / 2 - phaseAngleDiff), imag: BzAbs * sin(π / 2 - phaseAngleDiff)) * 0.5
         
-        let Bp = Bxp + Byp
-        let Bn = Bxn + Byn
+        let Bp = Brp + Bzp
+        let Bn = Brn + Bzn
         
         let Babs = Bp.cabs + Bn.cabs
         
         let fieldAbs = ("Bmax:", Complex(real: Babs), "T")
-        let fieldX = ("Bx:", Bx, "T")
-        let fieldY = ("By:", By, "T")
+        let fieldR = ("Br:", Br, "T")
+        let fieldZ = ("Bz:", Bz, "T")
         
-        return [potential, fieldAbs, fieldX, fieldY]
+        return [potential, fieldAbs, fieldR, fieldZ]
     }
+    
+    
     
     override func CalculateCouplingConstants(node: Node)
     {

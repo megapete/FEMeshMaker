@@ -23,9 +23,18 @@ class Element:Hashable, CustomStringConvertible
     
     // To get the class to conform to Hashable, we need to define hashValue and ==
     
+    /*
     var hashValue: Int
     {
         return self.corners.n0.hashValue ^ self.corners.n1.hashValue ^ self.corners.n2.hashValue &* 16777619
+    }
+ */
+    
+    func hash(into hasher: inout Hasher)
+    {
+        hasher.combine(self.corners.n0)
+        hasher.combine(self.corners.n1)
+        hasher.combine(self.corners.n2)
     }
     
     static func == (lhs:Element, rhs:Element) -> Bool
@@ -102,6 +111,9 @@ class Element:Hashable, CustomStringConvertible
     
     // A value that concrete subclasses of FE_Mesh can set to whatever they want (usually the triangle's internal field value)
     var value:Double = 0.0
+    
+    // A multi-dimensional array of complex values that can be set to whatever the concrete subclasses of FE_Mesh want to save there.
+    var valueArray:[Complex] = []
     
     // Most of the parameters are self explanatory except 'retain', which should be called if we don't want to add this triangle to region nor to the nodes (ie: usually used for a 'temporary' copy)
     init(n0:Node, n1:Node, n2:Node, region:Region? = nil, retain:Bool = true)

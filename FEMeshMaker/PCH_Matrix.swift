@@ -78,9 +78,13 @@ struct sparseKeyType:Hashable
     let col:Int
     
     // I found this hash function somewhere on the net
+    /*
     internal var hashValue: Int {
         return self.row.hashValue << MemoryLayout<Int>.size ^ self.col.hashValue
     }
+ */
+    
+    
 }
 
 /// The == function must be defined for Hashable types

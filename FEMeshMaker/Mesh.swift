@@ -93,7 +93,7 @@ class Mesh
                 let nextElement = nextPath.element(at: i, associatedPoints: pointArray)
                 
                 DLog("Point: \(pointArray[0])")
-                if nextElement == .moveToBezierPathElement
+                if nextElement == .moveTo
                 {
                     pathStartNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: pointArray[0])
                     
@@ -101,7 +101,7 @@ class Mesh
                     {
                         DLog("pathStartNode exists!")
                         
-                        if let existingIndex = self.nodes.index(of: pathStartNode)
+                        if let existingIndex = self.nodes.firstIndex(of: pathStartNode)
                         {
                             pathStartNode = self.nodes[existingIndex]
                         }
@@ -118,14 +118,14 @@ class Mesh
                     
                     currentNode = pathStartNode
                 }
-                else if nextElement == .lineToBezierPathElement
+                else if nextElement == .lineTo
                 {
                     var newNode = Node(tag: self.nodeIndex, marker:nextMarker, vertex: pointArray[0])
                     if self.nodes.contains(newNode)
                     {
                         DLog("newNode exists!")
                         
-                        if let existingIndex = self.nodes.index(of: newNode)
+                        if let existingIndex = self.nodes.firstIndex(of: newNode)
                         {
                             newNode = self.nodes[existingIndex]
                         }
@@ -144,7 +144,7 @@ class Mesh
                     
                     currentNode = newNode
                 }
-                else if nextElement == .closePathBezierPathElement
+                else if nextElement == .closePath
                 {
                     // The "end point" of this element is actually the original sart point of the path, so we won't add it again. If, for some reason, the current point is equal to the start point, we won't add a segment either
                     
@@ -174,7 +174,7 @@ class Mesh
                         {
                             DLog("newNode exists!")
                             
-                            if let existingIndex = self.nodes.index(of: newNode)
+                            if let existingIndex = self.nodes.firstIndex(of: newNode)
                             {
                                 newNode = self.nodes[existingIndex]
                             }

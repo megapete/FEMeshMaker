@@ -10,10 +10,11 @@ import Foundation
 
 class Edge:Hashable
 {
+    /*
     var hashValue: Int
     {
         return self.endPoint1.hashValue ^ self.endPoint2.hashValue &* 16777619
-    }
+    } */
     
     static func == (lhs:Edge, rhs:Edge) -> Bool
     {
@@ -33,6 +34,12 @@ class Edge:Hashable
         }
         
         return false
+    }
+    
+    func hash(into hasher: inout Hasher)
+    {
+        hasher.combine(self.endPoint1.hashValue)
+        hasher.combine(self.endPoint2.hashValue)
     }
     
     let endPoint1:Node
